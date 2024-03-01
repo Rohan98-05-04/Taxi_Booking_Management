@@ -12,8 +12,8 @@ using Taxi_Booking_Management.Data;
 namespace Taxi_Booking_Management.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240301082733_initialMigration")]
-    partial class initialMigration
+    [Migration("20240301092718_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

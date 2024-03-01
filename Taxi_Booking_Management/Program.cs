@@ -3,6 +3,7 @@ using Taxi_Booking_Management.Data;
 using System;
 using Microsoft.AspNetCore.Identity;
 using Taxi_Booking_Management.Models;
+using Taxi_Booking_Management.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ var connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
+builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddIdentity<User, IdentityRole>(
     options =>
     {
@@ -40,6 +42,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Auth}/{action=SignIn}/{id?}");
 
 app.Run();
