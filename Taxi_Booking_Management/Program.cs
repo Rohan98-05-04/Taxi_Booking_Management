@@ -4,12 +4,16 @@ using System;
 using Microsoft.AspNetCore.Identity;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Auth;
+
+
+
 using Taxi_Booking_Management.Services.Taxi;
 using Taxi_Booking_Management.Services.TaxiDriver;
 using Taxi_Booking_Management.Services.TaxiOwner;
 using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
 using Taxi_Booking_Management.LoggerService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +24,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
 
 builder.Services.AddTransient<IAuthService, AuthService>();
+
+
 builder.Services.AddTransient<ITaxiService , TaxiService>();
 builder.Services.AddTransient<ITaxiDriverService , TaxiDriverService>();
 builder.Services.AddTransient<ITaxiOwnerService , TaxiOwnerService>();
@@ -27,6 +33,7 @@ builder.Services.AddTransient<IBookingService , BookingService>();
 builder.Services.AddTransient<IPaymentHistoryService , PaymentHistoryService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 builder.Services.AddIdentity<User, IdentityRole>(
     options =>
