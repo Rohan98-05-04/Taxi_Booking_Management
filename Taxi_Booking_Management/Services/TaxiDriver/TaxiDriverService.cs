@@ -10,11 +10,11 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
     public class TaxiDriverService : ITaxiDriverService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILoggerManger _loggerManger;
-        public TaxiDriverService(ApplicationDbContext dbContext, ILoggerManger loggerManger)
+        private readonly ILoggerManager _loggerManager;
+        public TaxiDriverService(ApplicationDbContext dbContext, ILoggerManager loggerManager)
         {
             _context = dbContext;
-            _loggerManger = loggerManger;
+            _loggerManager = loggerManager;
         }
 
         public async Task<string> DeleteTaxiDriverAsync(int driverId)
@@ -25,18 +25,18 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == driverId);
                 if (exDriver == null)
                 {
-                    _loggerManger.LogInfo($"taxi driver not found by given id{driverId}");
+                    _loggerManager.LogInfo($"taxi driver not found by given id{driverId}");
                     return message;
                 }
                 _context.drivers.Remove(exDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullDelete;
-                _loggerManger.LogInfo($"taxi driver is successfully retrived with given id{driverId}");
+                _loggerManager.LogInfo($"taxi driver is successfully retrived with given id{driverId}");
                 return message;
             }
             catch (Exception ex)
             {
-                _loggerManger.LogError($"{ex.Message} ,method name: GetTaxiDriverAsync");
+                _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiDriverAsync");
                 throw;
             }
         }
@@ -53,11 +53,11 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
 
                 }
                 taxiDrivers = await data.ToPagedListAsync(page, pageSize);
-                _loggerManger.LogInfo($"all taxidriver records are retrived");
+                _loggerManager.LogInfo($"all taxidriver records are retrived");
             }
             catch (Exception ex)
             {
-                _loggerManger.LogError($"{ex.Message} ,method name: GetAllTaxiDriverAsync");
+                _loggerManager.LogError($"{ex.Message} ,method name: GetAllTaxiDriverAsync");
                 throw;
             }
             return taxiDrivers;
@@ -70,15 +70,15 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == driverId);
                 if (exDriver == null)
                 {
-                    _loggerManger.LogInfo($"taxi driver not found by given id{driverId}");
+                    _loggerManager.LogInfo($"taxi driver not found by given id{driverId}");
                     return null;
                 }
-                _loggerManger.LogInfo($"taxi driver is successfully retrived with given id{driverId}");
+                _loggerManager.LogInfo($"taxi driver is successfully retrived with given id{driverId}");
                 return exDriver;
             }
             catch (Exception ex)
             {
-                _loggerManger.LogError($"{ex.Message} ,method name: GetTaxiDriverAsync");
+                _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiDriverAsync");
                 throw;
             }
         }
@@ -91,18 +91,18 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverMobile == taxiDriver.DriverMobile);
                 if (exDriver != null)
                 {
-                    _loggerManger.LogInfo("taxi driver mobile is already exist");
+                    _loggerManager.LogInfo("taxi driver mobile is already exist");
                     return message;
                 }
                 await _context.drivers.AddAsync(taxiDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
-                _loggerManger.LogInfo($"taxi driver is successfully register with name {taxiDriver.DriverName}");
+                _loggerManager.LogInfo($"taxi driver is successfully register with name {taxiDriver.DriverName}");
                 return message;
             }
             catch (Exception ex)
             {
-                _loggerManger.LogError($"{ex.Message} ,method name: RegisterTaxiDriverAsync");
+                _loggerManager.LogError($"{ex.Message} ,method name: RegisterTaxiDriverAsync");
                 throw;
             }
         }
