@@ -4,7 +4,16 @@ using System;
 using Microsoft.AspNetCore.Identity;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Auth;
-using AspNetCoreHero.ToastNotification;
+
+
+
+using Taxi_Booking_Management.Services.Taxi;
+using Taxi_Booking_Management.Services.TaxiDriver;
+using Taxi_Booking_Management.Services.TaxiOwner;
+using Taxi_Booking_Management.Services.Booking;
+using Taxi_Booking_Management.Services.PaymentHistory;
+using Taxi_Booking_Management.LoggerService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,13 +22,19 @@ var connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
+
 builder.Services.AddTransient<IAuthService, AuthService>();
-builder.Services.AddNotyf(config =>
-{
-    config.DurationInSeconds = 3;
-    config.IsDismissable = true;
-    config.Position = NotyfPosition.TopRight;
-});
+
+
+builder.Services.AddTransient<ITaxiService , TaxiService>();
+builder.Services.AddTransient<ITaxiDriverService , TaxiDriverService>();
+builder.Services.AddTransient<ITaxiOwnerService , TaxiOwnerService>();
+builder.Services.AddTransient<IBookingService , BookingService>();
+builder.Services.AddTransient<IPaymentHistoryService , PaymentHistoryService>();
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
 builder.Services.AddIdentity<User, IdentityRole>(
     options =>
     {
@@ -30,6 +45,7 @@ builder.Services.AddIdentity<User, IdentityRole>(
         options.Password.RequireLowercase = false;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+NLog.LogManager.LoadConfiguration("LoggerService/nlog.config");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
