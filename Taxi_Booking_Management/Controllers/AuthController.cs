@@ -28,6 +28,7 @@ namespace Taxi_Booking_Management.Controllers
                     foreach (var errormessage in result.Errors)
                     {
                         ModelState.AddModelError("", errormessage.Description);
+                        return RedirectToRoute(new { controller = "Auth", action = "SignUp" });
 
                     }
                     return View(model);
