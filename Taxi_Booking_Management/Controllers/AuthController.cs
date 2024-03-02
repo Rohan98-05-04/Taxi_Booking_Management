@@ -1,4 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Services.Auth;
@@ -8,12 +8,12 @@ namespace Taxi_Booking_Management.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authData;
-        private readonly INotyfService _notyf;
+       
 
-        public AuthController(IAuthService authData, INotyfService notyf) 
+        public AuthController(IAuthService authData) 
         {
                 _authData=authData;
-                _notyf = notyf;
+                
 
         }
         public IActionResult SignUp()

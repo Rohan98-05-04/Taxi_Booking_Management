@@ -1,4 +1,7 @@
-﻿
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<User> _signInManager
+
 <header>
     <nav class="navbar navbar-expand-lg shadow mb-3" data-bs-theme="dark" style="background-color: #e3f2fd;">
         <div class="container-fluid">
@@ -15,14 +18,17 @@
                         <div class="userName">
                             <a  asp-action="" asp-controller="" asp-route-userId="">
                                 <img src="https://tse1.mm.bing.net/th?id=OIP.LG6UqvINZmEBMrUzrhADJAHaHa&pid=Api&P=0&h=180" alt="">
-                               
+                                <span id="LoginName">@User.Identity.Name</span>
                             </a>
                         </div>
                     </li>
-                    <li class="nav-item pt-1
-">
-                        <a class="nav-link" asp-area="" asp-controller="Auth" asp-action="LogOut">Logout</a>
+                    <form asp-controller="Auth" asp-action="LogOut">
+                    <li class="nav-item pt-1">
+                   
+                            <button class="btn btn-primary" type="submit" >Logout</button>
                     </li>
+                    </form>
+                   
                 </ul>
             </div>
         </div>
