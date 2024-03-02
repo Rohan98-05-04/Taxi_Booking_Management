@@ -2,5 +2,7 @@
 {
     public interface ITaxiService
     {
+        public Task<string> RegisterTaxiAsync(Models.Taxi taxi);
+         
     }
 }
