@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Services.Auth;
 
@@ -7,10 +8,13 @@ namespace Taxi_Booking_Management.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authData;
+        private readonly INotyfService _notyf;
 
-        public AuthController(IAuthService authData) 
+        public AuthController(IAuthService authData, INotyfService notyf) 
         {
                 _authData=authData;
+                _notyf = notyf;
+
         }
         public IActionResult SignUp()
         {
@@ -23,18 +27,25 @@ namespace Taxi_Booking_Management.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _authData.RegisterUser(model);
-                if (!result.Succeeded)
+
+                if(result == null)
+                {
+                    _notyf.Warning("Email Already Exist!");
+                }
+
+                else if (!result.Succeeded)
                 {
                     foreach (var errormessage in result.Errors)
                     {
                         ModelState.AddModelError("", errormessage.Description);
-                        return RedirectToRoute(new { controller = "Auth", action = "SignUp" });
-
+                        
                     }
+                   
                     return View(model);
                 }
                 ModelState.Clear();
-                return RedirectToRoute(new { controller = "Auth", action = "SignIn" });
+
+                return Ok("successfully");
             }
             return View(model);
         }
@@ -53,7 +64,8 @@ namespace Taxi_Booking_Management.Controllers
                 var result = await _authData.LogInUser(model);
                 if (result.Succeeded)
                 {
-                    return RedirectToRoute(new { controller = "Home", action = "Index" });
+
+                    return Ok("successfully");
 
 
                 }
@@ -65,6 +77,7 @@ namespace Taxi_Booking_Management.Controllers
         public async Task<IActionResult> LogOut()
         {
             await _authData.SignOut();
+           
             return RedirectToRoute(new { controller = "Auth", action = "SignIn" });
 
         }

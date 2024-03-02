@@ -4,6 +4,7 @@ using System;
 using Microsoft.AspNetCore.Identity;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Auth;
+using AspNetCoreHero.ToastNotification;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
 builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddNotyf(config =>
+{
+    config.DurationInSeconds = 3;
+    config.IsDismissable = true;
+    config.Position = NotyfPosition.TopRight;
+});
 builder.Services.AddIdentity<User, IdentityRole>(
     options =>
     {
