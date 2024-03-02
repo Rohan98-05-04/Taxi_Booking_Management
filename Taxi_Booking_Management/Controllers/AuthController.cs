@@ -26,28 +26,27 @@ namespace Taxi_Booking_Management.Controllers
         {
             if (ModelState.IsValid)
             {
+                string message = "Fail to signup";
                 var result = await _authData.RegisterUser(model);
 
-                if(result == null)
+                if (result == null)
                 {
-                    _notyf.Warning("Email Already Exist!");
+                    message = "Email Already Exist!";
+                    return Ok(message);
                 }
-
                 else if (!result.Succeeded)
                 {
-                    foreach (var errormessage in result.Errors)
-                    {
-                        ModelState.AddModelError("", errormessage.Description);
-                        
-                    }
-                   
-                    return View(model);
+                    return Ok(result.Errors.ToString());
                 }
                 ModelState.Clear();
-
+                message = "SignUp successfully";
                 return Ok("successfully");
             }
-            return View(model);
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                         .Select(e => e.ErrorMessage)
+                         .ToList();
+            string allErrors = string.Join(", ", errors);
+            return Ok(allErrors);
         }
 
         public IActionResult SignIn()
@@ -59,19 +58,26 @@ namespace Taxi_Booking_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> SignIn(LogInUserDto model)
         {
+            string message = "Fail to login";
             if (ModelState.IsValid)
             {
                 var result = await _authData.LogInUser(model);
                 if (result.Succeeded)
                 {
-
-                    return Ok("successfully");
-
-
+                    message = "Login successfully";
+                    return Ok(message);
                 }
-                ModelState.AddModelError("", "Invalid Credentials");
+              else if (!result.Succeeded)
+                {
+                    message = "Fail to login, provide valid email/password";
+                    return Ok(message);
+                }
             }
-            return View(model);
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                          .Select(e => e.ErrorMessage)
+                          .ToList();
+            string allErrors = string.Join(", ", errors);
+            return Ok(allErrors);
         }
         [HttpPost]
         public async Task<IActionResult> LogOut()

@@ -21,7 +21,8 @@
                         window.location.href = '/Home/Index';
                     }, 1000);
                 } else {
-                    toastr.error(failMessage);
+               
+                    toastr.error(response);
                 }
             },
             error: function (response) {
@@ -46,14 +47,13 @@
             data: formData,
             dataType: "text",
             success: function (response) {
-
                 if (response.includes('successfully')) {
                     toastr.success(successMessage)
                     setTimeout(function () {
                         window.location.href = '/Auth/SignIn';
                     }, 1000);
                 } else {
-                    toastr.error(failMessage);
+                    toastr.error(response);
                 }
             },
             error: function (response) {

@@ -20,22 +20,29 @@ namespace Taxi_Booking_Management.Services.Auth
 
         public async Task<IdentityResult?> RegisterUser(RegisterUserDto model)
         {
-            var checkEmailExist = await _userManager.FindByEmailAsync(model.Email);
-            if(checkEmailExist == null)
+            try
             {
-                var user = new Models.User()
+                var checkEmailExist = await _userManager.FindByEmailAsync(model.Email);
+                if (checkEmailExist == null)
                 {
-                    Email = model.Email,
-                    UserName = model.Email,
-                    Name = model.Name,
-                    City = model.City,
-                    State = model.State,
-                    Country = model.Country,
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                return result;
+                    var user = new Models.User()
+                    {
+                        Email = model.Email,
+                        UserName = model.Email,
+                        Name = model.Name,
+                        City = model.City,
+                        State = model.State,
+                        Country = model.Country,
+                    };
+                    var result = await _userManager.CreateAsync(user, model.Password);
+                    return result;
+                }
+                return null;
             }
-            return null;
+            catch(Exception ex) {
+                throw;
+            }
+            
         }
 
         public async Task<SignInResult> LogInUser(LogInUserDto model)
