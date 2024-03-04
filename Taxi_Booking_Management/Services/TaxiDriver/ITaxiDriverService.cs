@@ -7,6 +7,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
         public Task<string> RegisterTaxiDriverAsync(Models.TaxiDriver taxiDriver);
         public Task<Models.TaxiDriver?> GetTaxiDriverAsync(int driverId);
         public Task<IPagedList<Models.TaxiDriver>> GetAllTaxiDriverAsync(int page, int pageSize, string search);
-        public Task<string> DeleteTaxiDriverAsync(int driverId); 
+        public Task<string> DeleteTaxiDriverAsync(int driverId);
+        public Task<int?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver);
     }
 }

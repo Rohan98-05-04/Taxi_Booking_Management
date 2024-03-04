@@ -72,11 +72,35 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                await _context.owner.AddAsync(taxiOwner);
                await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
-                _loggerManager.LogInfo($"taxiOwner is successfully register with name {taxiOwner.TaxiOwnerName}");
+                _loggerManager.LogInfo($"taxiOwner {MessagesAlerts.SuccessfullSave} with name {taxiOwner.TaxiOwnerName}");
                 return message;
             }catch (Exception ex)
             {
                 _loggerManager.LogError($"{ex.Message} ,method name: RegisterTaxiOwnerAsync");
+                throw;
+            }
+        }
+
+        public async Task<int?> UpdateTaxiOwner(Models.TaxiOwner taxiOwner)
+        {
+            string message = MessagesAlerts.FailSave;
+            try
+            {
+                var exOwner = await _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerMobile == taxiOwner.TaxiOwnerMobile);
+                if (exOwner == null)
+                {
+                    _loggerManager.LogInfo($"taxiowner not found with {taxiOwner.TaxiOwnerId}");
+                    return null;
+                }
+                 _context.owner.Update(taxiOwner);
+                await _context.SaveChangesAsync();
+                message = MessagesAlerts.SuccessfullSave;
+                _loggerManager.LogInfo($"taxiOwner {MessagesAlerts.SuccessfullUpdate} with name {taxiOwner.TaxiOwnerName}");
+                return exOwner.TaxiOwnerId;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: UpdateTaxiOwner");
                 throw;
             }
         }

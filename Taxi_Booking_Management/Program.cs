@@ -24,8 +24,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
 
 builder.Services.AddTransient<IAuthService, AuthService>();
-
-
 builder.Services.AddTransient<ITaxiService , TaxiService>();
 builder.Services.AddTransient<ITaxiDriverService , TaxiDriverService>();
 builder.Services.AddTransient<ITaxiOwnerService , TaxiOwnerService>();
