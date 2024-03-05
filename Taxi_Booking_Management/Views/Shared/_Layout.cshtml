@@ -79,7 +79,7 @@
     <div id="loader" class="loader"></div>
 
     @await Html.PartialAsync("_BodyScript")
-
+    @await Component.InvokeAsync("Notyf")
     @await RenderSectionAsync("Scripts", required: false)
   
 </body>

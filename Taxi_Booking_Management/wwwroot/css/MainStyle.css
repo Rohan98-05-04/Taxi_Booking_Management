@@ -123,5 +123,13 @@ color : black;
 
 .cursor:hover {
     cursor: pointer;
-    background: linear-gradient(to right, #7db1df, #fff);
+    background: #e3f2fd;
+    background-image: linear-gradient(to right,#34bdeb, white);
+    border-radius: 5px;
+}
+
+.required::after {
+    content: " *";
+    color: red;
+    font-size: 20px;
 }

@@ -1,4 +1,4 @@
-﻿
+﻿@using Taxi_Booking_Management.Common;
 
 <div class="position-sticky">
     <ul class="nav flex-column">
@@ -25,14 +25,15 @@
                 </a>
             </li>
 
-
-        <li class="nav-item m3 mb-2 cursor">
-                <a class="nav-link" >
+       
+        <li class="nav-item m3 mb-2 cursor   @Html.IsActive("TaxiOwner", "AddOwner") @Html.IsActive("TaxiOwner", "Index")  @Html.IsActive("TaxiOwner", "OwnerDetails") @Html.IsActive("TaxiOwner", "EditOwner")">
+            <a class="nav-link" asp-action="Index" asp-controller="TaxiOwner">
                 <h5><i class="fas fa-users me-2"></i>Taxi Owners</h5>
                 </a>
             </li>
-        <li class="nav-item m3 mb-2 cursor">
-            <a class="nav-link">
+      
+        <li class="nav-item m3 mb-2 cursor @Html.IsActive("TaxiDriver", "AddDriver") @Html.IsActive("TaxiDriver", "Index") @Html.IsActive("TaxiDriver", "DriverDetails") @Html.IsActive("TaxiDriver", "EditDriver")">
+            <a class="nav-link" asp-action="Index" asp-controller="TaxiDriver">
                 <h5><i class="fas fa-users me-2"></i>Taxi Drivers</h5>
             </a>
         </li>
