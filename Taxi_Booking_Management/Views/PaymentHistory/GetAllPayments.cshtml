@@ -1,0 +1,91 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList.Web.Common;
+@model IPagedList<PaymentHistory>
+
+@{
+    ViewData["Title"] = "Payment History";
+}
+
+
+<h2 class="d-inline">Payment History </h2>
+
+
+<div class="d-flex mt-3 justify-content-between">
+    @using (Html.BeginForm("GetAllPayments", "PaymentHistory", FormMethod.Get, new { @class = "d-flex" }))
+    {
+        <div class="form-group me-2">
+            <input type="date" name="startDate" class="form-control" value="@ViewBag.startDate">
+        </div>
+        <div class="form-group me-2">
+            <input type="date" name="endDate" class="form-control" value="@ViewBag.endDate">
+        </div>
+        <button type="submit" class="btn btn-outline-success">
+            <i class="fas fa-search"></i>
+        </button>
+    }
+    <a href="@Url.Action("CreatePayment", "PaymentHistory")" class="btn btn-primary ms-2">Add New</a>
+</div>
+
+<table class="table table-striped  mt-3">
+    <thead>
+        <tr class="table-primary">
+            <th class="text-center">Booking ID</th>
+            <th class="text-center">Paid Medium</th>
+            <th class="text-center">Total Amount</th>
+            <th class="text-center">Date</th>
+            <th class="text-center">Remark</th>
+            <th class="text-center">Action</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var details in Model)
+        {
+            <tr>
+                <td class="text-center">@details.BookingId</td>
+                <td class="text-center">@details.PaidMedium</td>
+                <td class="text-center">@details.TotalAmount</td>
+                <td class="text-center">@details.createDateTime</td>
+                @if (!string.IsNullOrEmpty(details.Remark))
+                {
+                    <td class="text-center">@details.Remark</td>
+                }
+                else
+                {
+                    <td class="text-center">Not Available</td>
+                }
+                <td class="text-center"> <a href="@Url.Action("GetIndividualPaymentByBookingId", new { driverId =details.PaymentId })" class="btn btn-info ms-2">Details </a></td>
+
+            </tr>
+        }
+        @if (Model.TotalItemCount <= 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No Result Found</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+@if (Model != null && Model.Count() > 0)
+{
+    <br />
+    <div class="pull-right" style="float:right;margin-right:10px;">
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("GetAllPayments",
+                new
+                {
+                    page,
+                    StartDate = ViewBag.startDate,
+                    EndDate = ViewBag.endDate,
+                }),
+                new PagedListRenderOptionsBase
+    {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" },
+        Display = PagedListDisplayMode.Always
+
+    })
+    </div>
+}
