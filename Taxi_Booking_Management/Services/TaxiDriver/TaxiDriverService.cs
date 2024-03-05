@@ -97,12 +97,34 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 await _context.drivers.AddAsync(taxiDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
-                _loggerManager.LogInfo($"taxi driver is successfully register with name {taxiDriver.DriverName}");
+                _loggerManager.LogInfo($"taxi driver {MessagesAlerts.SuccessfullSave} with name {taxiDriver.DriverName}");
                 return message;
             }
             catch (Exception ex)
             {
                 _loggerManager.LogError($"{ex.Message} ,method name: RegisterTaxiDriverAsync");
+                throw;
+            }
+        }
+
+        public async Task<int?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver)
+        {
+            try
+            {
+                var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == taxiDriver.DriverId);
+                if (exDriver == null)
+                {
+                    _loggerManager.LogInfo("taxi driver not found");
+                    return null;
+                }
+                 _context.drivers.Update(taxiDriver);
+                await _context.SaveChangesAsync();
+                _loggerManager.LogInfo($"taxi driver {MessagesAlerts.SuccessfullUpdate} {taxiDriver.DriverName}");
+                return exDriver.DriverId;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: UpdateTaxiDriverAsync");
                 throw;
             }
         }
