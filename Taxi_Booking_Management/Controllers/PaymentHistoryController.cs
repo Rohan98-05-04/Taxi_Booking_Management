@@ -37,14 +37,14 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPayments(int? page)
+        public async Task<IActionResult> GetAllPayments(int? page, string startDate, string endDate)
         {
             try
             {
                 var pageNumber = page ?? 1;
                 var pageSize = 10; 
 
-                var pagedPayments = await _paymentHistoryService.GetAllPayments(pageNumber, pageSize);
+                var pagedPayments = await _paymentHistoryService.GetAllPayments(pageNumber, pageSize, startDate, endDate);
 
                 return View(pagedPayments);
             }

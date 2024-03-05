@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.LoggerService;
 using X.PagedList;
@@ -21,38 +22,71 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
                 paymentHistory.createDateTime = DateTime.Now;
                 paymentHistory.updateDateTime = DateTime.Now;
 
+                if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), paymentHistory.PaidMedium))
+                {
+                    _loggerManager.LogInfo($"Invalid payment medium: {paymentHistory.PaidMedium}");
+                    throw new InvalidOperationException($"Invalid payment medium {paymentHistory.PaidMedium}");
+                }
+
                 _context.PaymentHistories.Add(paymentHistory);
                 await _context.SaveChangesAsync();
 
-                _loggerManager.LogInfo( "Payment created successfully.");
+                _loggerManager.LogInfo("Payment created successfully.");
 
                 return paymentHistory.PaymentId;
             }
+            catch (InvalidOperationException ex)
+            {
+                _loggerManager.LogError($"Invalid payment medium: {ex.Message}");
+                throw;
+            }
             catch (Exception ex)
             {
-                _loggerManager.LogError( "Error occurred while creating payment.");
+                _loggerManager.LogError($"Error occurred while creating payment: {ex.Message}");
                 throw new ApplicationException("Error occurred while creating payment.", ex);
             }
         }
 
-        public async Task<IPagedList<Models.PaymentHistory>> GetAllPayments( int pageNumber, int pageSize)
+
+        public async Task<IPagedList<Models.PaymentHistory>> GetAllPayments(int pageNumber, int pageSize, string? startDate, string? endDate)
         {
             try
             {
-                var payments = await _context.PaymentHistories.ToListAsync();
+                var paymentsQuery = _context.PaymentHistories
+                    .Include(ph => ph.booking) 
+                    .AsQueryable();
 
-                _loggerManager.LogInfo( "Retrieved all payments successfully.");
+                if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDateValue))
+                {
+                    paymentsQuery = paymentsQuery
+                        .Where(ph => ph.createDateTime >= startDateValue);
+                }
 
-                var pagedPayments = payments.ToPagedList(pageNumber, pageSize);
+                if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDateValue))
+                { 
+                    endDateValue = endDateValue.AddDays(1).Date;
+                    paymentsQuery = paymentsQuery
+                        .Where(ph => ph.createDateTime < endDateValue);
+                }
+
+                var totalCount = await paymentsQuery.CountAsync();
+                var paymentsList = await paymentsQuery
+                    .OrderByDescending(ph => ph.createDateTime)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var pagedPayments = paymentsList.ToPagedList(pageNumber, pageSize);
 
                 return pagedPayments;
             }
             catch (Exception ex)
             {
-                _loggerManager.LogError( "Error occurred while retrieving all payments.");
-                throw new ApplicationException("Error occurred while retrieving all payments.", ex);
+                _loggerManager.LogError("Error occurred while retrieving payments.", ex);
+                throw new ApplicationException("Error occurred while retrieving payments.", ex);
             }
         }
+
 
         public async Task<Models.PaymentHistory> GetIndividualPaymentByBookingId(int bookingId)
         {
@@ -61,26 +95,13 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
                 var payment = await _context.PaymentHistories
                     .FirstOrDefaultAsync(ph => ph.BookingId == bookingId);
 
-                if (payment != null)
-                {
-                    if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), payment.PaidMedium))
-                    {
-                        _loggerManager.LogInfo($"Invalid payment medium: {payment.PaidMedium}");
-                        throw new InvalidOperationException($"Invalid payment medium {payment.PaidMedium}");
-                    }
+                _loggerManager.LogInfo($"Retrieved payment for BookingId: {bookingId} successfully.");
 
-                    _loggerManager.LogInfo($"Retrieved payment for BookingId: {bookingId} successfully.");
-                    return payment;
-                }
-                else
-                {
-                    _loggerManager.LogError($"Payment not found for BookingId: {bookingId}.");
-                    return null;
-                }
+                return payment;
             }
             catch (Exception ex)
             {
-                _loggerManager.LogError($"Error occurred while retrieving payment for BookingId: {bookingId}.", ex);
+                _loggerManager.LogError($"Error occurred while retrieving payment for BookingId: {bookingId}.");
                 throw new ApplicationException($"Error occurred while retrieving payment for BookingId: {bookingId}.", ex);
             }
         }
