@@ -1,0 +1,101 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList.Web.Common;
+
+@model IPagedList<TaxiDriver>
+
+@{
+    ViewData["Title"] = "All Driver Details";
+}
+
+
+<h2 class="d-inline">All Driver Details </h2>
+
+
+<div class="d-flex mt-3 justify-content-between">
+    @using (Html.BeginForm("Index", "TaxiDriver", FormMethod.Get, new { @class = "d-flex" }))
+    {
+        <div class="form-group me-2">
+            <input type="text" name="Search" class="form-control" value="@ViewBag.Search" placeholder="Search by name/Unique Code">
+        </div>
+        <button type="submit" class="btn btn-outline-success">
+            <i class="fas fa-search"></i>
+        </button>
+    }
+
+    <a href="@Url.Action("AddDriver", "TaxiDriver")" class="btn btn-primary ms-2">Add New</a>
+</div>
+
+<table class="table table-striped  mt-3">
+    <thead>
+        <tr class="table-primary">
+            <th class="text-center">Driver Name</th>
+            <th class="text-center">Mobile Number</th>
+            <th class="text-center">Address</th>
+            <th class="text-center">Action</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var details in Model)
+        {
+            <tr>
+                <td class="text-center">@details.DriverName</td>
+                <td class="text-center">@details.DriverMobile</td>
+                @if (!string.IsNullOrEmpty(details.Address))
+                {
+                    <td class="text-center">@details.Address</td>
+                }
+                else
+                {
+                    <td class="text-center">Not Available</td>
+                }
+                <td class="text-center"> <a href="@Url.Action("DriverDetails", new { driverId =details.DriverId })" class="btn btn-info ms-2">Details </a></td>
+
+            </tr>
+        }
+        @if (Model.TotalItemCount <= 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No Result Found</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+@if (Model != null && Model.Count() > 0)
+{
+    <br />
+    <div class="pull-right" style="float:right;margin-right:10px;">
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index",
+                new
+                {
+                    page,
+                    Search = ViewBag.Search
+                }),
+                new PagedListRenderOptionsBase
+    {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" },
+        Display = PagedListDisplayMode.Always
+
+    })
+    </div>
+}
+
+@* @functions {
+    // Helper function to truncate the description to a specified number of words
+    string Truncate(string input, int wordCount)
+    {
+        if (string.IsNullOrWhiteSpace(input) || input == null)
+            return "Not Available";
+
+        var words = input.Split(' ');
+        if (words.Length <= wordCount)
+            return input;
+
+        return string.Join(' ', words.Take(wordCount)) + " ...";
+    }
+} *@
+

@@ -47,13 +47,17 @@
                     <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
                 <span>or use your email for registeration</span>
-                <input type="text" placeholder="Name" asp-for="Name">
+                <label class="required">
+                   hiii
+                </label>
+                <input type="text" placeholder="Name" asp-for="Name" class="required">
                 <span asp-validation-for="Name" class="text-danger"></span>
-                <input type="email" placeholder="Email" asp-for="Email">
+                
+                <input type="email" placeholder="Email" asp-for="Email" class="required">
                 <span asp-validation-for="Email" class="text-danger"></span>
-                <input type="password" placeholder="Password" asp-for="Password">
+                <input type="password" placeholder="Password" asp-for="Password" class="required">
                 <span asp-validation-for="Password" class="text-danger"></span>
-                <input type="password" placeholder="ConfirmPassword" asp-for="ConfirmPassword">
+                <input type="password" placeholder="ConfirmPassword" asp-for="ConfirmPassword" class="required">
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 <input type="text" placeholder="City" asp-for="City">
                 <span asp-validation-for="City" class="text-danger"></span>

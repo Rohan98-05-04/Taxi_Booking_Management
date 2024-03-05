@@ -1,0 +1,31 @@
+﻿@model TaxiDriver
+
+@{
+    ViewData["Title"] = "Create New Taxi Driver";
+}
+
+<h2>Update Taxi Driver Details</h2>
+
+<form asp-action="EditDriver" asp-controller="TaxiDriver" method="post" id="AddproductForm">
+    <input asp-for="DriverId" class="form-control" required type="hidden" />
+    <div class="form-group w-50 mt-5">
+        <label asp-for="DriverName" class="required">Full Name</label>
+        <input asp-for="DriverName" class="form-control" required />
+        <span asp-validation-for="DriverName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="DriverMobile" class="required">Mobile Number</label>
+        <input asp-for="DriverMobile" class="form-control" type="number" required min="10" />
+        <span asp-validation-for="DriverMobile" class="text-danger"></span>
+    </div>
+
+    <div class="form-group  w-50 mt-3">
+        <label asp-for="Address"> Full Address</label>
+        <textarea asp-for="Address" class="form-control"></textarea>
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Update</button>
+    <a asp-action="Index" asp-controller="TaxiDriver" class="btn btn-warning mt-2">Cancel</a>
+</form>

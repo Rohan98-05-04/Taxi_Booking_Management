@@ -13,6 +13,7 @@ using Taxi_Booking_Management.Services.TaxiOwner;
 using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
 using Taxi_Booking_Management.LoggerService;
+using AspNetCoreHero.ToastNotification;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,14 @@ builder.Services.AddIdentity<User, IdentityRole>(
     })
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 NLog.LogManager.LoadConfiguration("LoggerService/nlog.config");
+
+//ADD Toaster
+builder.Services.AddNotyf(config =>
+{
+    config.DurationInSeconds = 3;
+    config.IsDismissable = true;
+    config.Position = NotyfPosition.TopRight;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

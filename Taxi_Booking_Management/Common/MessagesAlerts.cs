@@ -1,6 +1,6 @@
 ﻿namespace Taxi_Booking_Management.Common
 {
-    public class MessagesAlerts
+    public static class MessagesAlerts
     {
         public static string SuccessfullSave = "Saved successfully";
         public static string FailSave = "Fail to save";
