@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.PaymentHistory;
 
@@ -7,25 +9,29 @@ namespace Taxi_Booking_Management.Controllers
     public class PaymentHistoryController : Controller
     {
         private readonly IPaymentHistoryService _paymentHistoryService;
-        public PaymentHistoryController(IPaymentHistoryService paymentHistoryService)
+        private readonly ApplicationDbContext _context;
+        public PaymentHistoryController(IPaymentHistoryService paymentHistoryService, ApplicationDbContext context)
         {
             _paymentHistoryService = paymentHistoryService;
+            _context = context;
         }
         public IActionResult Index()
         {
             return View();
         }
 
+        [HttpGet]
         public IActionResult CreatePayment()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] PaymentHistory paymentHistory)
+        public async Task<IActionResult> CreatePayment(PaymentHistory paymentHistory)
         {
             try
             {
+                ViewBag.Bookings = _context.Bookings.Select(x => new SelectListItem { Value = x.BookingId.ToString(), Text = x.BookingCode });
                 var paymentId = await _paymentHistoryService.CreatePayment(paymentHistory);
                 return RedirectToAction("Index");
             }
@@ -37,10 +43,12 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPayments(int? page, string startDate, string endDate)
+        public async Task<IActionResult> GetAllPayments(int? page, string? startDate = "", string? endDate= "")
         {
             try
             {
+                ViewBag.startDate = startDate;
+                ViewBag.endDate = endDate;
                 var pageNumber = page ?? 1;
                 var pageSize = 10; 
 

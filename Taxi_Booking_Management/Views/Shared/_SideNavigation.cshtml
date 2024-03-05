@@ -46,8 +46,8 @@
             </li>
 
 
-        <li class="nav-item mb-2 cursor">
-                <a class="nav-link" >
+        <li class="nav-item mb-2 cursor @Html.IsActive("PaymentHistory", "CreatePayment") @Html.IsActive("PaymentHistory", "GetAllPayments") @Html.IsActive("PaymentHistory", "GetIndividualPaymentByBookingId")">
+            <a class="nav-link" asp-action="GetAllPayments" asp-controller="PaymentHistory">
                 <h5><i class="fas fa-file-invoice me-2"></i>Payment History</h5>
                 </a>
             </li>
