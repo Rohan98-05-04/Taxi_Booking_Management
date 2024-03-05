@@ -55,18 +55,18 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetIndividualPaymentByBookingId(int bookingId)
+        public async Task<IActionResult> GetIndividualPaymentByBookingId(int paymentId)
         {
             try
             {
-                var payment = await _paymentHistoryService.GetIndividualPaymentByBookingId(bookingId);
+                var payment = await _paymentHistoryService.GetIndividualPaymentById(paymentId);
                 if (payment != null)
                 {
                     return View(payment);
                 }
                 else
                 {
-                    return View("NotFound", bookingId);
+                    return View("NotFound", paymentId);
                 }
             }
             catch (Exception ex)

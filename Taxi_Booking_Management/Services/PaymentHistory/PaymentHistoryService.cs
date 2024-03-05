@@ -15,7 +15,7 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
             _context = context;
             _loggerManager = loggerManager;
         }
-        public async Task<int> CreatePayment(Models.PaymentHistory paymentHistory)
+        public async Task<int?> CreatePayment(Models.PaymentHistory paymentHistory)
         {
             try
             {
@@ -25,7 +25,7 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
                 if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), paymentHistory.PaidMedium))
                 {
                     _loggerManager.LogInfo($"Invalid payment medium: {paymentHistory.PaidMedium}");
-                    throw new InvalidOperationException($"Invalid payment medium {paymentHistory.PaidMedium}");
+                    return null;
                 }
 
                 _context.PaymentHistories.Add(paymentHistory);
@@ -88,21 +88,28 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
         }
 
 
-        public async Task<Models.PaymentHistory> GetIndividualPaymentByBookingId(int bookingId)
+        public async Task<Models.PaymentHistory?> GetIndividualPaymentById(int paymentId)
         {
             try
             {
                 var payment = await _context.PaymentHistories
-                    .FirstOrDefaultAsync(ph => ph.BookingId == bookingId);
+                    .FirstOrDefaultAsync(ph => ph.PaymentId == paymentId);
 
-                _loggerManager.LogInfo($"Retrieved payment for BookingId: {bookingId} successfully.");
+                if(payment == null)
+                {
+                    _loggerManager.LogInfo($"PaymentId not");
+
+                    return null;
+                    
+                }
+                _loggerManager.LogInfo($"Retrieved payment for PaymentId: {paymentId} successfully.");
 
                 return payment;
             }
             catch (Exception ex)
             {
-                _loggerManager.LogError($"Error occurred while retrieving payment for BookingId: {bookingId}.");
-                throw new ApplicationException($"Error occurred while retrieving payment for BookingId: {bookingId}.", ex);
+                _loggerManager.LogError($"Error occurred while retrieving payment for PaymentId: {paymentId}.");
+                throw new ApplicationException($"Error occurred while retrieving payment for PaymentId: {paymentId}.", ex);
             }
         }
 
