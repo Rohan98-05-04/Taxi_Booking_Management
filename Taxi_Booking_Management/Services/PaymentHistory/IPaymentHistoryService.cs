@@ -1,4 +1,5 @@
 ﻿using Taxi_Booking_Management.Models;
+using X.PagedList;
 
 
 namespace Taxi_Booking_Management.Services.PaymentHistory
@@ -6,7 +7,7 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
     public interface IPaymentHistoryService
     {
         Task<int> CreatePayment(Models.PaymentHistory paymentHistory);
-        Task<List<Models.PaymentHistory>> GetAllPayments();
+        Task<IPagedList<Models.PaymentHistory>> GetAllPayments( int pageNumber, int pageSize);
         Task<Models.PaymentHistory> GetIndividualPaymentByBookingId(int bookingId);
     }
 }
