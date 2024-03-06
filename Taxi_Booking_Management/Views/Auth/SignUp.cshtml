@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="~/css/SignUp.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    @await Html.PartialAsync("_LoadingPartial")
 
 
 </head>
@@ -34,7 +35,7 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
                 <input type="password" placeholder="Password" asp-for="Password">
                 <span asp-validation-for="Password" class="text-danger"></span>
-                <button type="submit" >Sign In</button>
+                <button onclick="displayBusyIndicator()" type="submit">Sign In</button>
             </form>
         </div>
         <div class="form-container sign-up">
@@ -65,7 +66,7 @@
                 <span asp-validation-for="State" class="text-danger"></span>
                 <input type="text" placeholder="Country" asp-for="Country">
                 <span asp-validation-for="Country" class="text-danger"></span>
-                <button type="submit">Sign Up</button>
+                <button onclick="displayBusyIndicator()" type="submit">Sign Up</button>
             </form>
         </div>
        
@@ -91,6 +92,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/custom.js"></script>
+<script src="~/js/site.js"></script>
+
 <script>
     const container = document.getElementById('container');
     const registerBtn = document.getElementById('register');
