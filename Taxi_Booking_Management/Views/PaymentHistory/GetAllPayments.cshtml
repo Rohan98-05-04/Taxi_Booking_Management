@@ -30,7 +30,7 @@
 <table class="table table-striped  mt-3">
     <thead>
         <tr class="table-primary">
-            <th class="text-center">Booking ID</th>
+            <th class="text-center">BookingId</th>
             <th class="text-center">Paid Medium</th>
             <th class="text-center">Total Amount</th>
             <th class="text-center">Date</th>
@@ -45,9 +45,11 @@
         {
             <tr>
                 <td class="text-center">@details.BookingId</td>
-                <td class="text-center">@details.PaidMedium</td>
+                <td class="text-center">
+                    @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), details.PaidMedium)
+                </td>
                 <td class="text-center">@details.TotalAmount</td>
-                <td class="text-center">@details.createDateTime</td>
+                <td class="text-center">@details.createDateTime.ToString("MM/dd/yyyy")</td>
                 @if (!string.IsNullOrEmpty(details.Remark))
                 {
                     <td class="text-center">@details.Remark</td>
@@ -56,7 +58,7 @@
                 {
                     <td class="text-center">Not Available</td>
                 }
-                <td class="text-center"> <a href="@Url.Action("GetIndividualPaymentByBookingId", new { driverId =details.PaymentId })" class="btn btn-info ms-2">Details </a></td>
+                <td class="text-center"> <a href="@Url.Action("GetIndividualPaymentByBookingId", new { PaymentId =details.PaymentId })" class="btn btn-info ms-2">Details </a></td>
 
             </tr>
         }

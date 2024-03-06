@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.LoggerService;
 using X.PagedList;
@@ -14,6 +15,28 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
         {
             _context = context;
             _loggerManager = loggerManager;
+        }
+
+        public async Task<Models.PaymentHistory?> DeletePaymentAsync(int paymentId)
+        {
+            try
+            {
+                var payment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+                if (payment == null)
+                {
+                    _loggerManager.LogInfo($"not Payment found with PaymentId {paymentId}");
+                    return null;
+                }
+                _context.PaymentHistories.Remove(payment);
+                await _context.SaveChangesAsync();
+                _loggerManager.LogInfo($"Payment {MessagesAlerts.SuccessfullDelete} with PaymentId {paymentId}");
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} method name : GetIndividualPaymentById");
+                throw;
+            }
         }
         public async Task<int?> CreatePayment(Models.PaymentHistory paymentHistory)
         {
