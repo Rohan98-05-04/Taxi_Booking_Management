@@ -17,6 +17,29 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             _loggerManager = loggerManager;
         }
 
+        public async Task<string> DeleteTaxiOwnerAsync(int ownerId)
+        {
+            string message = MessagesAlerts.FailDelete;
+            try
+            {
+                var exOwner = await _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerId == ownerId);
+                if (exOwner == null)
+                {
+                    _loggerManager.LogInfo($"taxi owner not found by given id{ownerId}");
+                    return message;
+                }
+                _context.owner.Remove(exOwner);
+                await _context.SaveChangesAsync();
+                message = MessagesAlerts.SuccessfullDelete;
+                _loggerManager.LogInfo($"taxi owner is successfully retrived with given id{ownerId}");
+                return message;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: DeleteTaxiOwnerAsync");
+                throw;
+            }
+        }
         public async Task<IPagedList<Models.TaxiOwner>> GetAllTaxiOwnerAsync(int page, int pageSize, string search)
         {
             IPagedList<Models.TaxiOwner> taxiOwners = null;
@@ -81,7 +104,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             }
         }
 
-        public async Task<int?> UpdateTaxiOwner(Models.TaxiOwner taxiOwner)
+        public async Task<string?> UpdateTaxiOwner(Models.TaxiOwner taxiOwner)
         {
             string message = MessagesAlerts.FailSave;
             try
@@ -90,13 +113,14 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                 if (exOwner == null)
                 {
                     _loggerManager.LogInfo($"taxiowner not found with {taxiOwner.TaxiOwnerId}");
-                    return null;
+                    return message;
                 }
-                 _context.owner.Update(taxiOwner);
+                _context.Entry(exOwner).State = EntityState.Detached;
+                _context.owner.Update(taxiOwner);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
                 _loggerManager.LogInfo($"taxiOwner {MessagesAlerts.SuccessfullUpdate} with name {taxiOwner.TaxiOwnerName}");
-                return exOwner.TaxiOwnerId;
+                return message;
             }
             catch (Exception ex)
             {

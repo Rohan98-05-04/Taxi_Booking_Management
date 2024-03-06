@@ -62,7 +62,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeDeleteModal()">Cancel</button>
-                <form asp-controller="TaxiOwner" asp-action="Delete" asp-route-productId="@Model.TaxiOwnerId">
+                <form asp-controller="TaxiOwner" asp-action="DeleteOwner" asp-route-ownerId="@Model.TaxiOwnerId">
                     <button class="btn btn-danger" type="submit">Delete</button>
                 </form>
 

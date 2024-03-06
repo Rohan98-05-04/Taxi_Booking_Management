@@ -1,5 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiDriver;
 using Taxi_Booking_Management.Services.TaxiOwner;
@@ -7,6 +9,7 @@ using X.PagedList;
 
 namespace Taxi_Booking_Management.Controllers
 {
+    [Authorize]
     public class TaxiDriverController : Controller
     {
         private readonly ITaxiDriverService _taxiDriverServices;
@@ -15,7 +18,7 @@ namespace Taxi_Booking_Management.Controllers
         {
             _taxiDriverServices = taxiDriverServices;
         }
-    
+
 
 
         [HttpGet]
@@ -39,7 +42,7 @@ namespace Taxi_Booking_Management.Controllers
 
         public async Task<IActionResult> AddDriver(TaxiDriver driverModel, [FromServices] INotyfService notyf)
         {
-
+            string message = MessagesAlerts.FailSave;
             if (ModelState.IsValid)
             {
                 var newDriver = await _taxiDriverServices.RegisterTaxiDriverAsync(driverModel);
@@ -55,7 +58,7 @@ namespace Taxi_Booking_Management.Controllers
                 }
 
             }
-
+            notyf.Error($"{message}");
             return View(driverModel);
 
         }
@@ -84,10 +87,47 @@ namespace Taxi_Booking_Management.Controllers
             return View(driver);
         }
         [HttpPost]
-        public async Task<IActionResult> EditDriver(TaxiDriver driverModel)
+        public async Task<IActionResult> EditDriver(TaxiDriver driverModel, [FromServices] INotyfService notyf)
         {
+            string message = MessagesAlerts.FailUpdate;
+            if (ModelState.IsValid)
+            {
+                var updatedDriver = await _taxiDriverServices.UpdateTaxiDriverAsync(driverModel);
+                if (updatedDriver.Contains("successfully"))
+                {
 
+                    notyf.Success($"{updatedDriver}");
+                    return RedirectToAction("Index", "TaxiDriver");
+                }
+                else
+                {
+                    notyf.Error($"{updatedDriver}");
+                }
+            }
+            notyf.Error($"{message}");
             return View(driverModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteDriver(int driverId , [FromServices] INotyfService notyf)
+        {
+            string message = MessagesAlerts.FailDelete;
+            if (driverId > 0)
+            {
+               var deletedDriver= await _taxiDriverServices.DeleteTaxiDriverAsync(driverId);
+                if (deletedDriver.Contains("successfully"))
+                {
+
+                    notyf.Success($"{deletedDriver}");
+                    return RedirectToAction("Index", "TaxiDriver");
+                }
+                else
+                {
+                    notyf.Error($"{deletedDriver}");
+                }
+
+            }
+            notyf.Error($"{message}");
+            return RedirectToAction("DriverDetails", "TaxiDriver");
         }
     }
 }
