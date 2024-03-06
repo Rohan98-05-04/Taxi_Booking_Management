@@ -31,7 +31,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 _context.drivers.Remove(exDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullDelete;
-                _loggerManager.LogInfo($"taxi driver is successfully retrived with given id{driverId}");
+                _loggerManager.LogInfo($"taxi driver is successfully Deleted with given id{driverId}");
                 return message;
             }
             catch (Exception ex)

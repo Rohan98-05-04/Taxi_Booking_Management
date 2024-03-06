@@ -78,7 +78,7 @@ namespace Taxi_Booking_Management.Controllers
         [HttpGet]
         public async Task<IActionResult> EditDriver(int driverId)
         {
-            TaxiDriver driver = null;
+            TaxiDriver? driver = null;
             if (driverId > 0)
             {
                 driver = await _taxiDriverServices.GetTaxiDriverAsync(driverId);

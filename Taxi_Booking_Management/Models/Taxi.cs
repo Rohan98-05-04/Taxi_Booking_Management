@@ -32,7 +32,5 @@ namespace Taxi_Booking_Management.Models
 
         [ForeignKey("TaxiOwnerId")]
         public TaxiOwner TaxiOwner { get; set; }
-
-
     }
 }
