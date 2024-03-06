@@ -5,6 +5,7 @@ using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.LoggerService;
+using Taxi_Booking_Management.Models;
 using X.PagedList;
 
 namespace Taxi_Booking_Management.Services.Taxi
@@ -22,12 +23,11 @@ namespace Taxi_Booking_Management.Services.Taxi
             _mapper = mapper;
         }
 
-        public async Task<Models.Taxi?> DeleteTaxiAsync(int taxiId)
+        public async Task<int?> DeleteTaxiAsync(int taxiId)
         {
             try
             {
-                var taxi = await _context.taxis.Include(t => t.TaxiOwner).Include(t => t.Driver)
-                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
+                Models.Taxi? taxi = await _context.taxis.FirstOrDefaultAsync(t => t.TaxiId == taxiId);
                 if (taxi == null)
                 {
                     _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
@@ -36,7 +36,7 @@ namespace Taxi_Booking_Management.Services.Taxi
                 _context.taxis.Remove(taxi);
                 await _context.SaveChangesAsync();
                 _loggerManager.LogInfo($"taxi {MessagesAlerts.SuccessfullDelete} with taxiId {taxiId}");
-                return taxi;
+                return taxiId;
             }
             catch (Exception ex)
             {
@@ -97,8 +97,8 @@ namespace Taxi_Booking_Management.Services.Taxi
         {
             try
             {
-               var exTaxi = await _context.taxis.FirstOrDefaultAsync(u => u.RegistrationNumber == taxi.RegistrationNumber);
-                if(exTaxi != null)
+                var exTaxi = await _context.taxis.FirstOrDefaultAsync(u =>u.RegistrationNumber == taxi.RegistrationNumber);
+                if (exTaxi != null)
                 {
                     _loggerManager.LogInfo($"taxi with register number already exit: {taxi.RegistrationNumber}");
                     return $"register number already exit {taxi.RegistrationNumber}";
@@ -124,6 +124,33 @@ namespace Taxi_Booking_Management.Services.Taxi
                 throw;
             }
         }
+
+        public async Task<string> UpdateTaxiAsync(TaxiViewModel taxiModel)
+        {
+            try
+            {
+                var exTaxi =await _context.taxis.FirstOrDefaultAsync(u => u.TaxiId == taxiModel.TaxiViewId);
+                if (exTaxi == null)
+                {
+                    _loggerManager.LogInfo($"taxi not found {taxiModel.TaxiViewId}");
+                    return $"taxi not found  {taxiModel.TaxiViewId}, {MessagesAlerts.FailUpdate}";
+                }
+                exTaxi.TaxiName = taxiModel.TaxiName;
+                exTaxi.RegistrationNumber=taxiModel.RegistrationNumber;
+                exTaxi.TaxiStatus = taxiModel.TaxiStatus;
+                exTaxi.DriverId = taxiModel.DriverId;
+                exTaxi.TaxiOwnerId = taxiModel.TaxiOwnerId;
+                exTaxi.TaxiType = taxiModel.TaxiType;
+                _context.taxis.Update(exTaxi);
+               await _context.SaveChangesAsync();
+                return $"{MessagesAlerts.SuccessfullUpdate}";
+            }catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} method name : UpdateTaxiAsync");
+                throw;
+            }
+        }
+
         public async Task<string> UpdateTaxiStatus(int taxiId, int taxiStatus)
         {
             try

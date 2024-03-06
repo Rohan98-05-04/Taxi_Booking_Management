@@ -21,7 +21,7 @@ namespace Taxi_Booking_Management.Helper
            .ForMember(dest => dest.RegistrationNumber, opt => opt.MapFrom(src => src.taxi.RegistrationNumber));
 
 
-
+            CreateMap<RegisterBookingDto, Booking>().ReverseMap();
             CreateMap<TaxiViewModel, Taxi>();
 
         }

@@ -44,8 +44,6 @@
             <th class="text-center">Registration Number</th>
             <th class="text-center">Driver Name</th>
             <th class="text-center">Action</th>
-
-
         </tr>
     </thead>
     <tbody>
@@ -70,8 +68,12 @@
                 {
                     <td class="text-center">Not Available</td>
                 }
-                <td class="text-center"> <a href="@Url.Action("Details", new { taxiId =@details.TaxiId })" class="btn btn-info ms-2">Details </a></td>
+                <td class="text-center">
+                    <a href="@Url.Action("Details", new { taxiId =@details.TaxiId })" class="btn btn-info ms-2">Details</a>
+                    
+                </td>
 
+                
             </tr>
         }
         @if (Model.TotalItemCount <= 0)
@@ -105,6 +107,7 @@
 }
 @section Scripts {
     <script>
+   
         function submitForm() {
             document.forms["filterForm"].submit();
         }

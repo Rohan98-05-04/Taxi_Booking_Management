@@ -9,7 +9,8 @@ namespace Taxi_Booking_Management.Services.Taxi
         public Task<TaxiDto?> GetTaxiDetailsAsync(int taxiId);
         public Task<IPagedList<Models.Taxi>> GetAllTaxiDetailsAsync(int page, int pageSize, string search);
         public Task<string> UpdateTaxiStatus(int taxiId, int taxiStatus);
-        public Task<Models.Taxi?> DeleteTaxiAsync(int taxiId);
+        public Task<int?> DeleteTaxiAsync(int taxiId);
+        public Task<string> UpdateTaxiAsync(TaxiViewModel taxiModel);
 
     }
 }

@@ -1,20 +1,21 @@
 ﻿@model Taxi_Booking_Management.DtoModels.TaxiViewModel;
 
 @{
-    ViewData["Title"] = "Register taxi";
+    ViewData["Title"] = "Update Your Taxi Details";
 }
-<h2>Register New Taxi</h2>
+<h2>Update Your Taxi Details</h2>
 
-<form asp-action="Add" asp-controller="Taxi" method="post" class="mb-4">
+<form asp-action="EditTaxi" asp-controller="Taxi" method="post" class="mb-4">
+    <input asp-for="TaxiViewId" class="form-control mt-2" type="hidden" />
     <div class="form-group w-50 mt-5">
         <label asp-for="TaxiName"></label>
-        <input asp-for="TaxiName" class="form-control mt-2" />
+        <input asp-for="TaxiName" class="form-control mt-2" value="@Model.TaxiName" />
         <span asp-validation-for="TaxiName" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
         <label asp-for="RegistrationNumber"></label>
-        <input asp-for="RegistrationNumber" class="form-control mt-2" />
+        <input asp-for="RegistrationNumber" class="form-control mt-2" value="@Model.RegistrationNumber" />
         <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
     </div>
 
@@ -58,7 +59,7 @@
         <span asp-validation-for="TaxiStatus" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Register</button>
+    <button type="submit" class="btn btn-primary mt-2">Submit</button>
     <button asp-action="Index" asp-controller="Taxi" class="btn btn-warning mt-2">Cancel</button>
 </form>
 
@@ -67,5 +68,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-
-
