@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Models;
@@ -130,10 +131,10 @@ namespace Taxi_Booking_Management.Controllers
         {
             if (taxiId > 0)
             {
-                var taxiDetails = _taxiService.DeleteTaxiAsync(taxiId);
-                if (taxiDetails != null)
+                var taxiDetails = await _taxiService.DeleteTaxiAsync(taxiId);
+                if (taxiDetails > 0)
                 {
-                    notyf.Success("taxi si delete successfully");
+                    notyf.Success("taxi is delete successfully");
                     return RedirectToAction("Index", "Taxi");
                 }
                 else
@@ -145,6 +146,62 @@ namespace Taxi_Booking_Management.Controllers
             }
             notyf.Error("provide valid taxiId");
             return RedirectToAction("Index", "Taxi");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateTaxiStatus(int taxiId, int taxiStatus)
+        {
+            if(taxiId >0 && taxiStatus > 0)
+            {
+                var result = await _taxiService.UpdateTaxiStatus(taxiId, taxiStatus);
+                return Json(result);
+            }
+            return BadRequest();
+             
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditTaxi(int taxiId, [FromServices] INotyfService notyf)
+        {
+            if (taxiId > 0)
+            {
+                var taxiDetails = await _context.taxis.Include(u => u.TaxiOwner).Include(y => y.Driver).FirstOrDefaultAsync(x => x.TaxiId == taxiId);
+                if (taxiDetails != null && taxiDetails.TaxiId >0)
+                {
+                    TaxiViewModel taxiViewModeldata = new TaxiViewModel()
+                    {
+                        TaxiViewId = taxiDetails.TaxiId,
+                        TaxiName = taxiDetails.TaxiName,
+                        RegistrationNumber = taxiDetails.RegistrationNumber,
+                        TaxiOwnerId = taxiDetails.TaxiOwnerId,
+                        DriverId = taxiDetails.DriverId,
+                        TaxiType = taxiDetails.TaxiType,
+                        TaxiStatus = taxiDetails.TaxiStatus,
+                        TaxiTypes = GetTaxiTypes(),
+                        TaxiStatuses = GetTaxiStatus(),
+                        TaxiOwners = _context.owner.Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" }),
+                        Drivers = _context.drivers
+                                           .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" }),
+
+                    };
+                    return View(taxiViewModeldata);
+                }
+                else
+                {
+                    notyf.Error("taxi not found by given details");
+                    return RedirectToAction("Index", "Taxi");
+                }
+            }
+            notyf.Error("provide valid taxiId");
+            return RedirectToAction("Index", "Taxi");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditTaxi(TaxiViewModel taxiViewModel, [FromServices] INotyfService notyf)
+        {
+          var data = await _taxiService.UpdateTaxiAsync(taxiViewModel);
+            return RedirectToAction("Index", "Taxi");
+
         }
 
         private  List<SelectListItem> GetTaxiTypes()

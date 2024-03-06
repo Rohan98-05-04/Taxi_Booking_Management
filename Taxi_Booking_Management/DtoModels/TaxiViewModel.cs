@@ -6,6 +6,7 @@ namespace Taxi_Booking_Management.DtoModels
 {
     public class TaxiViewModel
     {
+        public int TaxiViewId { get; set; }
         [Required(ErrorMessage = "taxi name is required")]
         [Display(Name = "Taxi Name")]
         public string TaxiName { get; set; }
