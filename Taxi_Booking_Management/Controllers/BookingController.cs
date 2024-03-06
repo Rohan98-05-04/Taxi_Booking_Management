@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Booking;
+using X.PagedList;
 
 namespace Taxi_Booking_Management.Controllers
 {
@@ -18,9 +20,23 @@ namespace Taxi_Booking_Management.Controllers
             _context = dbcontext;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter = 0)
         {
-            return View();
+            ViewBag.Search = search;
+            var pageNumber = page ?? 1;
+            int pageSize = 5;
+
+            IPagedList<Booking> allBookings;
+            allBookings = await _BookingService.GetAllBookingDetailsAsync(pageNumber, pageSize, search);
+            if (statusFilter > 0)
+            {
+                if (statusFilter.HasValue)
+                {
+                    allBookings = allBookings.Where(t => t.BookingStatus == statusFilter).ToPagedList();
+                    ViewBag.StatusFilter = statusFilter;
+                }
+            }
+            return View(allBookings);
         }
 
         public async Task<IActionResult> RegisterBooking()
@@ -32,7 +48,7 @@ namespace Taxi_Booking_Management.Controllers
         public async Task<IActionResult> RegisterBooking(RegisterBookingDto dto)
         {
            var data =  await _BookingService.RegisterBookingAsync(dto);
-            return View();
+            return RedirectToAction("Index","Booking");
         }
 
         [HttpGet]
