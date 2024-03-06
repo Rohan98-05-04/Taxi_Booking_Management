@@ -147,7 +147,7 @@ namespace Taxi_Booking_Management.Services.Booking
                 if (!string.IsNullOrEmpty(term))
                 {
                     taxies = await _context.taxis
-                        .Where(p => p.RegistrationNumber.Contains(term) || p.TaxiName.Contains(term))
+                        .Where(p => p.TaxiStatus==1 && (p.RegistrationNumber.Contains(term) || p.TaxiName.Contains(term)))
                         .Select(x => $"{x.TaxiName},{x.RegistrationNumber}")
                         .ToListAsync();
                     _loggerManager.LogInfo($"autocomplete taxies retirved :{term}");

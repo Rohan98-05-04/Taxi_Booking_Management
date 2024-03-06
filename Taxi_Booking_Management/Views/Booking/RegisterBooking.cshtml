@@ -51,14 +51,14 @@
  
 
     <button type="submit" class="btn btn-primary mt-2">Register</button>
-    <button asp-action="Index" asp-controller="Taxi" class="btn btn-warning mt-2">Cancel</button>
+    <button asp-action="Index" asp-controller="Booking" class="btn btn-warning mt-2">Cancel</button>
 </form>
 @section Scripts{
     <script type="text/javascript">
         $(function () {
         $("#txtSearch").autocomplete({
                 source: '@Url.Action("getTaxiAutoComplete")',
-        minLength: 2
+        minLength: 0
         });
         });
 
