@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.LoggerService;
@@ -21,6 +22,29 @@ namespace Taxi_Booking_Management.Services.Taxi
             _mapper = mapper;
         }
 
+        public async Task<Models.Taxi?> DeleteTaxiAsync(int taxiId)
+        {
+            try
+            {
+                var taxi = await _context.taxis.Include(t => t.TaxiOwner).Include(t => t.Driver)
+                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
+                if (taxi == null)
+                {
+                    _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
+                    return null;
+                }
+                _context.taxis.Remove(taxi);
+                await _context.SaveChangesAsync();
+                _loggerManager.LogInfo($"taxi {MessagesAlerts.SuccessfullDelete} with taxiId {taxiId}");
+                return taxi;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} method name : GetTaxiDetailsAsync");
+                throw;
+            }
+        }
+
         public async Task<IPagedList<Models.Taxi>> GetAllTaxiDetailsAsync(int page, int pageSize, string search)
         {
             IPagedList<Models.Taxi> taxies = null;
@@ -33,7 +57,7 @@ namespace Taxi_Booking_Management.Services.Taxi
 
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
                 {
-                    data = data.Where(u => u.TaxiName.Contains(search));
+                    data = data.Where(u => u.TaxiName.Contains(search) || u.RegistrationNumber.Contains(search));
 
                 }
                 taxies = await data.ToPagedListAsync(page, pageSize);
@@ -73,6 +97,12 @@ namespace Taxi_Booking_Management.Services.Taxi
         {
             try
             {
+               var exTaxi = await _context.taxis.FirstOrDefaultAsync(u => u.RegistrationNumber == taxi.RegistrationNumber);
+                if(exTaxi != null)
+                {
+                    _loggerManager.LogInfo($"taxi with register number already exit: {taxi.RegistrationNumber}");
+                    return $"register number already exit {taxi.RegistrationNumber}";
+                }
                 if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), taxi.TaxiStatus))
                 {
                     _loggerManager.LogInfo($"Invalid task status: {taxi.TaxiStatus}");

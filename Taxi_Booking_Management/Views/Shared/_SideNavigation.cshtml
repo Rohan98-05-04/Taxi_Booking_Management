@@ -17,8 +17,8 @@
                 </a>
             </li> *@
 
-        <li class="nav-item mb-2 cursor ">
-                <a class="nav-link" >
+        <li class="nav-item mb-2 cursor @Html.IsActive("Taxi", "Add") @Html.IsActive("Taxi", "Index") @Html.IsActive("Taxi", "Details")">
+            <a class="nav-link" asp-action="Index" asp-controller="Taxi">
                 <h5>
                     <i class="fa-solid fa-car me-2"></i>Taxi Details
                 </h5>

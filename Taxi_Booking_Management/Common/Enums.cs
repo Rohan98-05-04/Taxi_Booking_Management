@@ -17,7 +17,7 @@
         public enum TaxiStatus
         {
             Available = 1,
-            UnAvailable = 2,
+            Unavailable = 2,
             UnderRepair = 3,
         }
 
