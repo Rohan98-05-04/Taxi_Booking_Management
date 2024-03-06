@@ -36,7 +36,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
             }
             catch (Exception ex)
             {
-                _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiDriverAsync");
+                _loggerManager.LogError($"{ex.Message} ,method name: DeleteTaxiDriverAsync");
                 throw;
             }
         }
@@ -107,20 +107,23 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
             }
         }
 
-        public async Task<int?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver)
+        public async Task<string?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver)
         {
+            string message = MessagesAlerts.FailUpdate;
             try
             {
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == taxiDriver.DriverId);
                 if (exDriver == null)
                 {
                     _loggerManager.LogInfo("taxi driver not found");
-                    return null;
+                    return message;
                 }
-                 _context.drivers.Update(taxiDriver);
+                _context.Entry(exDriver).State = EntityState.Detached;
+                _context.drivers.Update(taxiDriver);
                 await _context.SaveChangesAsync();
+                message = MessagesAlerts.SuccessfullUpdate;
                 _loggerManager.LogInfo($"taxi driver {MessagesAlerts.SuccessfullUpdate} {taxiDriver.DriverName}");
-                return exDriver.DriverId;
+                return message;
             }
             catch (Exception ex)
             {
