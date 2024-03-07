@@ -1,6 +1,173 @@
-﻿namespace Taxi_Booking_Management.Services.Booking
+﻿using AutoMapper;
+using Humanizer;
+using Microsoft.EntityFrameworkCore;
+using Taxi_Booking_Management.Common;
+using Taxi_Booking_Management.Data;
+using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.LoggerService;
+using Taxi_Booking_Management.Models;
+using X.PagedList;
+
+namespace Taxi_Booking_Management.Services.Booking
 {
     public class BookingService : IBookingService
     {
+        private readonly ApplicationDbContext _context;
+        private readonly ILoggerManager _loggerManager;
+        private readonly IMapper _mapper;
+
+        public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager ,  IMapper mapper)
+        {
+            _context = dbContext;
+            _loggerManager = loggerManager;
+            _mapper = mapper;
+        }
+
+        public async Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search)
+        {
+            IPagedList<Models.Booking> Bookings = null;
+            try
+            {
+                IQueryable<Models.Booking> data = _context.Bookings
+                .Include(t => t.taxi)
+                .AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(search) && data != null)
+                {
+                    data = data.Where(u => u.BookingCode.Contains(search)||u.CustomerName.Contains(search));
+
+                }
+                Bookings = await data.ToPagedListAsync(page, pageSize);
+                _loggerManager.LogInfo($"all Bookings records are retrived");
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: GetAllBookingDetailsAsync");
+                throw;
+            }
+            return Bookings;
+
+        }
+
+        public async Task<BookingDto?> GetTaxiBookingAsync(int bookingId)
+        {
+            try
+            {
+                
+                var retrieveBooking = await _context.Bookings.Include(t => t.taxi)
+                    .FirstOrDefaultAsync(t => t.BookingId == bookingId);
+                if (retrieveBooking == null)
+                {
+                    _loggerManager.LogInfo($"not Booking Details found with bookingId {bookingId}");
+                    return null;
+                }
+                var bookingDto = _mapper.Map<BookingDto>(retrieveBooking);
+                _loggerManager.LogInfo($"Booking details is successfully retrived with given id{bookingId}");
+                return bookingDto;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiBookingAsync");
+                throw;
+            }
+        }
+
+        public async Task<string> DeleteTaxiBookingsAsync(int bookingId)
+        {
+            string message = MessagesAlerts.FailDelete;
+            try
+            {
+                var retriveBookingDetails = await _context.Bookings.FirstOrDefaultAsync(u => u.BookingId == bookingId);
+                if (retriveBookingDetails == null)
+                {
+                    _loggerManager.LogInfo($"taxi Booking not found by given id{bookingId}");
+                    return message;
+                }
+                _context.Bookings.Remove(retriveBookingDetails);
+                await _context.SaveChangesAsync();
+                message = MessagesAlerts.SuccessfullDelete;
+                _loggerManager.LogInfo($"taxi Booking is successfully retrived with given id{bookingId}");
+                return message;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: DeleteTaxiBookingsAsync");
+                throw;
+            }
+        }
+
+        public async Task<string> RegisterBookingAsync(RegisterBookingDto bookingDto)
+        {
+            try
+            {
+                bool isAvailable = await IsTaxiAvailableAsync(bookingDto.TaxiId, bookingDto.fromDate, bookingDto.toDate);
+                if (isAvailable)
+                {
+                    string[] taxi = bookingDto.RegistrationNo.Split(',');
+                    int exTaxiId = await GetTaxiIdByRegNo(taxi[1]);
+
+                    bookingDto.BookingCode = Guid.NewGuid().ToString("N").Substring(0, 10);
+                    bookingDto.UpdatedDateTime = DateTime.Now;
+                    bookingDto.CreatedDateTime = DateTime.Now;
+                    bookingDto.TaxiId = exTaxiId;
+                    decimal totalAmount = (bookingDto.GrossAmount * bookingDto.TotalGST) / 100;
+                    bookingDto.NetAmount = totalAmount;
+                    bookingDto.BookingStatus = Convert.ToInt32(Enums.BookingStatus.Pending);
+
+                    Models.Booking newBooking = _mapper.Map<Models.Booking>(bookingDto);
+                    await _context.Bookings.AddAsync(newBooking);
+                    await _context.SaveChangesAsync();
+                    _loggerManager.LogInfo($"Booking is successfully registed with given id{bookingDto.BookingCode}");
+                    return $"you booking {MessagesAlerts.SuccessfullSave} with {bookingDto.BookingCode}";
+                } 
+                _loggerManager.LogInfo($"date is not available for booking for cus :{bookingDto.CustomerName}");
+                return $"{MessagesAlerts.FailSave}";
+            }
+            catch  (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: RegisterBookingAsync");
+                throw;
+            }
+        }
+
+        public async Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate)
+        {
+            bool isTaxiAvailable = await _context.Bookings
+                .AnyAsync(b => b.TaxiId == taxiId && b.fromDate <= toDate && b.toDate >= fromDate);
+
+            return !isTaxiAvailable;
+        }
+
+
+        public async Task<IList<string>> GetAllTaxiByRegNo(string term)
+        {
+            IList<string> taxies = null;
+            try
+            {
+                if (!string.IsNullOrEmpty(term))
+                {
+                    taxies = await _context.taxis
+                        .Where(p => p.TaxiStatus==1 && (p.RegistrationNumber.Contains(term) || p.TaxiName.Contains(term)))
+                        .Select(x => $"{x.TaxiName},{x.RegistrationNumber}")
+                        .ToListAsync();
+                    _loggerManager.LogInfo($"autocomplete taxies retirved :{term}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: GetAllTaxiByRegNo");
+                throw;
+            }
+            return taxies;
+        }
+
+        public async Task<int> GetTaxiIdByRegNo(string regNo)
+        {
+            var exTaxi = await _context.taxis.FirstOrDefaultAsync(u => u.RegistrationNumber == regNo);
+            if (exTaxi == null)
+            {
+                return 0;
+            }return exTaxi.TaxiId;
+        }
     }
 }

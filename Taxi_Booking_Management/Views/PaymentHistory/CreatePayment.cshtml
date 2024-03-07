@@ -22,6 +22,7 @@
             Online
             @Html.RadioButtonFor(model => model.PaidMedium, 2)
         </div>
+        <span asp-validation-for="PaidMedium" class="text-danger"></span>
     </div>
     <div class="form-group w-50 mt-3">
         <label asp-for="TotalAmount" class="required">Total Amount</label>

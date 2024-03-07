@@ -1,0 +1,133 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList.Web.Common;
+
+@model IPagedList<Taxi>
+
+@{
+    ViewData["Title"] = "All Taxi Details";
+}
+
+
+<h2 class="d-inline">All Taxi Details </h2>
+
+
+<div class="d-flex mt-3 justify-content-between">
+    @using (Html.BeginForm("Index", "Taxi", FormMethod.Get, new { @class = "d-flex", id = "filterForm" }))
+    {
+        <div class="form-group me-2">
+            <input type="text" name="Search" class="form-control" value="@ViewBag.Search" placeholder="Search by taxi/reg.no" onkeypress="handleKeyPress(event)">
+        </div>
+
+        <div class="form-group me-2">
+            <select name="StatusFilter" class="form-control" onchange="submitForm()">
+                <option value="">-- Select Taxi Status --</option>
+                <option value="1">Available</option>
+                <option value="2">Unavailable</option>
+                <option value="3">Under Repair</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-outline-success" onclick="submitForm()">
+            <i class="fas fa-search"></i>
+        </button>
+    }
+    
+
+    <a href="@Url.Action("Add", "Taxi")" class="btn btn-primary ms-2">Add New</a>
+</div>
+
+<table class="table table-striped  mt-3">
+    <thead>
+        <tr class="table-primary">
+            <th class="text-center">Taxi Name</th>
+            <th class="text-center">Registration Number</th>
+            <th class="text-center">Driver Name</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var details in Model)
+        {
+            <tr>
+                <td class="text-center">@details.TaxiName</td>
+                <td class="text-center">
+                    @details.RegistrationNumber  
+                    <button class="btn btn-sm
+        @(details.TaxiStatus == 1 ? "btn-success" :
+        details.TaxiStatus == 2 ? "btn-warning" :
+        details.TaxiStatus == 3 ? "btn-danger" : "")">
+                        @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), details.TaxiStatus)
+                    </button>
+                </td>
+                @if (!string.IsNullOrEmpty(details.Driver.DriverName))
+                {
+                    <td class="text-center">@details.Driver.DriverName</td>
+                }
+                else
+                {
+                    <td class="text-center">Not Available</td>
+                }
+                <td class="text-center">
+                    <a href="@Url.Action("Details", new { taxiId =@details.TaxiId })" class="btn btn-info ms-2">Details</a>
+                    
+                </td>
+
+                
+            </tr>
+        }
+        @if (Model.TotalItemCount <= 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No Result Found</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+@if (Model != null && Model.Count() > 0)
+{
+    <br />
+    <div class="pull-right" style="float:right;margin-right:10px;">
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index",
+                new
+                {
+                    page,
+                    Search = ViewBag.Search,
+                statusFilter = ViewBag.StatusFilter
+                }),
+                new PagedListRenderOptionsBase
+    {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" },
+        Display = PagedListDisplayMode.Always
+
+    })
+    </div>
+}
+@section Scripts {
+    <script>
+   
+        function submitForm() {
+            document.forms["filterForm"].submit();
+        }
+
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) {
+                submitForm();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var statusFilter = "@ViewBag.StatusFilter";
+            var dropdown = document.getElementsByName("StatusFilter")[0];
+
+            for (var i = 0; i < dropdown.options.length; i++) {
+                if (dropdown.options[i].value === statusFilter) {
+                    dropdown.options[i].setAttribute("selected", "selected");
+                }
+            }
+        });
+    </script>
+}
+

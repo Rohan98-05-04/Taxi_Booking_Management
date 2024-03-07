@@ -8,6 +8,6 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
         public Task<Models.TaxiDriver?> GetTaxiDriverAsync(int driverId);
         public Task<IPagedList<Models.TaxiDriver>> GetAllTaxiDriverAsync(int page, int pageSize, string search);
         public Task<string> DeleteTaxiDriverAsync(int driverId);
-        public Task<int?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver);
+        public Task<string?> UpdateTaxiDriverAsync(Models.TaxiDriver taxiDriver);
     }
 }

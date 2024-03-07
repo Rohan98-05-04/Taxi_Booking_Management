@@ -1,0 +1,68 @@
+﻿@model Taxi_Booking_Management.DtoModels.RegisterBookingDto;
+
+@{
+    ViewData["Title"] = "Register booking";
+}
+
+<h2>Register New Booking</h2>
+<form asp-action="RegisterBooking" asp-controller="Booking" method="post" class="mb-4">
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="RegistrationNo"></label>
+        <input asp-for="RegistrationNo" class="form-control mt-2" id="txtSearch" />
+        <span asp-validation-for="RegistrationNo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="fromDate"></label>
+        <input asp-for="fromDate" class="form-control mt-2" />
+        <span asp-validation-for="fromDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="toDate"></label>
+        <input asp-for="toDate" class="form-control mt-2" />
+        <span asp-validation-for="toDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="CustomerName"></label>
+        <input asp-for="CustomerName" class="form-control mt-2" />
+        <span asp-validation-for="CustomerName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="CustomerMobile"></label>
+        <input asp-for="CustomerMobile" class="form-control mt-2" />
+        <span asp-validation-for="CustomerMobile" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="GrossAmount"></label>
+        <input asp-for="GrossAmount" class="form-control mt-2" />
+        <span asp-validation-for="GrossAmount" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="TotalGST"></label>
+        <input asp-for="TotalGST" class="form-control mt-2" />
+        <span asp-validation-for="TotalGST" class="text-danger"></span>
+    </div>
+ 
+
+    <button type="submit" class="btn btn-primary mt-2">Register</button>
+    <button asp-action="Index" asp-controller="Booking" class="btn btn-warning mt-2">Cancel</button>
+</form>
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+        $("#txtSearch").autocomplete({
+                source: '@Url.Action("getTaxiAutoComplete")',
+        minLength: 0
+        });
+        });
+
+    
+        
+    </script>
+}

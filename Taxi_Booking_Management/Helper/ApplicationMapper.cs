@@ -15,6 +15,15 @@ namespace Taxi_Booking_Management.Helper
            .ForMember(dest => dest.TaxiOwnerMobile, opt => opt.MapFrom(src => src.TaxiOwner.TaxiOwnerMobile));
 
             CreateMap<User, UpdateUserDto>();
+            
+            CreateMap<Booking, BookingDto>()
+           .ForMember(dest => dest.TaxiName, opt => opt.MapFrom(src => src.taxi.TaxiName))
+           .ForMember(dest => dest.RegistrationNumber, opt => opt.MapFrom(src => src.taxi.RegistrationNumber));
+
+            CreateMap<RegisterBookingDto, Booking>().ReverseMap();
+            CreateMap<TaxiViewModel, Taxi>();
+
+
         }
     }
 }

@@ -1,68 +1,59 @@
-﻿@model TaxiOwner
+﻿@model PaymentHistory
 
 
 @{
-    ViewData["Title"] = "Owner Details";
+    ViewData["Title"] = "Payment Details";
 }
 
 <div class="container mt-5">
-    <!-- 1. Top left side: Name and Verified User Button -->
     <div class="row">
         <div class="col-md-6">
-            <h4 class="h4 fw-bolder">Details of Owner</h4>
+            <h4 class="h4 fw-bolder">Details of Payment</h4>
         </div>
-        <!-- 2. Top right side: Delete and Edit Buttons -->
         <div class="col-md-6 text-end">
-            <a asp-controller="TaxiOwner" asp-action="EditOwner" asp-route-ownerId="@Model.TaxiOwnerId" class="btn btn-primary"><i class="bi bi-pencil"></i> &nbsp Edit</a>
+            <a asp-action="GetAllPayments" asp-controller="PaymentHistory" class="btn btn-warning mt-2"> &nbsp Back</a>
             <button class="btn btn-danger ms-2" data-toggle="modal" onclick="openModal()" id="deleteButton"><i class="bi bi-trash3"></i> &nbsp Delete </button>
         </div>
     </div>
 
     <hr />
-    <!-- 3. User Details -->
+
     <div class="row mt-3">
         <div class="col-md-6">
-            <p><strong>Owner Name : </strong> @Model.TaxiOwnerName</p>
-            <p><strong>Mobile Number : </strong> @Model.TaxiOwnerMobile</p>
-            @if (!string.IsNullOrEmpty(Model.TaxiOwnerEmail))
+            <p><strong>BookingId : </strong> @Model.BookingId</p>
+            <p><strong>Paid Medium : </strong> @Model.PaidMedium</p>
+            <p><strong>Total Amount : </strong> @Model.TotalAmount</p>
+
+            @if (!string.IsNullOrEmpty(Model.Remark))
             {
-                <p><strong>Email : </strong> @Model.TaxiOwnerEmail</p>
+                <p><strong>Remark : </strong> @Model.Remark</p>
             }
             else
             {
-                <p><strong>Email : </strong> Not Available</p>
+                <p><strong>Remark : </strong> Not Available</p>
             }
-            @if (!string.IsNullOrEmpty(Model.TaxiOwnerAddress))
-            {
-                <p><strong>Address : </strong> @Model.TaxiOwnerAddress</p>
-            }
-            else
-            {
-                <p><strong>Address : </strong> Not Available</p>
-            }
-           
+
 
         </div>
-       
+
     </div>
 </div>
 
-<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Delete Owner Details</h5>
+                <h5 class="modal-title" id="deleteModalLabel">Delete Payment Details</h5>
                 <button type="button" onclick="closeDeleteModal()" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this Owner?</p>
+                <p>Are you sure you want to delete this Payment?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeDeleteModal()">Cancel</button>
-                <form asp-controller="TaxiOwner" asp-action="DeleteOwner" asp-route-ownerId="@Model.TaxiOwnerId">
+                <form asp-controller="PaymentHistory" asp-action="DeletePayment" asp-route-paymentId="@Model.PaymentId">
                     <button class="btn btn-danger" type="submit">Delete</button>
                 </form>
 
@@ -78,4 +69,4 @@
     function closeDeleteModal() {
         $('#deleteModal').modal('hide')
     }
-</script> 
+</script>

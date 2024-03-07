@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.Models;
@@ -23,6 +24,7 @@ namespace Taxi_Booking_Management.Controllers
         [HttpGet]
         public IActionResult CreatePayment()
         {
+            ViewBag.Bookings = _context.Bookings.Select(x => new SelectListItem { Value = x.BookingId.ToString(), Text = x.CustomerName });
             return View();
         }
 
@@ -31,9 +33,8 @@ namespace Taxi_Booking_Management.Controllers
         {
             try
             {
-                ViewBag.Bookings = _context.Bookings.Select(x => new SelectListItem { Value = x.BookingId.ToString(), Text = x.BookingCode });
                 var paymentId = await _paymentHistoryService.CreatePayment(paymentHistory);
-                return RedirectToAction("Index");
+                return RedirectToAction("GetAllPayments");
             }
             catch (Exception ex)
             {
@@ -81,6 +82,27 @@ namespace Taxi_Booking_Management.Controllers
             {
                 return View("Error");
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeletePayment(int paymentId, [FromServices] INotyfService notyf)
+        {
+            if (paymentId > 0)
+            {
+                var paymentDetails = await _paymentHistoryService.DeletePaymentAsync(paymentId);
+                if (paymentDetails != null)
+                {
+                    notyf.Success("Payment History is delete successfully");
+                    return RedirectToAction("GetAllPayments", "PaymentHistory");
+                }
+                else
+                {
+                    notyf.Error("Payment not found by given details");
+                    return RedirectToAction("GetAllPayments", "PaymentHistory");
+
+                }
+            }
+            notyf.Error("provide valid paymentId");
+            return RedirectToAction("GetAllPayments", "PaymentHistory");
         }
     }
 }

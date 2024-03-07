@@ -1,0 +1,42 @@
+﻿@model Taxi_Booking_Management.DtoModels.CheckTaxiAvailability;
+
+@{
+    ViewData["Title"] = "Register booking";
+}
+
+
+<h2>Check availability</h2>
+<form asp-action="CheckBookingAvailbility" asp-controller="Booking" method="post" class="mb-4">
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="taxiId"></label>
+        <input asp-for="taxiId" class="form-control mt-2" id="txtSearch" />
+        <span asp-validation-for="taxiId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="FromDate"></label>
+        <input asp-for="FromDate" class="form-control mt-2" />
+        <span asp-validation-for="FromDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="ToDate"></label>
+        <input asp-for="ToDate" class="form-control mt-2" />
+        <span asp-validation-for="ToDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Check</button>
+    <button asp-action="Index" asp-controller="Taxi" class="btn btn-warning mt-2">Cancel</button>
+</form>
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            $("#txtSearch").autocomplete({
+                source: '@Url.Action("getTaxiAutoComplete")',
+                minLength: 2
+            });
+        });
+
+    </script>
+}

@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using System.Drawing.Printing;
@@ -10,6 +11,7 @@ using X.PagedList;
 
 namespace Taxi_Booking_Management.Controllers
 {
+    [Authorize]
     public class TaxiOwnerController : Controller
     {
         private readonly ITaxiOwnerService _taxiOwnerServices;
@@ -42,8 +44,9 @@ namespace Taxi_Booking_Management.Controllers
 
         public async Task<IActionResult> AddOwner(TaxiOwner ownerModel , [FromServices] INotyfService notyf)
         {
+            string message = MessagesAlerts.FailSave;
 
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
               var newOwner = await _taxiOwnerServices.RegisterTaxiOwnerAsync(ownerModel);
                 if(newOwner.Contains("successfully")) {
@@ -57,7 +60,7 @@ namespace Taxi_Booking_Management.Controllers
                 }
               
             }
-               
+            notyf.Error($"{message}");
             return View (ownerModel);
             
         }
@@ -89,10 +92,49 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditOwner(TaxiOwner ownerModel)
+        public async Task<IActionResult> EditOwner(TaxiOwner ownerModel, [FromServices] INotyfService notyf)
         {
-           
+            string message = MessagesAlerts.FailUpdate;
+            if (ModelState.IsValid)
+            {
+                var updatedDriver = await _taxiOwnerServices.UpdateTaxiOwner(ownerModel);
+                if (updatedDriver.Contains("successfully"))
+                {
+
+                    notyf.Success($"{updatedDriver}");
+                    return RedirectToAction("Index", "TaxiDriver");
+                }
+                else
+                {
+                    notyf.Error($"{updatedDriver}");
+                }
+            }
+            notyf.Error($"{message}");
             return View(ownerModel);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteOwner(int ownerId, [FromServices] INotyfService notyf)
+        {
+            string message = MessagesAlerts.FailDelete;
+            if (ownerId > 0)
+            {
+                var deleteOwner = await _taxiOwnerServices.DeleteTaxiOwnerAsync(ownerId);
+                if (deleteOwner.Contains("successfully"))
+                {
+
+                    notyf.Success($"{deleteOwner}");
+                    return RedirectToAction("Index", "TaxiOwner");
+                }
+                else
+                {
+                    notyf.Error($"{deleteOwner}");
+                }
+
+            }
+            notyf.Error($"{message}");
+            return RedirectToAction("DriverDetails", "TaxiDriver");
         }
     }
 }
