@@ -18,16 +18,16 @@ namespace Taxi_Booking_Management.Services.User
             _loggerManager = loggerManager;
         }
 
-        public async Task<Models.User?> GetUserById(string userId)
+        public async Task<Models.User?> GetUserById(string email)
         {
             try
             {
-                return await _userManager.FindByIdAsync(userId);
+                return await _userManager.FindByEmailAsync(email);
             }
             catch (Exception ex)
             {
                 
-                _loggerManager.LogError( $"Error in GetUserById for userId: {userId}");
+                _loggerManager.LogError( $"Error in GetUserById for userId: {email}");
 
                 throw new ApplicationException($"An error occurred in GetUserById: {ex.Message}", ex);
             }
@@ -46,7 +46,10 @@ namespace Taxi_Booking_Management.Services.User
                     return IdentityResult.Failed(new IdentityError { Description = "User not found." });
                 }
 
-                _mapper.Map(updateUserDto, user);
+                user.Name = updateUserDto.Name;
+                user.City = updateUserDto.City;
+                user.State = updateUserDto.State;
+                user.Country = updateUserDto.Country;
 
                 var result = await _userManager.UpdateAsync(user);
 

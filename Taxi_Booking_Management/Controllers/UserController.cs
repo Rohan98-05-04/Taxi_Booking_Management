@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.User;
 
 namespace Taxi_Booking_Management.Controllers
@@ -18,15 +19,15 @@ namespace Taxi_Booking_Management.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetUserDetails(string userId)
+        public async Task<IActionResult> GetUserDetails()
         {
             try
             {
-                var user = await _userService.GetUserById(userId);
-
+                var SessionAuth = HttpContext.Session.GetString("_Name");
+                var user = await _userService.GetUserById(SessionAuth);
                 if (user == null)
                 {
-                    return NotFound($"User with ID {userId} not found");
+                    return NotFound($"User with ID not found");
                 }
 
                 return View(user);
@@ -36,18 +37,25 @@ namespace Taxi_Booking_Management.Controllers
                 return StatusCode(500, $"An error occurred while retrieving user details: {ex.Message}");
             }
         }
-
+        [HttpGet]
+        public async Task<IActionResult> UpdateUser()
+        {
+            User user = null;
+            var SessionAuth = HttpContext.Session.GetString("_Name");
+            user = await _userService.GetUserById(SessionAuth);
+            return View(user);
+        }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateUser(string userId, UpdateUserDto model)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto model)
         {
             try
             {
-                var result = await _userService.UpdateUser(userId, model);
+                var result = await _userService.UpdateUser(model.Id, model);
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("GetUserDetails", new { userId = userId });
+                    return RedirectToAction("GetUserDetails");
                 }
 
                 var errors = result.Errors.Select(e => e.Description).ToList();
