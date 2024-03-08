@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Taxi_Booking_Management.Models;
+using System.ComponentModel;
 
 namespace Taxi_Booking_Management.DtoModels
 {
@@ -32,6 +33,14 @@ namespace Taxi_Booking_Management.DtoModels
 
             [Column(TypeName = "decimal(7, 2)")]
             public decimal NetAmount { get; set; }
+            
+            [Required(ErrorMessage = "From Location is required")]
+            [DisplayName("From Location")]
+            public string FromLocation { get; set; }
+
+            [Required(ErrorMessage = "To Location is required")]
+            [DisplayName("To Location")]
+            public string ToLocation { get; set; }
 
             [Required(ErrorMessage = "Booking status is required")]
             public int BookingStatus { get; set; }

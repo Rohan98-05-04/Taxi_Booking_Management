@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taxi_Booking_Management.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,6 +23,21 @@ namespace Taxi_Booking_Management.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoleses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,7 +76,7 @@ namespace Taxi_Booking_Management.Migrations
                     DriverId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DriverName = table.Column<string>(type: "varchar(225)", nullable: false),
-                    DriverMobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DriverMobile = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Address = table.Column<string>(type: "varchar(225)", nullable: true)
                 },
                 constraints: table =>
@@ -231,12 +246,14 @@ namespace Taxi_Booking_Management.Migrations
                     TaxiId = table.Column<int>(type: "int", nullable: false),
                     CustomerName = table.Column<string>(type: "varchar(225)", nullable: false),
                     CustomerMobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GrossAmount = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
-                    TotalGST = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
-                    NetAmount = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
+                    GrossAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    TotalGST = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    NetAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     BookingStatus = table.Column<int>(type: "int", nullable: false),
-                    fromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    toDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaidAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    DueAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    FromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ToDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -259,10 +276,10 @@ namespace Taxi_Booking_Management.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     PaidMedium = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    createDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    updateDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreateDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -340,6 +357,9 @@ namespace Taxi_Booking_Management.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoleses");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserClaims");

@@ -6,6 +6,7 @@ namespace Taxi_Booking_Management.Models
 {
     public class User : IdentityUser
     {
+        
         [MaxLength(100)]
         [Required(ErrorMessage ="Name is required")]
         public string Name { get; set; }

@@ -12,8 +12,8 @@ using Taxi_Booking_Management.Data;
 namespace Taxi_Booking_Management.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240302060708_initial")]
-    partial class initial
+    [Migration("20240307135556_addLocationFieldNBooking")]
+    partial class addLocationFieldNBooking
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,28 @@ namespace Taxi_Booking_Management.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Taxi_Booking_Management.Models.AspNetRoles", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AspNetRoleses");
+                });
+
             modelBuilder.Entity("Taxi_Booking_Management.Models.Booking", b =>
                 {
                     b.Property<int>("BookingId")
@@ -184,25 +206,39 @@ namespace Taxi_Booking_Management.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(225)");
 
+                    b.Property<decimal>("DueAmount")
+                        .HasColumnType("decimal(17, 2)");
+
+                    b.Property<DateTime>("FromDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FromLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("GrossAmount")
-                        .HasColumnType("decimal(7, 2)");
+                        .HasColumnType("decimal(17, 2)");
 
                     b.Property<decimal>("NetAmount")
-                        .HasColumnType("decimal(7, 2)");
+                        .HasColumnType("decimal(17, 2)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(17, 2)");
 
                     b.Property<int>("TaxiId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("ToDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ToLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("TotalGST")
-                        .HasColumnType("decimal(7, 2)");
+                        .HasColumnType("decimal(17, 2)");
 
                     b.Property<DateTime>("UpdatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("fromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("toDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("BookingId");
@@ -223,6 +259,9 @@ namespace Taxi_Booking_Management.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreateDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PaidMedium")
                         .HasColumnType("int");
 
@@ -231,12 +270,9 @@ namespace Taxi_Booking_Management.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(7, 2)");
+                        .HasColumnType("decimal(17, 2)");
 
-                    b.Property<DateTime>("createDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("updateDateTime")
+                    b.Property<DateTime>("UpdateDateTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("PaymentId");
@@ -296,7 +332,8 @@ namespace Taxi_Booking_Management.Migrations
 
                     b.Property<string>("DriverMobile")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("DriverName")
                         .IsRequired()

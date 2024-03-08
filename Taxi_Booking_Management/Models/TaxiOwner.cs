@@ -14,6 +14,7 @@ namespace Taxi_Booking_Management.Models
 
         [Phone]
         [MaxLength(10)]
+        [MinLength(10)]
         public string TaxiOwnerMobile { get; set; }
 
         [EmailAddress]

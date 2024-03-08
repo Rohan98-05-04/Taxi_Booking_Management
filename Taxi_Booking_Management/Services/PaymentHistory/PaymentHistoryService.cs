@@ -42,8 +42,8 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
         {
             try
             {
-                paymentHistory.createDateTime = DateTime.Now;
-                paymentHistory.updateDateTime = DateTime.Now;
+                paymentHistory.CreateDateTime = DateTime.Now;
+                paymentHistory.UpdateDateTime = DateTime.Now;
 
                 if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), paymentHistory.PaidMedium))
                 {
@@ -82,19 +82,19 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
                 if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDateValue))
                 {
                     paymentsQuery = paymentsQuery
-                        .Where(ph => ph.createDateTime >= startDateValue);
+                        .Where(ph => ph.CreateDateTime >= startDateValue);
                 }
 
                 if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDateValue))
                 { 
                     endDateValue = endDateValue.AddDays(1).Date;
                     paymentsQuery = paymentsQuery
-                        .Where(ph => ph.createDateTime < endDateValue);
+                        .Where(ph => ph.CreateDateTime < endDateValue);
                 }
 
                 var totalCount = await paymentsQuery.CountAsync();
                 var paymentsList = await paymentsQuery
-                    .OrderByDescending(ph => ph.createDateTime)
+                    .OrderByDescending(ph => ph.CreateDateTime)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();

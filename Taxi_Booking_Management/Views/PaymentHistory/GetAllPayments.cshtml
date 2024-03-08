@@ -49,7 +49,7 @@
                     @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), details.PaidMedium)
                 </td>
                 <td class="text-center">@details.TotalAmount</td>
-                <td class="text-center">@details.createDateTime.ToString("MM/dd/yyyy")</td>
+                <td class="text-center">@details.CreateDateTime.ToString("MM/dd/yyyy")</td>
                 @if (!string.IsNullOrEmpty(details.Remark))
                 {
                     <td class="text-center">@details.Remark</td>

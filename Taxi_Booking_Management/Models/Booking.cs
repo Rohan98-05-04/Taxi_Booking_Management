@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Taxi_Booking_Management.Models
@@ -24,21 +25,35 @@ namespace Taxi_Booking_Management.Models
         [Phone]
         public string CustomerMobile { get; set; }
 
-        [Column(TypeName = "decimal(7, 2)")]
+        [Column(TypeName = "decimal(17, 2)")]
         public decimal GrossAmount { get; set; }
 
-        [Column(TypeName = "decimal(7, 2)")]
+        [Column(TypeName = "decimal(17, 2)")]
         public decimal TotalGST { get; set; }
 
-        [Column(TypeName = "decimal(7, 2)")]
+        [Column(TypeName = "decimal(17, 2)")]
         public decimal NetAmount { get; set; }
 
         [Required(ErrorMessage = "Booking status is required")]
         public int BookingStatus { get; set; }
 
-        public DateTime fromDate { get; set; }
+        [Required(ErrorMessage = "From Location is required")]
+        [DisplayName("From Location")]
+        public string FromLocation {  get; set; }
 
-        public DateTime toDate { get; set; }
+        [Required(ErrorMessage = "To Location is required")]
+        [DisplayName("To Location")]
+        public string ToLocation { get; set; }
+
+        [Column(TypeName = "decimal(17, 2)")]
+        public decimal PaidAmount { get; set; }
+
+        [Column(TypeName = "decimal(17, 2)")]
+        public decimal DueAmount { get; set; }
+
+        public DateTime FromDate { get; set; }
+
+        public DateTime ToDate { get; set; }
 
         public DateTime CreatedDateTime { get; set; }
 

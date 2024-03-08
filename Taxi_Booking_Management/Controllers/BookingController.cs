@@ -39,7 +39,7 @@ namespace Taxi_Booking_Management.Controllers
             return View(allBookings);
         }
 
-        public async Task<IActionResult> RegisterBooking()
+        public  IActionResult RegisterBooking()
         {
             return View();
         }
@@ -52,7 +52,7 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckBookingAvailbility()
+        public IActionResult CheckBookingAvailbility()
         {
             CheckTaxiAvailability checkTaxi = new CheckTaxiAvailability();
             return View(checkTaxi);
@@ -67,6 +67,7 @@ namespace Taxi_Booking_Management.Controllers
                 string[] taxi = dto.taxiId.Split(',');
                int exTaxi = await _BookingService.GetTaxiIdByRegNo(taxi[1]);
                data  = await _BookingService.IsTaxiAvailableAsync(exTaxi, dto.FromDate, dto.ToDate);
+              ViewBag.TaxiDates=  await _BookingService.GetTaxiAvailableDates(exTaxi);
             }
             if (data)
             {
@@ -76,13 +77,13 @@ namespace Taxi_Booking_Management.Controllers
             {
                 notyf.Information("taxi is not available for booking");
             }
-            return View();
+            return View(dto);
         }
         
 
         public async Task<JsonResult> getTaxiAutoComplete(string term)
         {
-            IList<string?> taxies = null;
+            IList<string> taxies = null;
             taxies = await _BookingService.GetAllTaxiByRegNo(term);
             return Json(taxies);
         }
