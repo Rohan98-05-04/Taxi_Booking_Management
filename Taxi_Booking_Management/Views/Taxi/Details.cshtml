@@ -33,14 +33,7 @@
     <!-- 1. Top left side: Name and Verified User Button -->
     <div class="row">
         <div class="col-md-6">
-            <h4 class="h4 fw-bolder">Details of Taxi
-                <button class="btn btn-sm
-        @(Model.TaxiStatus == 1 ? "btn-success" :
-        Model.TaxiStatus == 2 ? "btn-warning" :
-        Model.TaxiStatus == 3 ? "btn-danger" : "")">
-                    @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), @Model.TaxiStatus)
-                </button>
-            </h4>
+            <h4 class="h4 fw-bolder">Details of Taxi</h4>
         </div>
         <!-- 2. Top right side: Delete and Edit Buttons -->
         <div class="col-md-6 text-end">
@@ -50,8 +43,11 @@
         </div>
 
         <div class="dropdown mt-2" id="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownButton">
-                Update Status
+            <button class="btn btn-sm
+@(Model.TaxiStatus == 1 ? "btn-success" :
+Model.TaxiStatus == 2 ? "btn-warning" :
+Model.TaxiStatus == 3 ? "btn-danger" : "") dropdown-toggle" type="button" id="dropdownButton">
+                @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), @Model.TaxiStatus)
             </button>
             <div class="dropdown-menu" id="dropdownMenu">
                 <button class="dropdown-item" onclick="updateTaxiStatus(@Model.TaxiId, 1)">Available</button>

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Xml;
 using Taxi_Booking_Management.Models;
 
 namespace Taxi_Booking_Management.Data
@@ -14,6 +16,14 @@ namespace Taxi_Booking_Management.Data
         public DbSet<TaxiDriver> drivers { get; set; }
         public DbSet<Booking> Bookings { get; set;}
         public DbSet<PaymentHistory> PaymentHistories { get; set; }
-        
+        public DbSet<AspNetRoles> AspNetRoleses { get; set;}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Ignore<IdentityUser>();
+            modelBuilder.Entity<IdentityRole>().ToTable("AspNetRoles");
+        }
+
     }
 }

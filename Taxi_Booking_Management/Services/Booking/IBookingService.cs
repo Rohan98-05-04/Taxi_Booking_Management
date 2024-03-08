@@ -11,5 +11,6 @@ namespace Taxi_Booking_Management.Services.Booking
         public Task<IList<string>> GetAllTaxiByRegNo(string term);
         public Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate);
         public Task<int> GetTaxiIdByRegNo(string regNo);
+        public Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId);
     }
 }

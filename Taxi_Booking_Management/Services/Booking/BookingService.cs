@@ -110,11 +110,13 @@ namespace Taxi_Booking_Management.Services.Booking
                     bookingDto.UpdatedDateTime = DateTime.Now;
                     bookingDto.CreatedDateTime = DateTime.Now;
                     bookingDto.TaxiId = exTaxiId;
-                    decimal totalAmount = (bookingDto.GrossAmount * bookingDto.TotalGST) / 100;
+                    decimal totalAmount = bookingDto.GrossAmount + (bookingDto.GrossAmount * bookingDto.TotalGST) / 100;
                     bookingDto.NetAmount = totalAmount;
                     bookingDto.BookingStatus = Convert.ToInt32(Enums.BookingStatus.Pending);
 
                     Models.Booking newBooking = _mapper.Map<Models.Booking>(bookingDto);
+                    newBooking.PaidAmount = 0;
+                    newBooking.DueAmount = bookingDto.NetAmount;
                     await _context.Bookings.AddAsync(newBooking);
                     await _context.SaveChangesAsync();
                     _loggerManager.LogInfo($"Booking is successfully registed with given id{bookingDto.BookingCode}");
@@ -133,7 +135,7 @@ namespace Taxi_Booking_Management.Services.Booking
         public async Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate)
         {
             bool isTaxiAvailable = await _context.Bookings
-                .AnyAsync(b => b.TaxiId == taxiId && b.fromDate <= toDate && b.toDate >= fromDate);
+                .AnyAsync(b => b.TaxiId == taxiId && b.FromDate <= toDate && b.ToDate >= fromDate);
 
             return !isTaxiAvailable;
         }
@@ -168,6 +170,28 @@ namespace Taxi_Booking_Management.Services.Booking
             {
                 return 0;
             }return exTaxi.TaxiId;
+        }
+
+        public async Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId)
+        {
+            try
+            {
+                DateTime todayDate = DateTime.Today;
+
+                var availableDates = await _context.Bookings
+                    .Where(b => b.TaxiId == taxiId && b.FromDate >= todayDate || b.ToDate >= todayDate)
+                    .ToListAsync();
+                if (availableDates.Any())
+                {
+                    return availableDates;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiAvailableDates");
+                throw;
+            }
         }
     }
 }

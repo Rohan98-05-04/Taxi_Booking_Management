@@ -14,6 +14,8 @@ namespace Taxi_Booking_Management.Models
 
         [Required(ErrorMessage = "Driver mobile no is required")]
         [Phone]
+        [MaxLength(10)]
+        [MinLength(10)]
         public string DriverMobile { get; set; }
 
         [Column(TypeName = "varchar(225)")]
