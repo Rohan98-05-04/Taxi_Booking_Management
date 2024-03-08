@@ -1,0 +1,56 @@
+﻿@model User
+
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h4 class="h4 fw-bolder">Details of User</h4>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-controller="User" asp-action="UpdateUser"  class="btn btn-primary"><i class="bi bi-pencil"></i> &nbsp Edit</a>
+        </div>
+    </div>
+
+    <hr />
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <p><strong>Name : </strong> @Model.Name</p>
+            <p><strong>Email : </strong> @Model.Email</p>
+
+            @if (!string.IsNullOrEmpty(Model.Country))
+            {
+                <p><strong>Country : </strong> @Model.Country</p>
+            }
+            else
+            {
+                <p><strong>Country : </strong> Not Available</p>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.City))
+            {
+                <p><strong>City : </strong> @Model.City</p>
+            }
+            else
+            {
+                <p><strong>City : </strong> Not Available</p>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.State))
+            {
+                <p><strong>State : </strong> @Model.State</p>
+            }
+            else
+            {
+                <p><strong>State : </strong> Not Available</p>
+            }
+
+
+        </div>
+
+    </div>
+</div>
+

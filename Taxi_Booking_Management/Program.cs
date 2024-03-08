@@ -14,6 +14,7 @@ using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
 using Taxi_Booking_Management.LoggerService;
 using AspNetCoreHero.ToastNotification;
+using Taxi_Booking_Management.Services.User;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ builder.Services.AddTransient<ITaxiDriverService , TaxiDriverService>();
 builder.Services.AddTransient<ITaxiOwnerService , TaxiOwnerService>();
 builder.Services.AddTransient<IBookingService , BookingService>();
 builder.Services.AddTransient<IPaymentHistoryService , PaymentHistoryService>();
+builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -53,6 +55,14 @@ builder.Services.AddNotyf(config =>
     config.IsDismissable = true;
     config.Position = NotyfPosition.TopRight;
 });
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -67,6 +77,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthorization();
 

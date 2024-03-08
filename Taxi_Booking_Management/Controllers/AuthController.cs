@@ -9,7 +9,7 @@ namespace Taxi_Booking_Management.Controllers
     {
         const string SessionName = "_Name";
         private readonly IAuthService _authData;
-       
+        const string SessionName = "_Name";
 
         public AuthController(IAuthService authData) 
         {
@@ -62,6 +62,7 @@ namespace Taxi_Booking_Management.Controllers
             string message = "Fail to login";
             if (ModelState.IsValid)
             {
+                HttpContext.Session.SetString(SessionName, model.Email);
                 var result = await _authData.LogInUser(model);
                 if (result.Succeeded)
                 {
