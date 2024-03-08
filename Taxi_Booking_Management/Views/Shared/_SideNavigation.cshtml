@@ -1,4 +1,5 @@
-﻿@using Taxi_Booking_Management.Common;
+﻿
+@using Taxi_Booking_Management.Common;
 
 <div class="position-sticky">
     <ul class="nav flex-column">
@@ -52,13 +53,10 @@
                 </a>
             </li>
 
-        <li class="nav-item mb-2 cursor ">
-               
-                <a class="nav-link" >
-
-                    <h5><i class="fas fa-user-edit me-2"></i>Edit Profile</h5>
+        <li class="nav-item mb-2 cursor @Html.IsActive("User", "Edit") @Html.IsActive("User", "GetUserDetails")">
+            <a class="nav-link" asp-action="GetUserDetails" asp-controller="User" >
+                    <h5><i class="fas fa-user-edit me-2"></i>Edit Profile </h5>
                 </a>
             </li>
-         
     </ul>
 </div>
