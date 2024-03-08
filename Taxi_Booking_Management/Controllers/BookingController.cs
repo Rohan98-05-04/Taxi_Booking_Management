@@ -1,5 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
@@ -41,6 +42,10 @@ namespace Taxi_Booking_Management.Controllers
 
         public  IActionResult RegisterBooking()
         {
+            ViewBag.taxiName = _context.taxis
+                                .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" });
+            ViewBag.driverName = _context.drivers
+                                 .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" });
             return View();
         }
 
@@ -55,6 +60,9 @@ namespace Taxi_Booking_Management.Controllers
         public IActionResult CheckBookingAvailbility()
         {
             CheckTaxiAvailability checkTaxi = new CheckTaxiAvailability();
+            ViewBag.taxiName = _context.taxis
+               .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" });
+           
             return View(checkTaxi);
         }
 
@@ -64,10 +72,8 @@ namespace Taxi_Booking_Management.Controllers
             var data = false;
             if (ModelState.IsValid)
             {
-                string[] taxi = dto.taxiId.Split(',');
-               int exTaxi = await _BookingService.GetTaxiIdByRegNo(taxi[1]);
-               data  = await _BookingService.IsTaxiAvailableAsync(exTaxi, dto.FromDate, dto.ToDate);
-              ViewBag.TaxiDates=  await _BookingService.GetTaxiAvailableDates(exTaxi);
+               data  = await _BookingService.IsTaxiAvailableAsync(Convert.ToInt32(dto.taxiId), dto.FromDate, dto.ToDate);
+              ViewBag.TaxiDates =  await _BookingService.GetTaxiAvailableDates(Convert.ToInt32(dto.taxiId));
             }
             if (data)
             {
@@ -78,14 +84,6 @@ namespace Taxi_Booking_Management.Controllers
                 notyf.Information("taxi is not available for booking");
             }
             return View(dto);
-        }
-        
-
-        public async Task<JsonResult> getTaxiAutoComplete(string term)
-        {
-            IList<string> taxies = null;
-            taxies = await _BookingService.GetAllTaxiByRegNo(term);
-            return Json(taxies);
         }
     }
 }

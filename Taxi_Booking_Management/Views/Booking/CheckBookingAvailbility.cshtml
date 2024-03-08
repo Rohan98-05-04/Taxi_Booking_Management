@@ -2,9 +2,12 @@
 
 @{
     ViewData["Title"] = "Register booking";
+    var minDate = DateTime.Now.ToString("yyyy-MM-dd");
 }
 
-
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+</head>
 <div class="row">
     <div class="col-md-6">
         <h2>Check availability</h2>
@@ -12,19 +15,21 @@
 
             <div class="form-group w-50 mt-3">
                 <label asp-for="taxiId"></label>
-                <input asp-for="taxiId" class="form-control mt-2" id="txtSearch" />
+                <select asp-for="taxiId" asp-items="@((IEnumerable<SelectListItem>)ViewBag.taxiName)" class="form-control mt-2" id="taxiIdSelect">
+                    <option value="">-- Select Taxi --</option>
+                </select>
                 <span asp-validation-for="taxiId" class="text-danger"></span>
             </div>
 
             <div class="form-group w-50 mt-3">
                 <label asp-for="FromDate"></label>
-                <input asp-for="FromDate" class="form-control mt-2" id="fromDate" />
+                <input asp-for="FromDate" type="date" min="@minDate" class="form-control mt-2" id="fromDate" />
                 <span asp-validation-for="FromDate" class="text-danger"></span>
             </div>
 
             <div class="form-group w-50 mt-3">
                 <label asp-for="ToDate"></label>
-                <input asp-for="ToDate" class="form-control mt-2" id="toDate" />
+                <input asp-for="ToDate" type="date" class="form-control mt-2" id="toDate" />
                 <span asp-validation-for="ToDate" class="text-danger"></span>
             </div>
 
@@ -59,15 +64,22 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script type="text/javascript">
 
-        $(function () {
-            $("#txtSearch").autocomplete({
-                source: '@Url.Action("getTaxiAutoComplete")',
-                minLength: 2
+        $(document).ready(function () {
+            $('#taxiIdSelect').select2({
+                placeholder: "-- Select Taxi --",
+                allowClear: true,
+                width: '100%' 
+            });
+
+            $("#fromDate").change(function () {
+
+                var selectedDate = $(this).val();
+
+                $("#toDate").attr("min", selectedDate);
             });
         });
-        console.log("hii");
-        console.log(@ViewBag.TaxiDates);
     </script>
 }

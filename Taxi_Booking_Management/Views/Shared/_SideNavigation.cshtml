@@ -4,9 +4,9 @@
 <div class="position-sticky">
     <ul class="nav flex-column">
 
-      
-            <li class="nav-item mt-2 mb-2 cursor" >
-                <a class="nav-link" >
+
+        <li class="nav-item mt-2 mb-2 cursor @Html.IsActive("DashBoard", "Index")">
+            <a class="nav-link" asp-action="Index" asp-controller="DashBoard">
                     <h5><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h5>
                 </a>
             </li>
@@ -17,14 +17,6 @@
                     <h5><i class="fas fa-cogs me-2"></i>Taxi Details</h5>
                 </a>
             </li> *@
-
-        <li class="nav-item mb-2 cursor @Html.IsActive("Taxi", "Add") @Html.IsActive("Taxi", "Index") @Html.IsActive("Taxi", "Details")">
-            <a class="nav-link" asp-action="Index" asp-controller="Taxi">
-                <h5>
-                    <i class="fa-solid fa-car me-2"></i>Taxi Details
-                </h5>
-                </a>
-            </li>
 
        
         <li class="nav-item m3 mb-2 cursor   @Html.IsActive("TaxiOwner", "AddOwner") @Html.IsActive("TaxiOwner", "Index")  @Html.IsActive("TaxiOwner", "OwnerDetails") @Html.IsActive("TaxiOwner", "EditOwner")">
@@ -39,8 +31,16 @@
             </a>
         </li>
 
+        <li class="nav-item mb-2 cursor @Html.IsActive("Taxi", "Add") @Html.IsActive("Taxi", "Index") @Html.IsActive("Taxi", "Details")">
+            <a class="nav-link" asp-action="Index" asp-controller="Taxi">
+                <h5>
+                    <i class="fa-solid fa-car me-2"></i>Taxi Details
+                </h5>
+            </a>
+        </li>
 
-        <li class="nav-item mb-2 cursor @Html.IsActive("Booking", "Index") ">
+
+        <li class="nav-item mb-2 cursor @Html.IsActive("Booking", "Index") @Html.IsActive("Booking","RegisterBooking")">
             <a class="nav-link" asp-action="Index" asp-controller="Booking">
                 <h5><i class="fas fa-list me-2"></i>Booking Details</h5>
                 </a>

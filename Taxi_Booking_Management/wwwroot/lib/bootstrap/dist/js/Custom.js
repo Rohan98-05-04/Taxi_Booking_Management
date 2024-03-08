@@ -18,7 +18,7 @@
                 if (response.includes('successfully')) {
                     toastr.success(successMessage)
                     setTimeout(function () {
-                        window.location.href = '/Home/Index';
+                        window.location.href = '/DashBoard/Index';
                     }, 1000);
                 } else {
                

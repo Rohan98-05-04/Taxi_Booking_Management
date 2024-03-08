@@ -129,5 +129,6 @@ namespace Taxi_Booking_Management.Controllers
             notyf.Error($"{message}");
             return RedirectToAction("DriverDetails", "TaxiDriver");
         }
+
     }
 }

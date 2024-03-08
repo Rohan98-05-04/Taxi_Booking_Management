@@ -14,8 +14,13 @@ namespace Taxi_Booking_Management.DtoModels
 
             [Required]
             public int TaxiId { get; set; }
-            
+
+            [DisplayName("Taxi Name")]
             public string RegistrationNo { get; set; }
+
+            [DisplayName("Driver name")]
+            [Required(ErrorMessage ="Driver name is required")]
+            public string DriverName { get; set; }
 
             [Required(ErrorMessage = "Customer name is required")]
             [Column(TypeName = "varchar(225)")]
@@ -29,6 +34,7 @@ namespace Taxi_Booking_Management.DtoModels
             public decimal GrossAmount { get; set; }
 
             [Column(TypeName = "decimal(7, 2)")]
+            [Range(1, 100, ErrorMessage = "Total GST must be between 1 and 100")]
             public decimal TotalGST { get; set; }
 
             [Column(TypeName = "decimal(7, 2)")]

@@ -15,6 +15,7 @@ namespace Taxi_Booking_Management.Models
         [Phone]
         [MaxLength(10)]
         [MinLength(10)]
+        [Required(ErrorMessage = "Owner mobile no is required")]
         public string TaxiOwnerMobile { get; set; }
 
         [EmailAddress]

@@ -17,6 +17,12 @@ namespace Taxi_Booking_Management.Models
         [ForeignKey("TaxiId")]
         public Taxi taxi { get; set; }
 
+        [Required]
+        public int DriverId { get; set; }
+
+        [ForeignKey("DriverId")]
+        public TaxiDriver TaxiDrivers { get; set; }
+
         [Required(ErrorMessage ="Customer name is required")]
         [Column(TypeName = "varchar(225)")]
         public string CustomerName {  get; set; }
@@ -44,12 +50,6 @@ namespace Taxi_Booking_Management.Models
         [Required(ErrorMessage = "To Location is required")]
         [DisplayName("To Location")]
         public string ToLocation { get; set; }
-
-        [Column(TypeName = "decimal(17, 2)")]
-        public decimal PaidAmount { get; set; }
-
-        [Column(TypeName = "decimal(17, 2)")]
-        public decimal DueAmount { get; set; }
 
         public DateTime FromDate { get; set; }
 

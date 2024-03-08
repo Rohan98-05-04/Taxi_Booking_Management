@@ -216,18 +216,11 @@ namespace Taxi_Booking_Management.Migrations
                     TaxiType = table.Column<int>(type: "int", nullable: true),
                     RegistrationNumber = table.Column<string>(type: "varchar(125)", nullable: false),
                     TaxiStatus = table.Column<int>(type: "int", nullable: false),
-                    DriverId = table.Column<int>(type: "int", nullable: false),
                     TaxiOwnerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_taxis", x => x.TaxiId);
-                    table.ForeignKey(
-                        name: "FK_taxis_drivers_DriverId",
-                        column: x => x.DriverId,
-                        principalTable: "drivers",
-                        principalColumn: "DriverId",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_taxis_owner_TaxiOwnerId",
                         column: x => x.TaxiOwnerId,
@@ -244,14 +237,15 @@ namespace Taxi_Booking_Management.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookingCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TaxiId = table.Column<int>(type: "int", nullable: false),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
                     CustomerName = table.Column<string>(type: "varchar(225)", nullable: false),
                     CustomerMobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GrossAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     TotalGST = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     NetAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     BookingStatus = table.Column<int>(type: "int", nullable: false),
-                    PaidAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
-                    DueAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    FromLocation = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ToLocation = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -260,6 +254,12 @@ namespace Taxi_Booking_Management.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Bookings", x => x.BookingId);
+                    table.ForeignKey(
+                        name: "FK_Bookings_drivers_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "drivers",
+                        principalColumn: "DriverId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Bookings_taxis_TaxiId",
                         column: x => x.TaxiId,
@@ -276,7 +276,7 @@ namespace Taxi_Booking_Management.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     PaidMedium = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
+                    PayAmount = table.Column<decimal>(type: "decimal(17,2)", nullable: false),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -332,6 +332,11 @@ namespace Taxi_Booking_Management.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bookings_DriverId",
+                table: "Bookings",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bookings_TaxiId",
                 table: "Bookings",
                 column: "TaxiId");
@@ -340,11 +345,6 @@ namespace Taxi_Booking_Management.Migrations
                 name: "IX_PaymentHistories_BookingId",
                 table: "PaymentHistories",
                 column: "BookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_taxis_DriverId",
-                table: "taxis",
-                column: "DriverId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_taxis_TaxiOwnerId",
@@ -386,10 +386,10 @@ namespace Taxi_Booking_Management.Migrations
                 name: "Bookings");
 
             migrationBuilder.DropTable(
-                name: "taxis");
+                name: "drivers");
 
             migrationBuilder.DropTable(
-                name: "drivers");
+                name: "taxis");
 
             migrationBuilder.DropTable(
                 name: "owner");

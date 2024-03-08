@@ -8,7 +8,6 @@ namespace Taxi_Booking_Management.Services.Booking
         public Task<string> RegisterBookingAsync(RegisterBookingDto bookingDto);
         public Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search);
         public Task<BookingDto?> GetTaxiBookingAsync(int bookingId);
-        public Task<IList<string>> GetAllTaxiByRegNo(string term);
         public Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate);
         public Task<int> GetTaxiIdByRegNo(string regNo);
         public Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId);

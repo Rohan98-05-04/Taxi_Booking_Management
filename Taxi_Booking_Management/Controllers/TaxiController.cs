@@ -69,8 +69,7 @@ namespace Taxi_Booking_Management.Controllers
             }),
                 TaxiOwners = _context.owner
                .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" }),
-                Drivers = _context.drivers
-               .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" })
+               
             };
 
             return View(viewModel);
@@ -93,8 +92,7 @@ namespace Taxi_Booking_Management.Controllers
                     notyf.Error($"{data}");
                     taxiViewModel.TaxiOwners = _context.owner
                        .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" });
-                    taxiViewModel.Drivers = _context.drivers
-                        .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" });
+                   
                     taxiViewModel.TaxiTypes = GetTaxiTypes();
                     taxiViewModel.TaxiStatuses = GetTaxiStatus();
                     return View(taxiViewModel);
@@ -165,7 +163,7 @@ namespace Taxi_Booking_Management.Controllers
         {
             if (taxiId > 0)
             {
-                var taxiDetails = await _context.taxis.Include(u => u.TaxiOwner).Include(y => y.Driver).FirstOrDefaultAsync(x => x.TaxiId == taxiId);
+                var taxiDetails = await _context.taxis.Include(u => u.TaxiOwner).FirstOrDefaultAsync(x => x.TaxiId == taxiId);
                 if (taxiDetails != null && taxiDetails.TaxiId >0)
                 {
                     TaxiViewModel taxiViewModeldata = new TaxiViewModel()
@@ -174,15 +172,12 @@ namespace Taxi_Booking_Management.Controllers
                         TaxiName = taxiDetails.TaxiName,
                         RegistrationNumber = taxiDetails.RegistrationNumber,
                         TaxiOwnerId = taxiDetails.TaxiOwnerId,
-                        DriverId = taxiDetails.DriverId,
                         TaxiType = taxiDetails.TaxiType,
                         TaxiStatus = taxiDetails.TaxiStatus,
                         TaxiTypes = GetTaxiTypes(),
                         TaxiStatuses = GetTaxiStatus(),
-                        TaxiOwners = _context.owner.Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" }),
-                        Drivers = _context.drivers
-                                           .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" }),
-
+                        TaxiOwners = _context.owner.Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" })
+                      
                     };
                     return View(taxiViewModeldata);
                 }
@@ -204,6 +199,7 @@ namespace Taxi_Booking_Management.Controllers
 
         }
 
+        
         private  List<SelectListItem> GetTaxiTypes()
         {
  

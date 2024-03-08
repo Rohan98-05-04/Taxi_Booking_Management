@@ -2,62 +2,75 @@
 
 @{
     ViewData["Title"] = "Register booking";
+    var minDate = DateTime.Now.ToString("yyyy-MM-dd");
 }
-
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+</head>
 <h2>Register New Booking</h2>
 <form asp-action="RegisterBooking" asp-controller="Booking" method="post" class="mb-4">
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="RegistrationNo"></label>
-        <input asp-for="RegistrationNo" class="form-control mt-2" id="txtSearch" />
+        <label asp-for="RegistrationNo">Taxi name</label>
+        <select asp-for="RegistrationNo" asp-items="@((IEnumerable<SelectListItem>)ViewBag.taxiName)" class="form-control mt-2" id="taxiNameSelect">
+            <option value="">-- Select Taxi --</option>
+        </select>
         <span asp-validation-for="RegistrationNo" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="fromDate"></label>
-        <input asp-for="fromDate" class="form-control mt-2" />
+        <label asp-for="DriverName">Driver name</label>
+        <select asp-for="DriverName" asp-items="@((IEnumerable<SelectListItem>)ViewBag.driverName)" class="form-control mt-2" id="driverNameSelect">
+            <option value="">-- Select Driver --</option>
+        </select>
+        <span asp-validation-for="DriverName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group w-50 mt-3">
+        <label asp-for="fromDate">From Date</label>
+        <input asp-for="fromDate" type="date" min="@minDate" class="form-control mt-2" />
         <span asp-validation-for="fromDate" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="toDate"></label>
-        <input asp-for="toDate" class="form-control mt-2" />
+        <label asp-for="toDate">To Date</label>
+        <input asp-for="toDate" type="date" class="form-control mt-2" />
         <span asp-validation-for="toDate" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="CustomerName"></label>
+        <label asp-for="CustomerName">Customer Name</label>
         <input asp-for="CustomerName" class="form-control mt-2" />
         <span asp-validation-for="CustomerName" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="CustomerMobile"></label>
+        <label asp-for="CustomerMobile">Customer Mobile</label>
         <input asp-for="CustomerMobile" class="form-control mt-2" />
         <span asp-validation-for="CustomerMobile" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="FromLocation"></label>
+        <label asp-for="FromLocation">From Location</label>
         <input asp-for="FromLocation" class="form-control mt-2" />
         <span asp-validation-for="FromLocation" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="ToLocation"></label>
+        <label asp-for="ToLocation">To Location</label>
         <input asp-for="ToLocation" class="form-control mt-2" />
         <span asp-validation-for="ToLocation" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="GrossAmount"></label>
+        <label asp-for="GrossAmount">Gross Amount</label>
         <input asp-for="GrossAmount" class="form-control mt-2" />
         <span asp-validation-for="GrossAmount" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="TotalGST"></label>
-        <input asp-for="TotalGST" class="form-control mt-2" />
+        <label asp-for="TotalGST">Total GST percentage</label>
+        <input asp-for="TotalGST" class="form-control mt-2" min="1" max="100" type="number"/>
         <span asp-validation-for="TotalGST" class="text-danger"></span>
     </div>
  
@@ -66,15 +79,30 @@
     <button asp-action="Index" asp-controller="Booking" class="btn btn-warning mt-2">Cancel</button>
 </form>
 @section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script type="text/javascript">
-        $(function () {
-        $("#txtSearch").autocomplete({
-                source: '@Url.Action("getTaxiAutoComplete")',
-        minLength: 0
-        });
+        $(document).ready(function () {
+            $('#taxiNameSelect').select2({
+                placeholder: "-- Select Taxi --",
+                allowClear: true,
+                width: '100%' 
+            });
+
+            
+            $('#driverNameSelect').select2({
+                placeholder: "-- Select Driver --",
+                allowClear: true,
+                width: '100%' 
+            });
+
+           
+            $("#fromDate").change(function () {
+                var selectedDate = $(this).val();
+                $("#toDate").attr("min", selectedDate);
+            });
         });
         
     </script>

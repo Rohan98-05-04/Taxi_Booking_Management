@@ -22,12 +22,6 @@ namespace Taxi_Booking_Management.Models
         public int TaxiStatus {  get; set; }
 
         [Required]
-        public int DriverId { get; set; }
-
-        [ForeignKey("DriverId")]
-        public TaxiDriver Driver { get; set; }
-
-        [Required]
         public int TaxiOwnerId { get; set; }
 
         [ForeignKey("TaxiOwnerId")]
