@@ -9,7 +9,6 @@ namespace Taxi_Booking_Management.Controllers
     {
         const string SessionName = "_Name";
         private readonly IAuthService _authData;
-        const string SessionName = "_Name";
 
         public AuthController(IAuthService authData) 
         {

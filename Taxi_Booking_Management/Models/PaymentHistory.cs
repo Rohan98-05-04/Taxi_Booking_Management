@@ -18,7 +18,7 @@ namespace Taxi_Booking_Management.Models
         public int PaidMedium { get; set; }
 
         [Column(TypeName = "decimal(17, 2)")]
-        public decimal TotalAmount { get; set; }
+        public decimal PayAmount { get; set; }
 
         public string Remark { get; set; }
 

@@ -51,7 +51,6 @@ namespace Taxi_Booking_Management.Services.Taxi
             try
             {
                 IQueryable<Models.Taxi> data = _context.taxis
-                .Include(t => t.Driver)
                 .Include(t => t.TaxiOwner)
                 .AsQueryable();
 
@@ -76,7 +75,7 @@ namespace Taxi_Booking_Management.Services.Taxi
         {
             try
             {
-                var taxi = await  _context.taxis.Include(t => t.TaxiOwner).Include(t => t.Driver)
+                var taxi = await  _context.taxis.Include(t => t.TaxiOwner)
                                                 .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
                 if(taxi == null)
                 {
@@ -138,7 +137,6 @@ namespace Taxi_Booking_Management.Services.Taxi
                 exTaxi.TaxiName = taxiModel.TaxiName;
                 exTaxi.RegistrationNumber=taxiModel.RegistrationNumber;
                 exTaxi.TaxiStatus = taxiModel.TaxiStatus;
-                exTaxi.DriverId = taxiModel.DriverId;
                 exTaxi.TaxiOwnerId = taxiModel.TaxiOwnerId;
                 exTaxi.TaxiType = taxiModel.TaxiType;
                 _context.taxis.Update(exTaxi);

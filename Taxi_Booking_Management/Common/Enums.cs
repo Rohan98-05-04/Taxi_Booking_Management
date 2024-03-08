@@ -35,6 +35,12 @@
             Online = 2,
         }
 
+        public enum BookingPaymentStatus
+        {
+            Pending = 1,
+            Completed =2
+        }
+
 
     }
 }

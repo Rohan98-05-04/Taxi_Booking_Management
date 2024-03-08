@@ -6,6 +6,7 @@ using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
+using Taxi_Booking_Management.Services.TaxiDriver;
 using X.PagedList;
 
 namespace Taxi_Booking_Management.Services.Booking
@@ -16,7 +17,8 @@ namespace Taxi_Booking_Management.Services.Booking
         private readonly ILoggerManager _loggerManager;
         private readonly IMapper _mapper;
 
-        public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager ,  IMapper mapper)
+        public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager ,
+              IMapper mapper)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
@@ -103,20 +105,16 @@ namespace Taxi_Booking_Management.Services.Booking
                 bool isAvailable = await IsTaxiAvailableAsync(bookingDto.TaxiId, bookingDto.fromDate, bookingDto.toDate);
                 if (isAvailable)
                 {
-                    string[] taxi = bookingDto.RegistrationNo.Split(',');
-                    int exTaxiId = await GetTaxiIdByRegNo(taxi[1]);
-
                     bookingDto.BookingCode = Guid.NewGuid().ToString("N").Substring(0, 10);
                     bookingDto.UpdatedDateTime = DateTime.Now;
                     bookingDto.CreatedDateTime = DateTime.Now;
-                    bookingDto.TaxiId = exTaxiId;
+                    bookingDto.TaxiId = Convert.ToInt32(bookingDto.RegistrationNo);
                     decimal totalAmount = bookingDto.GrossAmount + (bookingDto.GrossAmount * bookingDto.TotalGST) / 100;
                     bookingDto.NetAmount = totalAmount;
                     bookingDto.BookingStatus = Convert.ToInt32(Enums.BookingStatus.Pending);
 
                     Models.Booking newBooking = _mapper.Map<Models.Booking>(bookingDto);
-                    newBooking.PaidAmount = 0;
-                    newBooking.DueAmount = bookingDto.NetAmount;
+                    newBooking.DriverId = Convert.ToInt32(bookingDto.DriverName);
                     await _context.Bookings.AddAsync(newBooking);
                     await _context.SaveChangesAsync();
                     _loggerManager.LogInfo($"Booking is successfully registed with given id{bookingDto.BookingCode}");
@@ -141,27 +139,7 @@ namespace Taxi_Booking_Management.Services.Booking
         }
 
 
-        public async Task<IList<string>> GetAllTaxiByRegNo(string term)
-        {
-            IList<string> taxies = null;
-            try
-            {
-                if (!string.IsNullOrEmpty(term))
-                {
-                    taxies = await _context.taxis
-                        .Where(p => p.TaxiStatus==1 && (p.RegistrationNumber.Contains(term) || p.TaxiName.Contains(term)))
-                        .Select(x => $"{x.TaxiName},{x.RegistrationNumber}")
-                        .ToListAsync();
-                    _loggerManager.LogInfo($"autocomplete taxies retirved :{term}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _loggerManager.LogError($"{ex.Message} ,method name: GetAllTaxiByRegNo");
-                throw;
-            }
-            return taxies;
-        }
+       
 
         public async Task<int> GetTaxiIdByRegNo(string regNo)
         {

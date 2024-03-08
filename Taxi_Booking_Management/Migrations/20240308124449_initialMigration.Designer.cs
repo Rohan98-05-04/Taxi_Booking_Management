@@ -12,8 +12,8 @@ using Taxi_Booking_Management.Data;
 namespace Taxi_Booking_Management.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240307135556_addLocationFieldNBooking")]
-    partial class addLocationFieldNBooking
+    [Migration("20240308124449_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -206,8 +206,8 @@ namespace Taxi_Booking_Management.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(225)");
 
-                    b.Property<decimal>("DueAmount")
-                        .HasColumnType("decimal(17, 2)");
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FromDate")
                         .HasColumnType("datetime2");
@@ -220,9 +220,6 @@ namespace Taxi_Booking_Management.Migrations
                         .HasColumnType("decimal(17, 2)");
 
                     b.Property<decimal>("NetAmount")
-                        .HasColumnType("decimal(17, 2)");
-
-                    b.Property<decimal>("PaidAmount")
                         .HasColumnType("decimal(17, 2)");
 
                     b.Property<int>("TaxiId")
@@ -242,6 +239,8 @@ namespace Taxi_Booking_Management.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("BookingId");
+
+                    b.HasIndex("DriverId");
 
                     b.HasIndex("TaxiId");
 
@@ -265,12 +264,12 @@ namespace Taxi_Booking_Management.Migrations
                     b.Property<int>("PaidMedium")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PayAmount")
+                        .HasColumnType("decimal(17, 2)");
+
                     b.Property<string>("Remark")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(17, 2)");
 
                     b.Property<DateTime>("UpdateDateTime")
                         .HasColumnType("datetime2");
@@ -290,9 +289,6 @@ namespace Taxi_Booking_Management.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaxiId"));
 
-                    b.Property<int>("DriverId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
                         .HasColumnType("varchar(125)");
@@ -311,8 +307,6 @@ namespace Taxi_Booking_Management.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("TaxiId");
-
-                    b.HasIndex("DriverId");
 
                     b.HasIndex("TaxiOwnerId");
 
@@ -504,11 +498,19 @@ namespace Taxi_Booking_Management.Migrations
 
             modelBuilder.Entity("Taxi_Booking_Management.Models.Booking", b =>
                 {
+                    b.HasOne("Taxi_Booking_Management.Models.TaxiDriver", "TaxiDrivers")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Taxi_Booking_Management.Models.Taxi", "taxi")
                         .WithMany()
                         .HasForeignKey("TaxiId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("TaxiDrivers");
 
                     b.Navigation("taxi");
                 });
@@ -526,19 +528,11 @@ namespace Taxi_Booking_Management.Migrations
 
             modelBuilder.Entity("Taxi_Booking_Management.Models.Taxi", b =>
                 {
-                    b.HasOne("Taxi_Booking_Management.Models.TaxiDriver", "Driver")
-                        .WithMany()
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Taxi_Booking_Management.Models.TaxiOwner", "TaxiOwner")
                         .WithMany()
                         .HasForeignKey("TaxiOwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Driver");
 
                     b.Navigation("TaxiOwner");
                 });

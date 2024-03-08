@@ -74,18 +74,6 @@ Model.TaxiStatus == 3 ? "btn-danger" : "") dropdown-toggle" type="button" id="dr
             {
                 <p><strong>Taxi Owner Name : </strong> Not Available</p>
             }
-            @if (!string.IsNullOrEmpty(Model.DriverName))
-            {
-                <p class="text-danger"><strong>Taxi Driver Name : </strong> @Model.DriverName</p>
-                <p><strong>Driver Mobile No : </strong> @Model.DriverMobile</p>
-
-            }
-            else
-            {
-                <p><strong>Taxi Driver Name : </strong> Not Available</p>
-            }
-
-
         </div>
 
     </div>

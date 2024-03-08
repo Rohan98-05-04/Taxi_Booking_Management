@@ -42,7 +42,7 @@
         <tr class="table-primary">
             <th class="text-center">Taxi Name</th>
             <th class="text-center">Registration Number</th>
-            <th class="text-center">Driver Name</th>
+            <th class="text-center">Owner Name</th>
             <th class="text-center">Action</th>
         </tr>
     </thead>
@@ -60,14 +60,7 @@
                         @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), details.TaxiStatus)
                     </button>
                 </td>
-                @if (!string.IsNullOrEmpty(details.Driver.DriverName))
-                {
-                    <td class="text-center">@details.Driver.DriverName</td>
-                }
-                else
-                {
-                    <td class="text-center">Not Available</td>
-                }
+                <td class="text-center">@details.TaxiOwner.TaxiOwnerName</td>
                 <td class="text-center">
                     <a href="@Url.Action("Details", new { taxiId =@details.TaxiId })" class="btn btn-info ms-2">Details</a>
                     

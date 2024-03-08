@@ -35,10 +35,5 @@ namespace Taxi_Booking_Management.DtoModels
         [AllowNull]
         public IEnumerable<SelectListItem?> TaxiOwners { get; set; }
 
-        [Display(Name = "Driver")]
-        public int DriverId { get; set; } = 0;
-
-        [AllowNull]
-        public IEnumerable<SelectListItem?> Drivers { get; set; }
     }
 }

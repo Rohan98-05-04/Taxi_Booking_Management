@@ -136,6 +136,18 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
             }
         }
 
-
+        public decimal GetPaidAmountByBookingId(int bookingId)
+        {
+            decimal paidAmount = 0;
+            try
+            {
+              paidAmount =  _context.PaymentHistories.Where(u=> u.BookingId == bookingId).Select(u => u.PayAmount).Sum();
+            }catch(Exception ex)
+            {
+                _loggerManager.LogError($"Error occurred while retrieving payment for BookingId: {bookingId}.");
+                throw;
+            }
+            return paidAmount;
+        }
     }
 }
