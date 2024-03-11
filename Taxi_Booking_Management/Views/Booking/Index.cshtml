@@ -64,11 +64,12 @@
                     </button>
                 </td>
 
-                <td class="text-center">@details.FromDate</td>
-                <td class="text-center">@details.ToDate</td>
+                <td class="text-center">@details.FromDate.ToString("MM/dd/yyyy")</td>
+                <td class="text-center">@details.ToDate.ToString("MM/dd/yyyy")</td>
                 <td class="text-center">@details.NetAmount</td>
                 
                 <td class="text-center">
+                    <a href="@Url.Action("CreatePayment", "PaymentHistory", new { bookingCode =@details.BookingCode })" class="btn btn-primary ms-2">Make Payment</a>
                     <a href="@Url.Action("Details", new { taxiId =@details.TaxiId })" class="btn btn-info ms-2">Details</a>
 
                 </td>

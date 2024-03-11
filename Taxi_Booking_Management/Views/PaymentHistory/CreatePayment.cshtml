@@ -5,13 +5,12 @@
 }
 
 <h2>Create New Payment</h2>
+<input asp-for="BookingId" value="@ViewBag.BookingCode" class="form-control" type="text" required min="10" />
 
 <form asp-action="CreatePayment" asp-controller="PaymentHistory" method="post" id="AddproductForm">
     <div class="form-group w-50 mt-3">
         <label asp-for="BookingId"></label>
-        <select asp-for="BookingId" asp-items="@ViewBag.Bookings" class="form-control mt-2">
-            <option value="">-- Select Booking code --</option>
-        </select>
+        <input asp-for="BookingId" value="@ViewBag.BookingCode" class="form-control" type="text" required min="10" />
         <span asp-validation-for="BookingId" class="text-danger"></span>
     </div>
     <div class="form-group w-50 mt-5">
