@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.PaymentHistory;
@@ -22,9 +23,10 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpGet]
-        public IActionResult CreatePayment()
+        public async Task<IActionResult> CreatePayment(string bookingCode)
         {
-            ViewBag.Bookings = _context.Bookings.Select(x => new SelectListItem { Value = x.BookingId.ToString(), Text = x.CustomerName });
+            var Bookings = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingCode == bookingCode);
+            ViewBag.BookingCode = Bookings.BookingCode;
             return View();
         }
 
