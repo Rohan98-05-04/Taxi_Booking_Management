@@ -328,8 +328,8 @@ namespace Taxi_Booking_Management.Services.Booking
         {
             const string cacheKey = "TaxiDriversCacheKey";
             if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiDrivers))
-                {
-                taxiDrivers =  _context.drivers
+            {
+                taxiDrivers = _context.drivers
                    .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" }).ToList();
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions
@@ -339,7 +339,7 @@ namespace Taxi_Booking_Management.Services.Booking
                 _memoryCache.Set(cacheKey, taxiDrivers, cacheEntryOptions);
             }
             return taxiDrivers;
-            
+        } 
 
         public async Task<Models.Booking> GetBookingByBookingCode(string bookingCode)
         {
