@@ -14,7 +14,7 @@
         <form asp-action="CheckBookingAvailbility" asp-controller="Booking" method="post" class="mb-4">
 
             <div class="form-group w-50 mt-3">
-                <label asp-for="taxiId"></label>
+                <label asp-for="taxiId" class="required"></label>
                 <select asp-for="taxiId" asp-items="@((IEnumerable<SelectListItem>)ViewBag.taxiName)" class="form-control mt-2" id="taxiIdSelect">
                     <option value="">-- Select Taxi --</option>
                 </select>
@@ -22,13 +22,13 @@
             </div>
 
             <div class="form-group w-50 mt-3">
-                <label asp-for="FromDate"></label>
+                <label asp-for="FromDate" class="required"></label>
                 <input asp-for="FromDate" type="date" min="@minDate" class="form-control mt-2" id="fromDate" />
                 <span asp-validation-for="FromDate" class="text-danger"></span>
             </div>
 
             <div class="form-group w-50 mt-3">
-                <label asp-for="ToDate"></label>
+                <label asp-for="ToDate" class="required"></label>
                 <input asp-for="ToDate" type="date" class="form-control mt-2" id="toDate" />
                 <span asp-validation-for="ToDate" class="text-danger"></span>
             </div>

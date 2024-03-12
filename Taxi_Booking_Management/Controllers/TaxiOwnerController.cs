@@ -97,16 +97,16 @@ namespace Taxi_Booking_Management.Controllers
             string message = MessagesAlerts.FailUpdate;
             if (ModelState.IsValid)
             {
-                var updatedDriver = await _taxiOwnerServices.UpdateTaxiOwner(ownerModel);
-                if (updatedDriver.Contains("successfully"))
+                var updatedOwner = await _taxiOwnerServices.UpdateTaxiOwner(ownerModel);
+                if (updatedOwner.Contains("successfully"))
                 {
 
-                    notyf.Success($"{updatedDriver}");
-                    return RedirectToAction("Index", "TaxiDriver");
+                    notyf.Success($"{updatedOwner}");
+                    return RedirectToAction("Index", "TaxiOwner");
                 }
                 else
                 {
-                    notyf.Error($"{updatedDriver}");
+                    notyf.Error($"{updatedOwner}");
                 }
             }
             notyf.Error($"{message}");
@@ -134,7 +134,7 @@ namespace Taxi_Booking_Management.Controllers
 
             }
             notyf.Error($"{message}");
-            return RedirectToAction("DriverDetails", "TaxiDriver");
+            return RedirectToAction("OwnerDetails", "TaxiOwner");
         }
     }
 }

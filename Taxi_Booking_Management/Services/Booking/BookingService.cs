@@ -8,6 +8,7 @@ using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiDriver;
 using X.PagedList;
+using static Taxi_Booking_Management.Common.Enums;
 
 namespace Taxi_Booking_Management.Services.Booking
 {
@@ -51,21 +52,20 @@ namespace Taxi_Booking_Management.Services.Booking
 
         }
 
-        public async Task<BookingDto?> GetTaxiBookingAsync(int bookingId)
+        public async Task<Models.Booking> GetTaxiBookingAsync(int bookingId)
         {
             try
             {
-                
-                var retrieveBooking = await _context.Bookings.Include(t => t.taxi)
+
+                var retrieveBooking = await _context.Bookings.Include(t => t.taxi).Include(d => d.TaxiDrivers)
                     .FirstOrDefaultAsync(t => t.BookingId == bookingId);
                 if (retrieveBooking == null)
                 {
                     _loggerManager.LogInfo($"not Booking Details found with bookingId {bookingId}");
                     return null;
                 }
-                var bookingDto = _mapper.Map<BookingDto>(retrieveBooking);
                 _loggerManager.LogInfo($"Booking details is successfully retrived with given id{bookingId}");
-                return bookingDto;
+                return retrieveBooking;
             }
             catch (Exception ex)
             {
@@ -147,7 +147,8 @@ namespace Taxi_Booking_Management.Services.Booking
             if (exTaxi == null)
             {
                 return 0;
-            }return exTaxi.TaxiId;
+            }
+            return exTaxi.TaxiId;
         }
 
         public async Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId)
@@ -168,6 +169,34 @@ namespace Taxi_Booking_Management.Services.Booking
             catch (Exception ex)
             {
                 _loggerManager.LogError($"{ex.Message} ,method name: GetTaxiAvailableDates");
+                throw;
+            }
+        }
+
+        public async Task<string> UpdateBookingStatusById(int BookingId, int BookingStatus)
+        {
+            try
+            {
+                var exBook = await _context.Bookings.FirstOrDefaultAsync(u => u.BookingId == BookingId);
+                if (exBook == null)
+                {
+                    _loggerManager.LogInfo($"booking not found by given bookingId {BookingId}");
+                    return $"booking not found by given bookingId {BookingId}";
+                }
+                if (!Enum.IsDefined(typeof(Taxi_Booking_Management.Common.Enums.BookingStatus), BookingStatus))
+                {
+                    _loggerManager.LogInfo($"booking status is invalid with given status code {BookingStatus}");
+                    return "booking status is invalid";
+                }
+                exBook.BookingStatus = Convert.ToInt32((Taxi_Booking_Management.Common.Enums.BookingStatus)BookingStatus);
+                _context.Bookings.Update(exBook);
+                await _context.SaveChangesAsync();
+                _loggerManager.LogInfo($"booking status is successfully changed to {BookingStatus}");
+                return "booking status is successfully changed";
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} method name : UpdateBookingStatusById");
                 throw;
             }
         }

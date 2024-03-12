@@ -1,6 +1,7 @@
 ﻿@using X.PagedList;
 @using X.PagedList.Mvc.Core;
 @using X.PagedList.Web.Common;
+@inject IConfiguration Configuration
 @model IPagedList<PaymentHistory>
 
 @{
@@ -29,7 +30,7 @@
 <table class="table table-striped  mt-3">
     <thead>
         <tr class="table-primary">
-            <th class="text-center">BookingId</th>
+            <th class="text-center">Booking Code</th>
             <th class="text-center">Paid Medium</th>
             <th class="text-center">Total Amount</th>
             <th class="text-center">Date</th>
@@ -43,12 +44,12 @@
         @foreach (var details in Model)
         {
             <tr>
-                <td class="text-center">@details.BookingId</td>
+                <td class="text-center">@details.booking.BookingCode</td>
                 <td class="text-center">
                     @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), details.PaidMedium)
                 </td>
-                <td class="text-center">@details.PayAmount</td>
-                <td class="text-center">@details.CreateDateTime.ToString("MM/dd/yyyy")</td>
+                <td class="text-center">@Configuration["AppSettings:indianCurrency"] @details.PayAmount</td>
+                <td class="text-center">@details.CreateDateTime.ToString("dd/MMM/yyyy")</td>
                 @if (!string.IsNullOrEmpty(details.Remark))
                 {
                     <td class="text-center">@details.Remark</td>

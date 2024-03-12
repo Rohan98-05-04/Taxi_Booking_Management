@@ -11,7 +11,7 @@
 <form asp-action="RegisterBooking" asp-controller="Booking" method="post" class="mb-4">
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="RegistrationNo">Taxi name</label>
+        <label asp-for="RegistrationNo" class="required">Taxi name</label>
         <select asp-for="RegistrationNo" asp-items="@((IEnumerable<SelectListItem>)ViewBag.taxiName)" class="form-control mt-2" id="taxiNameSelect">
             <option value="">-- Select Taxi --</option>
         </select>
@@ -19,7 +19,7 @@
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="DriverName">Driver name</label>
+        <label asp-for="DriverName" class="required">Driver name</label>
         <select asp-for="DriverName" asp-items="@((IEnumerable<SelectListItem>)ViewBag.driverName)" class="form-control mt-2" id="driverNameSelect">
             <option value="">-- Select Driver --</option>
         </select>
@@ -27,49 +27,49 @@
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="fromDate">From Date</label>
+        <label asp-for="fromDate" class="required">From Date</label>
         <input asp-for="fromDate" type="date" min="@minDate" class="form-control mt-2" />
         <span asp-validation-for="fromDate" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="toDate">To Date</label>
+        <label asp-for="toDate" class="required">To Date</label>
         <input asp-for="toDate" type="date" class="form-control mt-2" />
         <span asp-validation-for="toDate" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="CustomerName">Customer Name</label>
+        <label asp-for="CustomerName" class="required">Customer Name</label>
         <input asp-for="CustomerName" class="form-control mt-2" />
         <span asp-validation-for="CustomerName" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="CustomerMobile">Customer Mobile</label>
+        <label asp-for="CustomerMobile" class="required">Customer Mobile</label>
         <input asp-for="CustomerMobile" class="form-control mt-2" />
         <span asp-validation-for="CustomerMobile" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="FromLocation">From Location</label>
+        <label asp-for="FromLocation" class="required">From Location</label>
         <input asp-for="FromLocation" class="form-control mt-2" />
         <span asp-validation-for="FromLocation" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="ToLocation">To Location</label>
+        <label asp-for="ToLocation" class="required">To Location</label>
         <input asp-for="ToLocation" class="form-control mt-2" />
         <span asp-validation-for="ToLocation" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="GrossAmount">Gross Amount</label>
+        <label asp-for="GrossAmount" class="required">Gross Amount</label>
         <input asp-for="GrossAmount" class="form-control mt-2" />
         <span asp-validation-for="GrossAmount" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="TotalGST">Total GST percentage</label>
+        <label asp-for="TotalGST" class="required">Total GST percentage</label>
         <input asp-for="TotalGST" class="form-control mt-2" min="1" max="100" type="number"/>
         <span asp-validation-for="TotalGST" class="text-danger"></span>
     </div>
