@@ -1,5 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +18,15 @@ namespace Taxi_Booking_Management.Controllers
     public class BookingController : Controller
     {
         private readonly IBookingService _BookingService;
-        private readonly ApplicationDbContext _context;
+    
         private readonly IPaymentHistoryService _paymentHistoryService;
-
-        public BookingController(IBookingService context, ApplicationDbContext dbcontext
+        const string bookingcontroller = "Booking";
+        const string indexAction = "Index";
+        public BookingController(IBookingService context
             , IPaymentHistoryService paymentHistoryService)
         {
             _BookingService=context;
-            _context = dbcontext;
+          
             _paymentHistoryService = paymentHistoryService;
         }
 
@@ -47,29 +49,28 @@ namespace Taxi_Booking_Management.Controllers
             return View(allBookings);
         }
 
-        public  IActionResult RegisterBooking()
+        public async Task<IActionResult> RegisterBooking()
         {
-            ViewBag.taxiName = _context.taxis
-                                .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" });
-            ViewBag.driverName = _context.drivers
-                                 .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" });
+
+            ViewBag.taxiName =  _BookingService.GetTaxiNames();
+            ViewBag.driverName =  _BookingService.GetDriverNames();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterBooking(RegisterBookingDto dto)
+        public async Task<IActionResult> RegisterBooking(RegisterBookingDto dto, [FromServices] INotyfService notyf)
         {
            var data =  await _BookingService.RegisterBookingAsync(dto);
-            return RedirectToAction("Index","Booking");
+            notyf.Success(data);
+            return RedirectToAction(indexAction, bookingcontroller);
         }
 
         [HttpGet]
         public IActionResult CheckBookingAvailbility()
         {
             CheckTaxiAvailability checkTaxi = new CheckTaxiAvailability();
-            ViewBag.taxiName = _context.taxis
-               .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" });
-           
+            ViewBag.taxiName = _BookingService.GetTaxiNames();
+
             return View(checkTaxi);
         }
 
@@ -84,11 +85,11 @@ namespace Taxi_Booking_Management.Controllers
             }
             if (data)
             {
-                notyf.Success("taxi is available for booking");
+                notyf.Success(MessagesAlerts.TaxiIsAvailable);
             }
             else
             {
-                notyf.Information("taxi is not available for booking");
+                notyf.Information(MessagesAlerts.TaxiIsNotAvailable);
             }
             return View(dto);
         }
@@ -111,7 +112,43 @@ namespace Taxi_Booking_Management.Controllers
                 }
             return RedirectToAction("Error", "Home");
         }
+        [HttpGet]
 
+        public async Task<IActionResult> EditBooking(int bookingid, [FromServices] INotyfService notyf)
+        {
+            if (bookingid > 0)
+            {
+                var BookingData = await _BookingService.GetBookingDataForUpdate(bookingid);
+                if (BookingData != null )
+                {
+                   
+                    return View(BookingData);
+                }
+                else
+                {
+                    notyf.Error(MessagesAlerts.BookingDetailsNotAvailable);
+                    return RedirectToAction(indexAction, bookingcontroller);
+                }
+
+            }
+            notyf.Error(MessagesAlerts.InvalidId);
+            return RedirectToAction(indexAction, bookingcontroller);
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditBooking(EditBookingViewModel bookingViewModel, [FromServices] INotyfService notyf)
+        {
+            
+            if (bookingViewModel != null)
+            {
+                var updatedBookingData= await _BookingService.UpdateBookingAsync(bookingViewModel);
+
+                notyf.Success($"{updatedBookingData}");
+                return RedirectToAction(indexAction, bookingcontroller);
+            }
+            notyf.Error($"{MessagesAlerts.FailUpdate}");
+            return View(bookingViewModel);
+        }
         [HttpPost]
         public async Task<IActionResult> UpdateBookingStatus(int bookingId, int bookingStatus)
         {
@@ -135,7 +172,7 @@ namespace Taxi_Booking_Management.Controllers
                 {
 
                     notyf.Success($"{deleteBooking}");
-                    return RedirectToAction("Index", "Booking");
+                    return RedirectToAction(indexAction, bookingcontroller);
                 }
                 else
                 {
@@ -144,7 +181,7 @@ namespace Taxi_Booking_Management.Controllers
 
             }
             notyf.Error($"{message}");
-            return RedirectToAction("BookingDetails", "Booking");
+            return RedirectToAction("BookingDetails", bookingcontroller);
         }
     }
 }

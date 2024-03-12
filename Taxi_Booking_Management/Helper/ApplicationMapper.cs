@@ -20,6 +20,7 @@ namespace Taxi_Booking_Management.Helper
 
             CreateMap<RegisterBookingDto, Booking>().ReverseMap();
             CreateMap<TaxiViewModel, Taxi>();
+            CreateMap<EditBookingViewModel, Booking>();
 
 
         }

@@ -14,5 +14,13 @@
         public static string FailLogIn = "Fail to login";
         public static string SuccessSignUp = "SignUP successfully";
         public static string FailSignUp = "Fail to signup";
+
+
+        //For Bookings
+
+        public static string TaxiIsNotAvailable = "taxi is not available for booking";
+        public static string TaxiIsAvailable = "taxi is available for booking";
+        public static string BookingDetailsNotAvailable = "Booking details not found by given details";
+        public static string InvalidId = "provide valid BookingID";
     }
 }
