@@ -1,4 +1,5 @@
-﻿using Taxi_Booking_Management.Models;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Taxi_Booking_Management.Models;
 using X.PagedList;
 namespace Taxi_Booking_Management.Services.TaxiOwner
 {
@@ -10,5 +11,6 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
         public Task<string?> UpdateTaxiOwner(Models.TaxiOwner taxiOwner);
 
         public Task<string> DeleteTaxiOwnerAsync(int ownerId);
+        public IEnumerable<SelectListItem> GetTaxiOwners();
     }
 }

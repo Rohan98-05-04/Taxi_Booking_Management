@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Services.Auth;
 
 namespace Taxi_Booking_Management.Controllers
@@ -9,10 +10,12 @@ namespace Taxi_Booking_Management.Controllers
     {
         const string SessionName = "_Name";
         private readonly IAuthService _authData;
+        private readonly ILoggerManager _loggerManager;
 
-        public AuthController(IAuthService authData) 
+        public AuthController(IAuthService authData, ILoggerManager loggerManager) 
         {
-                _authData=authData;
+                _authData = authData;
+            _loggerManager = loggerManager;
                 
 
         }
@@ -32,20 +35,24 @@ namespace Taxi_Booking_Management.Controllers
                 if (result == null)
                 {
                     message = "Email Already Exist!";
+                    _loggerManager.LogInfo($"Sign up failed: {message}");
                     return Ok(message);
                 }
                 else if (!result.Succeeded)
                 {
+                    _loggerManager.LogError($"Sign up failed: {result.Errors}");
                     return Ok(result.Errors.ToString());
                 }
                 ModelState.Clear();
                 message = "SignUp successfully";
+                _loggerManager.LogInfo(message);
                 return Ok("successfully");
             }
             var errors = ModelState.Values.SelectMany(v => v.Errors)
                          .Select(e => e.ErrorMessage)
                          .ToList();
             string allErrors = string.Join(", ", errors);
+            _loggerManager.LogError($"Model state is not valid: {allErrors}");
             return Ok(allErrors);
         }
 
@@ -66,11 +73,13 @@ namespace Taxi_Booking_Management.Controllers
                 if (result.Succeeded)
                 {
                     message = "Login successfully";
+                    _loggerManager.LogInfo(message);
                     return Ok(message);
                 }
               else if (!result.Succeeded)
                 {
                     message = "Fail to login, provide valid email/password";
+                    _loggerManager.LogError(message);
                     return Ok(message);
                 }
             }
@@ -78,13 +87,13 @@ namespace Taxi_Booking_Management.Controllers
                           .Select(e => e.ErrorMessage)
                           .ToList();
             string allErrors = string.Join(", ", errors);
+            _loggerManager.LogError($"Model state is not valid: {allErrors}");
             return Ok(allErrors);
         }
         [HttpPost]
         public async Task<IActionResult> LogOut()
         {
             await _authData.SignOut();
-           
             return RedirectToRoute(new { controller = "Auth", action = "SignIn" });
 
         }

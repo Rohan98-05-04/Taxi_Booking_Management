@@ -200,5 +200,26 @@ namespace Taxi_Booking_Management.Services.Booking
                 throw;
             }
         }
+
+        public async Task<Models.Booking> GetBookingByBookingCode(string bookingCode)
+        {
+            try
+            {
+                var retrieveBooking = await _context.Bookings.Include(t => t.taxi).Include(d => d.TaxiDrivers)
+                    .FirstOrDefaultAsync(t => t.BookingCode == bookingCode);
+                if (retrieveBooking == null)
+                {
+                    _loggerManager.LogInfo($"not Booking Details found with bookingCode {bookingCode}");
+                    return null;
+                }
+                _loggerManager.LogInfo($"Booking details is successfully retrived with given booking code{bookingCode}");
+                return retrieveBooking;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: GetBookingByBookingCode");
+                throw;
+            }
+        }
     }
 }

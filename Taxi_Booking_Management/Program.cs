@@ -37,6 +37,7 @@ builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddTransient<IDashBoardService , DashBoardService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddMemoryCache();
 
 builder.Services.AddIdentity<User, IdentityRole>(
     options =>
