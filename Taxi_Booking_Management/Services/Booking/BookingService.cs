@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Humanizer;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
@@ -17,13 +19,15 @@ namespace Taxi_Booking_Management.Services.Booking
         private readonly ApplicationDbContext _context;
         private readonly ILoggerManager _loggerManager;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _memoryCache;
 
         public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager ,
-              IMapper mapper)
+              IMapper mapper,IMemoryCache memoryCache)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
 
         public async Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search)
@@ -73,7 +77,106 @@ namespace Taxi_Booking_Management.Services.Booking
                 throw;
             }
         }
+        public async Task<EditBookingViewModel?> GetBookingDataForUpdate(int bookingid)
+        {
+            try
+            {
+                var retrieveBooking = await _context.Bookings.Include(t => t.taxi).Include(d => d.TaxiDrivers)
+                    .FirstOrDefaultAsync(t => t.BookingId == bookingid);
+                if (retrieveBooking != null && retrieveBooking.BookingId > 0)
+                {
+                    EditBookingViewModel bookingViewModeldata = new EditBookingViewModel()
+                    {
+                        BookingId = retrieveBooking.BookingId,
+                        BookingCode = retrieveBooking.BookingCode,
+                        RegistrationNo = $"{retrieveBooking.taxi.TaxiName}",
+                        TaxiId = retrieveBooking.TaxiId,
+                        DriverId = retrieveBooking.DriverId,
+                        DriverName = _context.drivers
+                                   .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" }),
+                        TaxiNames = _context.taxis
+                                 .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" }),
+                        CustomerName = retrieveBooking.CustomerName,
+                        CustomerMobile = retrieveBooking.CustomerMobile,
+                        GrossAmount = retrieveBooking.GrossAmount,
+                        TotalGST = retrieveBooking.TotalGST,
+                        NetAmount = retrieveBooking.NetAmount,
+                        FromLocation = retrieveBooking.FromLocation,
+                        ToLocation = retrieveBooking.ToLocation,
+                        BookingStatus = retrieveBooking.BookingStatus,
+                        fromDate = retrieveBooking.FromDate,
+                        toDate = retrieveBooking.ToDate,
 
+
+                    };
+                    _loggerManager.LogInfo($"Booking details is successfully retrived with given id{bookingid}");
+                    return (bookingViewModeldata);
+                }
+                else
+                {
+                    _loggerManager.LogInfo($"not Booking Details found with bookingId {bookingid}");
+                    return null;
+                }
+
+            } 
+            catch(Exception ex)
+            {
+                _loggerManager.LogError($"method name: GetBookingDataForUpdate");
+                throw;
+            }
+
+        }
+        public async Task<string> UpdateBookingAsync(EditBookingViewModel bookingmodel)
+        {
+            try
+            {
+                bool isAvailable = true;
+                var exkBookingdata = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == bookingmodel.BookingId);
+                if (exkBookingdata!=null ) 
+                {
+                    if(exkBookingdata.FromDate!=bookingmodel.fromDate || exkBookingdata.ToDate != bookingmodel.toDate) 
+                    {
+                      isAvailable = await IsTaxiAvailableAsync(bookingmodel.BookingId, bookingmodel.fromDate, bookingmodel.toDate); 
+                    }
+                  
+                    if (isAvailable)
+                    {
+                        exkBookingdata.FromDate = bookingmodel.fromDate;
+                        exkBookingdata.ToDate = bookingmodel.toDate;
+                        exkBookingdata.FromLocation = bookingmodel.FromLocation;
+                        exkBookingdata.ToLocation = bookingmodel.ToLocation;
+                        exkBookingdata.TaxiId = bookingmodel.TaxiId;
+                        exkBookingdata.DriverId = bookingmodel.DriverId;
+                        exkBookingdata.TotalGST = bookingmodel.TotalGST;
+                        exkBookingdata.GrossAmount = bookingmodel.GrossAmount;
+                        exkBookingdata.CustomerName = bookingmodel.CustomerName;
+                        exkBookingdata.CustomerMobile = bookingmodel.CustomerMobile;
+                        exkBookingdata.UpdatedDateTime = DateTime.Now;
+                        decimal totalAmount = bookingmodel.GrossAmount + (bookingmodel.GrossAmount * bookingmodel.TotalGST) / 100;
+                        exkBookingdata.NetAmount = totalAmount;
+                      
+                        _context.Bookings.Update(exkBookingdata);
+                        await _context.SaveChangesAsync();
+                        _loggerManager.LogInfo($"Booking is successfully updated with given id{bookingmodel.BookingId}");
+                        return $"you booking details {MessagesAlerts.SuccessfullUpdate} ";
+                    }
+                    else
+                    {
+                        _loggerManager.LogInfo($"date is not available for booking for cus :{bookingmodel.CustomerName}");
+                        return $"{MessagesAlerts.TaxiIsNotAvailable}";
+                    }
+                    
+                }
+                _loggerManager.LogInfo($"taxi not found {bookingmodel.BookingId}");
+                return $"Booking Details not found  {bookingmodel.BookingCode}, {MessagesAlerts.FailUpdate}";
+
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} ,method name: RegisterBookingAsync");
+                throw;
+            }
+        }
         public async Task<string> DeleteTaxiBookingsAsync(int bookingId)
         {
             string message = MessagesAlerts.FailDelete;
@@ -118,7 +221,7 @@ namespace Taxi_Booking_Management.Services.Booking
                     await _context.Bookings.AddAsync(newBooking);
                     await _context.SaveChangesAsync();
                     _loggerManager.LogInfo($"Booking is successfully registed with given id{bookingDto.BookingCode}");
-                    return $"you booking {MessagesAlerts.SuccessfullSave} with {bookingDto.BookingCode}";
+                    return $"you booking details {MessagesAlerts.SuccessfullSave} ";
                 } 
                 _loggerManager.LogInfo($"date is not available for booking for cus :{bookingDto.CustomerName}");
                 return $"{MessagesAlerts.FailSave}";
@@ -199,6 +302,43 @@ namespace Taxi_Booking_Management.Services.Booking
                 _loggerManager.LogError($"{ex.Message} method name : UpdateBookingStatusById");
                 throw;
             }
+        }
+
+        public List<SelectListItem> GetTaxiNames()
+        {
+            const string cacheKey = "TaxiNamesCacheKey";
+            if(!_memoryCache.TryGetValue(cacheKey,out List<SelectListItem> taxiNames))
+                {
+                taxiNames = _context.taxis
+               .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" })
+               .ToList();
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                };
+                _memoryCache.Set(cacheKey,taxiNames,cacheEntryOptions);
+            }
+            return taxiNames;
+           
+        }
+
+        public List<SelectListItem> GetDriverNames()
+        {
+            const string cacheKey = "TaxiDriversCacheKey";
+            if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiDrivers))
+                {
+                taxiDrivers =  _context.drivers
+                   .Select(x => new SelectListItem { Value = x.DriverId.ToString(), Text = $"{x.DriverName} ({x.DriverMobile})" }).ToList();
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                };
+                _memoryCache.Set(cacheKey, taxiDrivers, cacheEntryOptions);
+            }
+            return taxiDrivers;
+            
         }
     }
 }

@@ -1,31 +1,29 @@
-﻿@model Taxi_Booking_Management.DtoModels.RegisterBookingDto;
+﻿@model Taxi_Booking_Management.DtoModels.EditBookingViewModel;
 
 @{
-    ViewData["Title"] = "Register booking";
-    var minDate = DateTime.Now.ToString("yyyy-MM-dd");
-    var taxiNames = ViewBag.taxiName as List<SelectListItem>;
+    ViewData["Title"] = "Update booking Details";
+    var minDate = Model.fromDate.ToString("yyyy-MM-dd");
 }
 <head>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 </head>
-<h2>Register New Booking</h2>
-<form asp-action="RegisterBooking" asp-controller="Booking" method="post" class="mb-4">
-
+<h2>Update booking Details</h2>
+<form asp-action="EditBooking" asp-controller="Booking" method="post" class="mb-4">
+    <input asp-for="BookingId" class="form-control mt-2" type="hidden" />
     <div class="form-group w-50 mt-3">
-        <label asp-for="RegistrationNo" class="required">Taxi name</label>
-        <select asp-for="RegistrationNo" asp-items="@(ViewBag.taxiName as IEnumerable<SelectListItem>)" class="form-control mt-2" id="taxiNameSelect">
+        <label asp-for="TaxiId" class="required">Taxi name</label>
+        <select asp-for="TaxiId" asp-items="@Model.TaxiNames" class="form-control mt-2" id="taxiNameSelect">
             <option value="">-- Select Taxi --</option>
-            
         </select>
-        <span asp-validation-for="RegistrationNo" class="text-danger"></span>
+        <span asp-validation-for="TaxiId" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
-        <label asp-for="DriverName" class="required">Driver name</label>
-        <select asp-for="DriverName" asp-items="@(ViewBag.driverName as IEnumerable<SelectListItem>)" class="form-control mt-2" id="driverNameSelect">
+        <label asp-for="DriverId" class="required">Driver name</label>
+        <select asp-for="DriverId" asp-items="@Model.DriverName" class="form-control mt-2" id="driverNameSelect">
             <option value="">-- Select Driver --</option>
         </select>
-        <span asp-validation-for="DriverName" class="text-danger"></span>
+        <span asp-validation-for="DriverId" class="text-danger"></span>
     </div>
 
     <div class="form-group w-50 mt-3">
@@ -72,40 +70,42 @@
 
     <div class="form-group w-50 mt-3">
         <label asp-for="TotalGST" class="required">Total GST percentage</label>
-        <input asp-for="TotalGST" class="form-control mt-2" min="1" max="100" type="number"/>
+        <input asp-for="TotalGST" class="form-control mt-2" min="1" max="100" type="number" />
         <span asp-validation-for="TotalGST" class="text-danger"></span>
     </div>
- 
 
-    <button type="submit" class="btn btn-primary mt-2">Register</button>
+
+    <button type="submit" class="btn btn-primary mt-2">Update</button>
     <button asp-action="Index" asp-controller="Booking" class="btn btn-warning mt-2">Cancel</button>
 </form>
-@section Scripts{
+@section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script type="text/javascript">
         $(document).ready(function () {
+
+
+
             $('#taxiNameSelect').select2({
                 placeholder: "-- Select Taxi --",
                 allowClear: true,
-                width: '100%' 
+                width: '100%'
             });
 
-            
             $('#driverNameSelect').select2({
                 placeholder: "-- Select Driver --",
                 allowClear: true,
-                width: '100%' 
+                width: '100%'
             });
 
-           
+
             $("#fromDate").change(function () {
                 var selectedDate = $(this).val();
                 $("#toDate").attr("min", selectedDate);
             });
         });
-        
+
     </script>
 }
