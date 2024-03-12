@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.Common;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiDriver;
 using Taxi_Booking_Management.Services.TaxiOwner;
@@ -13,10 +14,14 @@ namespace Taxi_Booking_Management.Controllers
     public class TaxiDriverController : Controller
     {
         private readonly ITaxiDriverService _taxiDriverServices;
+        private readonly ILoggerManager _loggerManager;
+        private readonly IConfiguration _configuration;
 
-        public TaxiDriverController(ITaxiDriverService taxiDriverServices)
+        public TaxiDriverController(IConfiguration configuration ,ITaxiDriverService taxiDriverServices, ILoggerManager loggerManager)
         {
             _taxiDriverServices = taxiDriverServices;
+            _loggerManager = loggerManager;
+            _configuration = configuration;
         }
 
 
@@ -26,7 +31,7 @@ namespace Taxi_Booking_Management.Controllers
         {
             ViewBag.Search = search;
             var pageNumber = page ?? 1;
-            int pageSize = 5;
+            int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
 
             IPagedList<TaxiDriver> allDrivers;
             allDrivers = await _taxiDriverServices.GetAllTaxiDriverAsync(pageNumber, pageSize, search);
@@ -38,41 +43,54 @@ namespace Taxi_Booking_Management.Controllers
         {
             return View();
         }
-        [HttpPost]
 
+        [HttpPost]
         public async Task<IActionResult> AddDriver(TaxiDriver driverModel, [FromServices] INotyfService notyf)
         {
-            string message = MessagesAlerts.FailSave;
-            if (ModelState.IsValid)
+            try
             {
-                var newDriver = await _taxiDriverServices.RegisterTaxiDriverAsync(driverModel);
-                if (newDriver.Contains("successfully"))
+                string message = MessagesAlerts.FailSave;
+                if (ModelState.IsValid)
                 {
-
-                    notyf.Success($"{newDriver}");
-                    return RedirectToAction("Index", "TaxiDriver");
+                    var newDriver = await _taxiDriverServices.RegisterTaxiDriverAsync(driverModel);
+                    if (newDriver.Contains("successfully"))
+                    {
+                        notyf.Success($"{newDriver}");
+                        return RedirectToAction("Index", "TaxiDriver");
+                    }
+                    else
+                    {
+                        notyf.Error($"{newDriver}");
+                    }
                 }
-                else
-                {
-                    notyf.Error($"{newDriver}");
-                }
-
+                notyf.Error($"{message}");
+                return View(driverModel);
             }
-            notyf.Error($"{message}");
-            return View(driverModel);
-
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while adding a new driver: {ex.Message}");
+                return View("Error");
+            }
         }
-        //Details By id 
+
+         
         [HttpGet]
         public async Task<IActionResult> DriverDetails(int driverId)
         {
-            TaxiDriver driver = null;
-            if (driverId > 0)
+            try
             {
-                driver = await _taxiDriverServices.GetTaxiDriverAsync(driverId);
-
+                TaxiDriver driver = null;
+                if (driverId > 0)
+                {
+                    driver = await _taxiDriverServices.GetTaxiDriverAsync(driverId);
+                }
+                return View(driver);
             }
-            return View(driver);
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while fetching driver details: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpGet]
@@ -86,48 +104,64 @@ namespace Taxi_Booking_Management.Controllers
             }
             return View(driver);
         }
+
         [HttpPost]
         public async Task<IActionResult> EditDriver(TaxiDriver driverModel, [FromServices] INotyfService notyf)
         {
-            string message = MessagesAlerts.FailUpdate;
-            if (ModelState.IsValid)
+            try
             {
-                var updatedDriver = await _taxiDriverServices.UpdateTaxiDriverAsync(driverModel);
-                if (updatedDriver.Contains("successfully"))
+                string message = MessagesAlerts.FailUpdate;
+                if (ModelState.IsValid)
                 {
-
-                    notyf.Success($"{updatedDriver}");
-                    return RedirectToAction("Index", "TaxiDriver");
+                    var updatedDriver = await _taxiDriverServices.UpdateTaxiDriverAsync(driverModel);
+                    if (updatedDriver.Contains("successfully"))
+                    {
+                        notyf.Success($"{updatedDriver}");
+                        return RedirectToAction("Index", "TaxiDriver");
+                    }
+                    else
+                    {
+                        notyf.Error($"{updatedDriver}");
+                    }
                 }
-                else
-                {
-                    notyf.Error($"{updatedDriver}");
-                }
+                notyf.Error($"{message}");
+                return View(driverModel);
             }
-            notyf.Error($"{message}");
-            return View(driverModel);
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while updating driver details: {ex.Message}");
+                return View("Error");
+            }
         }
+
+
         [HttpPost]
         public async Task<IActionResult> DeleteDriver(int driverId , [FromServices] INotyfService notyf)
         {
-            string message = MessagesAlerts.FailDelete;
-            if (driverId > 0)
+            try
             {
-               var deletedDriver= await _taxiDriverServices.DeleteTaxiDriverAsync(driverId);
-                if (deletedDriver.Contains("successfully"))
+                string message = MessagesAlerts.FailDelete;
+                if (driverId > 0)
                 {
-
-                    notyf.Success($"{deletedDriver}");
-                    return RedirectToAction("Index", "TaxiDriver");
+                    var deletedDriver = await _taxiDriverServices.DeleteTaxiDriverAsync(driverId);
+                    if (deletedDriver.Contains("successfully"))
+                    {
+                        notyf.Success($"{deletedDriver}");
+                        return RedirectToAction("Index", "TaxiDriver");
+                    }
+                    else
+                    {
+                        notyf.Error($"{deletedDriver}");
+                    }
                 }
-                else
-                {
-                    notyf.Error($"{deletedDriver}");
-                }
-
+                notyf.Error($"{message}");
+                return RedirectToAction("DriverDetails", "TaxiDriver");
             }
-            notyf.Error($"{message}");
-            return RedirectToAction("DriverDetails", "TaxiDriver");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while deleting driver with ID {driverId}: {ex.Message}");
+                return View("Error");
+            }
         }
 
     }

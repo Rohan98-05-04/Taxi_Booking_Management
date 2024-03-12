@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Taxi;
+using Taxi_Booking_Management.Services.TaxiOwner;
 using X.PagedList;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static Taxi_Booking_Management.Common.Enums;
@@ -18,132 +20,170 @@ namespace Taxi_Booking_Management.Controllers
     [Authorize]
     public class TaxiController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly ITaxiService _taxiService;
         private readonly IMapper _mapper;
-        public TaxiController(ApplicationDbContext applicationDb , ITaxiService taxiService
-            , IMapper mapper)
+        private readonly ILoggerManager _loggerManager;
+        private readonly ITaxiOwnerService _OwnerService;
+        private readonly IConfiguration _configuration;
+
+        public TaxiController(IConfiguration configuration ,ITaxiService taxiService
+            , IMapper mapper, ILoggerManager loggerManager , ITaxiOwnerService OwnerService)
         {
-            _context = applicationDb;
+            
             _taxiService = taxiService;
             _mapper = mapper;
+            _loggerManager = loggerManager;
+            _OwnerService = OwnerService;
+            _configuration = configuration;
         }
         public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter =0)
         {
-            ViewBag.Search = search;
-            var pageNumber = page ?? 1;
-            int pageSize = 5;
-
-            IPagedList<Taxi> allTaxies;
-            allTaxies = await _taxiService.GetAllTaxiDetailsAsync(pageNumber, pageSize, search);
-            if(statusFilter > 0)
+            try
             {
-                if (statusFilter.HasValue)
+                ViewBag.Search = search;
+                var pageNumber = page ?? 1;
+                int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
+
+                IPagedList<Taxi> allTaxies;
+                allTaxies = await _taxiService.GetAllTaxiDetailsAsync(pageNumber, pageSize, search);
+
+                if (statusFilter > 0 && statusFilter.HasValue)
                 {
                     allTaxies = allTaxies.Where(t => t.TaxiStatus == statusFilter).ToPagedList();
                     ViewBag.StatusFilter = statusFilter;
                 }
+
+                return View(allTaxies);
             }
-            return View(allTaxies);
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while fetching taxi details: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpGet]
         public IActionResult Add()
         {
+            try
+            {
+                var viewModel = new TaxiViewModel
+                {
+                    TaxiTypes = Enum.GetValues(typeof(TaxiType))
+                        .Cast<TaxiType>()
+                        .Select(t => new SelectListItem
+                        {
+                            Value = ((int)t).ToString(),
+                            Text = t.ToString()
+                        }),
+                    TaxiStatuses = Enum.GetValues(typeof(TaxiStatus))
+                        .Cast<TaxiStatus>()
+                        .Select(s => new SelectListItem
+                        {
+                            Value = ((int)s).ToString(),
+                            Text = s.ToString()
+                        }),
+                    TaxiOwners = _OwnerService.GetTaxiOwners(),
+                };
 
-            var viewModel = new TaxiViewModel
+                return View(viewModel);
+            }
+            catch (Exception ex)
             {
-                TaxiTypes = Enum.GetValues(typeof(TaxiType))
-            .Cast<TaxiType>()
-            .Select(t => new SelectListItem
-            {
-                Value = ((int)t).ToString(),
-                Text = t.ToString()
-            }),
-                TaxiStatuses = Enum.GetValues(typeof(TaxiStatus))
-            .Cast<TaxiStatus>()
-            .Select(s => new SelectListItem
-            {
-                Value = ((int)s).ToString(),
-                Text = s.ToString()
-            }),
-                TaxiOwners = _context.owner
-               .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" }),
-               
-            };
-
-            return View(viewModel);
+                _loggerManager.LogError($"An error occurred while loading the Add view: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Add(TaxiViewModel taxiViewModel, [FromServices] INotyfService notyf)
         {
-            if(!string.IsNullOrWhiteSpace(taxiViewModel.RegistrationNumber) && !string.IsNullOrWhiteSpace(taxiViewModel.TaxiName))
+            try
             {
-                var taxi = _mapper.Map<Taxi>(taxiViewModel);
-                var data = await _taxiService.RegisterTaxiAsync(taxi);
-                if (data.Contains("successfully"))
+                if (!string.IsNullOrWhiteSpace(taxiViewModel.RegistrationNumber) && !string.IsNullOrWhiteSpace(taxiViewModel.TaxiName))
                 {
-                    notyf.Success($"{data}");
-                    return RedirectToAction("Index", "Taxi");
+                    var taxi = _mapper.Map<Taxi>(taxiViewModel);
+                    var data = await _taxiService.RegisterTaxiAsync(taxi);
+                    if (data.Contains("successfully"))
+                    {
+                        notyf.Success($"{data}");
+                        return RedirectToAction("Index", "Taxi");
+                    }
+                    else
+                    {
+                        notyf.Error($"{data}");
+                        taxiViewModel.TaxiOwners = _OwnerService.GetTaxiOwners();
+                        taxiViewModel.TaxiTypes = GetTaxiTypes();
+                        taxiViewModel.TaxiStatuses = GetTaxiStatus();
+                        return View(taxiViewModel);
+                    }
                 }
-                else
-                {
-                    notyf.Error($"{data}");
-                    taxiViewModel.TaxiOwners = _context.owner
-                       .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" });
-                   
-                    taxiViewModel.TaxiTypes = GetTaxiTypes();
-                    taxiViewModel.TaxiStatuses = GetTaxiStatus();
-                    return View(taxiViewModel);
-                }
+                notyf.Error("Enter valid details for taxi");
+                return RedirectToAction("Add", "Taxi");
             }
-            notyf.Error("Enter valid details for taxi");
-            return RedirectToAction("Add", "Taxi");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while adding a new taxi: {ex.Message}");
+                return View("Error");
+            }
 
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int taxiId, [FromServices] INotyfService notyf)
         {
-            if(taxiId> 0)
+            try
             {
-               var taxiDetails = await _taxiService.GetTaxiDetailsAsync(taxiId);
-                if(taxiDetails != null)
+                if (taxiId > 0)
                 {
-                    return View(taxiDetails);
+                    var taxiDetails = await _taxiService.GetTaxiDetailsAsync(taxiId);
+                    if (taxiDetails != null)
+                    {
+                        return View(taxiDetails);
+                    }
+                    else
+                    {
+                        notyf.Error("Taxi not found by given details");
+                        return RedirectToAction("Index", "Taxi");
+                    }
                 }
-                else
-                {
-                    notyf.Error("taxi not found by given details");
-                    return RedirectToAction("Index", "Taxi");
-
-                }
+                notyf.Error("Provide valid taxiId");
+                return RedirectToAction("Index", "Taxi");
             }
-            notyf.Error("provide valid taxiId");
-            return RedirectToAction("Index", "Taxi");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while fetching taxi details: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int taxiId, [FromServices] INotyfService notyf)
         {
-            if (taxiId > 0)
+            try
             {
-                var taxiDetails = await _taxiService.DeleteTaxiAsync(taxiId);
-                if (taxiDetails > 0)
+                if (taxiId > 0)
                 {
-                    notyf.Success("taxi is delete successfully");
-                    return RedirectToAction("Index", "Taxi");
+                    var deletedCount = await _taxiService.DeleteTaxiAsync(taxiId);
+                    if (deletedCount > 0)
+                    {
+                        notyf.Success("Taxi is deleted successfully");
+                        return RedirectToAction("Index", "Taxi");
+                    }
+                    else
+                    {
+                        notyf.Error("Taxi not found by given details");
+                        return RedirectToAction("Index", "Taxi");
+                    }
                 }
-                else
-                {
-                    notyf.Error("taxi not found by given details");
-                    return RedirectToAction("Index", "Taxi");
-
-                }
+                notyf.Error("Provide valid taxiId");
+                return RedirectToAction("Index", "Taxi");
             }
-            notyf.Error("provide valid taxiId");
-            return RedirectToAction("Index", "Taxi");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while deleting taxi with ID {taxiId}: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpPost]
@@ -161,41 +201,57 @@ namespace Taxi_Booking_Management.Controllers
         [HttpGet]
         public async Task<IActionResult> EditTaxi(int taxiId, [FromServices] INotyfService notyf)
         {
-            if (taxiId > 0)
+            try
             {
-                var taxiDetails = await _context.taxis.Include(u => u.TaxiOwner).FirstOrDefaultAsync(x => x.TaxiId == taxiId);
-                if (taxiDetails != null && taxiDetails.TaxiId >0)
+                if (taxiId > 0)
                 {
-                    TaxiViewModel taxiViewModeldata = new TaxiViewModel()
+                    var taxiDetails = await _taxiService.GetDBTaxiDetailsAsync(taxiId);
+                    if (taxiDetails != null && taxiDetails.TaxiId > 0)
                     {
-                        TaxiViewId = taxiDetails.TaxiId,
-                        TaxiName = taxiDetails.TaxiName,
-                        RegistrationNumber = taxiDetails.RegistrationNumber,
-                        TaxiOwnerId = taxiDetails.TaxiOwnerId,
-                        TaxiType = taxiDetails.TaxiType,
-                        TaxiStatus = taxiDetails.TaxiStatus,
-                        TaxiTypes = GetTaxiTypes(),
-                        TaxiStatuses = GetTaxiStatus(),
-                        TaxiOwners = _context.owner.Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" })
-                      
-                    };
-                    return View(taxiViewModeldata);
+                        TaxiViewModel taxiViewModeldata = new TaxiViewModel()
+                        {
+                            TaxiViewId = taxiDetails.TaxiId,
+                            TaxiName = taxiDetails.TaxiName,
+                            RegistrationNumber = taxiDetails.RegistrationNumber,
+                            TaxiOwnerId = taxiDetails.TaxiOwnerId,
+                            TaxiType = taxiDetails.TaxiType,
+                            TaxiStatus = taxiDetails.TaxiStatus,
+                            TaxiTypes = GetTaxiTypes(),
+                            TaxiStatuses = GetTaxiStatus(),
+                            TaxiOwners = _OwnerService.GetTaxiOwners()
+
+                        };
+                        return View(taxiViewModeldata);
+                    }
+                    else
+                    {
+                        notyf.Error("Taxi not found by given details");
+                        return RedirectToAction("Index", "Taxi");
+                    }
                 }
-                else
-                {
-                    notyf.Error("taxi not found by given details");
-                    return RedirectToAction("Index", "Taxi");
-                }
+                notyf.Error("Provide valid taxiId");
+                return RedirectToAction("Index", "Taxi");
             }
-            notyf.Error("provide valid taxiId");
-            return RedirectToAction("Index", "Taxi");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while retrieving taxi details for editing: {ex.Message}");
+                return View("Error");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> EditTaxi(TaxiViewModel taxiViewModel, [FromServices] INotyfService notyf)
         {
-          var data = await _taxiService.UpdateTaxiAsync(taxiViewModel);
-            return RedirectToAction("Index", "Taxi");
+            try
+            {
+                var data = await _taxiService.UpdateTaxiAsync(taxiViewModel);
+                return RedirectToAction("Index", "Taxi");
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while updating taxi details: {ex.Message}");
+                return View("Error");
+            }
 
         }
 

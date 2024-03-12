@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.LoggerService;
@@ -11,10 +13,13 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
     {
         private readonly ApplicationDbContext _context;
         private readonly ILoggerManager _loggerManager;
-        public TaxiOwnerService(ApplicationDbContext dbContext , ILoggerManager loggerManager)
+        private readonly IMemoryCache _memoryCache;
+
+        public TaxiOwnerService(IMemoryCache memoryCache ,ApplicationDbContext dbContext , ILoggerManager loggerManager)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
+            _memoryCache = memoryCache;
         }
 
         public async Task<string> DeleteTaxiOwnerAsync(int ownerId)
@@ -127,6 +132,25 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                 _loggerManager.LogError($"{ex.Message} ,method name: UpdateTaxiOwner");
                 throw;
             }
+        }
+
+        public IEnumerable<SelectListItem> GetTaxiOwners()
+        {
+            const string cacheKey = "TaxiOwnerCacheKey";
+            if(!_memoryCache.TryGetValue(cacheKey, out IEnumerable<SelectListItem> taxiOwner))
+            {
+                taxiOwner = _context.owner
+                .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" })
+                .ToList();
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                };
+
+                _memoryCache.Set(cacheKey, taxiOwner, cacheEntryOptions);
+            }
+            return taxiOwner;
         }
     }
 }

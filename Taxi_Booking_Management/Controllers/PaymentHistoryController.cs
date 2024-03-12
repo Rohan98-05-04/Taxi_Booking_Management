@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Data;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
+using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
 
 namespace Taxi_Booking_Management.Controllers
@@ -13,11 +15,16 @@ namespace Taxi_Booking_Management.Controllers
     public class PaymentHistoryController : Controller
     {
         private readonly IPaymentHistoryService _paymentHistoryService;
-        private readonly ApplicationDbContext _context;
-        public PaymentHistoryController(IPaymentHistoryService paymentHistoryService, ApplicationDbContext context)
+        private readonly ILoggerManager _loggerManager;
+        private readonly IBookingService _bookingService;
+
+        public PaymentHistoryController(IPaymentHistoryService paymentHistoryService,
+              ILoggerManager loggerManager
+            ,IBookingService bookingService)
         {
             _paymentHistoryService = paymentHistoryService;
-            _context = context;
+            _loggerManager = loggerManager;
+            _bookingService = bookingService;
         }
         public IActionResult Index()
         {
@@ -27,17 +34,25 @@ namespace Taxi_Booking_Management.Controllers
         [HttpGet]
         public async Task<IActionResult> CreatePayment(string bookingCode)
         {
-            var Bookings = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingCode == bookingCode);
-            if(Bookings != null)
+            try
             {
-                ViewBag.BookingCode = Bookings.BookingCode;
-                ViewBag.BookingId = Bookings.BookingId;
-               var paidAmount =  _paymentHistoryService.GetPaidAmountByBookingId(Bookings.BookingId);
-                var dueAmount = Bookings.NetAmount - paidAmount;
-                ViewBag.DueAmount = dueAmount;
-                ViewBag.PaidAmount = paidAmount;
+                var booking = await _bookingService.GetBookingByBookingCode(bookingCode);
+                if (booking != null)
+                {
+                    ViewBag.BookingCode = booking.BookingCode;
+                    ViewBag.BookingId = booking.BookingId;
+                    var paidAmount = _paymentHistoryService.GetPaidAmountByBookingId(booking.BookingId);
+                    var dueAmount = booking.NetAmount - paidAmount;
+                    ViewBag.DueAmount = dueAmount;
+                    ViewBag.PaidAmount = paidAmount;
+                }
+                return View();
             }
-            return View();
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while creating payment for booking code {bookingCode}: {ex.Message}");
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         [HttpPost]
@@ -56,6 +71,7 @@ namespace Taxi_Booking_Management.Controllers
             }
             catch (Exception ex)
             {
+                _loggerManager.LogError($"An error occurred while creating payment: {ex.Message}");
                 return View("Error");
             }
         }
@@ -75,7 +91,8 @@ namespace Taxi_Booking_Management.Controllers
                 return View(pagedPayments);
             }
             catch (Exception ex)
-            { 
+            {
+                _loggerManager.LogError($"An error occurred while fetching all payments: {ex.Message}");
                 return View("Error");
             }
         }
@@ -97,6 +114,7 @@ namespace Taxi_Booking_Management.Controllers
             }
             catch (Exception ex)
             {
+                _loggerManager.LogError($"An error occurred while fetching individual payment with ID {paymentId}: {ex.Message}");
                 return View("Error");
             }
         }
@@ -106,23 +124,30 @@ namespace Taxi_Booking_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> DeletePayment(int paymentId, [FromServices] INotyfService notyf)
         {
-            if (paymentId > 0)
+            try
             {
-                var paymentDetails = await _paymentHistoryService.DeletePaymentAsync(paymentId);
-                if (paymentDetails != null)
+                if (paymentId > 0)
                 {
-                    notyf.Success("Payment History is delete successfully");
-                    return RedirectToAction("GetAllPayments", "PaymentHistory");
+                    var paymentDetails = await _paymentHistoryService.DeletePaymentAsync(paymentId);
+                    if (paymentDetails != null)
+                    {
+                        notyf.Success("Payment History is deleted successfully");
+                        return RedirectToAction("GetAllPayments", "PaymentHistory");
+                    }
+                    else
+                    {
+                        notyf.Error("Payment not found by given details");
+                        return RedirectToAction("GetAllPayments", "PaymentHistory");
+                    }
                 }
-                else
-                {
-                    notyf.Error("Payment not found by given details");
-                    return RedirectToAction("GetAllPayments", "PaymentHistory");
-
-                }
+                notyf.Error("Provide valid paymentId");
+                return RedirectToAction("GetAllPayments", "PaymentHistory");
             }
-            notyf.Error("provide valid paymentId");
-            return RedirectToAction("GetAllPayments", "PaymentHistory");
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while deleting payment with ID {paymentId}: {ex.Message}");
+                return View("Error");
+            }
         }
     }
 }

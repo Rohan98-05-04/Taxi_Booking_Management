@@ -14,5 +14,6 @@ namespace Taxi_Booking_Management.Services.Booking
         public Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId);
         public Task<string> UpdateBookingStatusById(int BookingId, int BookingStatus);
         public Task<string> DeleteTaxiBookingsAsync(int bookingId);
+        public Task<Models.Booking> GetBookingByBookingCode(string bookingCode);
     }
 }
