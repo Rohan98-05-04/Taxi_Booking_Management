@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
@@ -69,6 +70,26 @@ namespace Taxi_Booking_Management.Services.Taxi
             }
             return taxies;
 
+        }
+
+        public async Task<Models.Taxi> GetDBTaxiDetailsAsync(int taxiId)
+        {
+            try
+            {
+                var taxi = await _context.taxis.Include(t => t.TaxiOwner)
+                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
+                if (taxi == null)
+                {
+                    _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
+                    return null;
+                }
+                return taxi;
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"{ex.Message} method name : GetTaxiDetailsAsync");
+                throw;
+            }
         }
 
         public async Task<TaxiDto?> GetTaxiDetailsAsync(int taxiId)
@@ -176,5 +197,7 @@ namespace Taxi_Booking_Management.Services.Taxi
                 throw;
             }
         }
+
+        
     }
 }

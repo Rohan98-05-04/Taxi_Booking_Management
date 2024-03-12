@@ -1,4 +1,5 @@
-﻿using Taxi_Booking_Management.DtoModels;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Taxi_Booking_Management.DtoModels;
 using X.PagedList;
 
 namespace Taxi_Booking_Management.Services.Taxi
@@ -11,6 +12,8 @@ namespace Taxi_Booking_Management.Services.Taxi
         public Task<string> UpdateTaxiStatus(int taxiId, int taxiStatus);
         public Task<int?> DeleteTaxiAsync(int taxiId);
         public Task<string> UpdateTaxiAsync(TaxiViewModel taxiModel);
+        public Task<Models.Taxi> GetDBTaxiDetailsAsync(int taxiId);
+       
 
     }
 }

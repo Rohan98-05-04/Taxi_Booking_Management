@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using System.Drawing.Printing;
 using Taxi_Booking_Management.Common;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiOwner;
 using Taxi_Booking_Management.Services.User;
@@ -15,10 +16,14 @@ namespace Taxi_Booking_Management.Controllers
     public class TaxiOwnerController : Controller
     {
         private readonly ITaxiOwnerService _taxiOwnerServices;
+        private readonly ILoggerManager _loggerManager;
+        private readonly IConfiguration _configuration;
 
-        public TaxiOwnerController(ITaxiOwnerService taxiOwnerServices )
+        public TaxiOwnerController(IConfiguration configuration ,ILoggerManager loggerManager, ITaxiOwnerService taxiOwnerServices )
         {
-            _taxiOwnerServices=taxiOwnerServices;
+            _taxiOwnerServices = taxiOwnerServices;
+            _loggerManager = loggerManager;
+            _configuration = configuration;
         }
 
 
@@ -27,7 +32,7 @@ namespace Taxi_Booking_Management.Controllers
         {
             ViewBag.Search = search;
             var pageNumber = page ?? 1;
-            int pageSize = 5;
+            int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
 
             IPagedList<TaxiOwner> allOwners;
              allOwners = await _taxiOwnerServices.GetAllTaxiOwnerAsync(pageNumber, pageSize, search);
@@ -41,28 +46,35 @@ namespace Taxi_Booking_Management.Controllers
         }
 
         [HttpPost]
-
         public async Task<IActionResult> AddOwner(TaxiOwner ownerModel , [FromServices] INotyfService notyf)
         {
-            string message = MessagesAlerts.FailSave;
-
-            if (ModelState.IsValid)
+            try
             {
-              var newOwner = await _taxiOwnerServices.RegisterTaxiOwnerAsync(ownerModel);
-                if(newOwner.Contains("successfully")) {
+                string message = MessagesAlerts.FailSave;
 
-                    notyf.Success($"{newOwner}");
-                    return RedirectToAction("Index", "TaxiOwner");
-                }
-                else
+                if (ModelState.IsValid)
                 {
-                    notyf.Error($"{newOwner}");
+                    var newOwner = await _taxiOwnerServices.RegisterTaxiOwnerAsync(ownerModel);
+                    if (newOwner.Contains("successfully"))
+                    {
+                        notyf.Success($"{newOwner}");
+                        return RedirectToAction("Index", "TaxiOwner");
+                    }
+                    else
+                    {
+                        notyf.Error($"{newOwner}");
+                    }
+
                 }
-              
+                notyf.Error($"{message}");
+                return View(ownerModel);
             }
-            notyf.Error($"{message}");
-            return View (ownerModel);
-            
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while adding a new owner: {ex.Message}");
+                return View("Error");
+            }
+
         }
 
 
@@ -94,23 +106,30 @@ namespace Taxi_Booking_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> EditOwner(TaxiOwner ownerModel, [FromServices] INotyfService notyf)
         {
-            string message = MessagesAlerts.FailUpdate;
-            if (ModelState.IsValid)
+            try
             {
-                var updatedOwner = await _taxiOwnerServices.UpdateTaxiOwner(ownerModel);
-                if (updatedOwner.Contains("successfully"))
+                string message = MessagesAlerts.FailUpdate;
+                if (ModelState.IsValid)
                 {
-
-                    notyf.Success($"{updatedOwner}");
-                    return RedirectToAction("Index", "TaxiOwner");
+                    var updatedOwner = await _taxiOwnerServices.UpdateTaxiOwner(ownerModel);
+                    if (updatedOwner!=null && updatedOwner.Contains("successfully"))
+                    {
+                        notyf.Success($"{updatedOwner}");
+                        return RedirectToAction("Index", "TaxiOwner");
+                    }
+                    else
+                    {
+                        notyf.Error($"{updatedOwner}");
+                    }
                 }
-                else
-                {
-                    notyf.Error($"{updatedOwner}");
-                }
+                notyf.Error($"{message}");
+                return View(ownerModel);
             }
-            notyf.Error($"{message}");
-            return View(ownerModel);
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while updating taxi owner details: {ex.Message}");
+                return View("Error");
+            }
         }
 
 

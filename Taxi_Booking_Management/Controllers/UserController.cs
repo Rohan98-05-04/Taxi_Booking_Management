@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.User;
 
@@ -10,9 +11,12 @@ namespace Taxi_Booking_Management.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly ILoggerManager _loggerManager;
+
+        public UserController(ILoggerManager loggerManager, IUserService userService)
         {
             _userService = userService;
+            _loggerManager = loggerManager;
         }
         public IActionResult Index()
         {
@@ -36,16 +40,26 @@ namespace Taxi_Booking_Management.Controllers
             }
             catch (Exception ex)
             {
+                _loggerManager.LogError($"An error occurred while retrieving user details: {ex.Message}");
                 return StatusCode(500, $"An error occurred while retrieving user details: {ex.Message}");
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> UpdateUser()
         {
-            User user = null;
-            var SessionAuth = HttpContext.Session.GetString("_Name");
-            user = await _userService.GetUserById(SessionAuth);
-            return View(user);
+            try
+            {
+                User user = null;
+                var SessionAuth = HttpContext.Session.GetString("_Name");
+                user = await _userService.GetUserById(SessionAuth);
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while retrieving user details for update: {ex.Message}");
+                return StatusCode(500, $"An error occurred while retrieving user details for update: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -67,6 +81,7 @@ namespace Taxi_Booking_Management.Controllers
             }
             catch (Exception ex)
             {
+                _loggerManager.LogError($"An error occurred while retrieving user details: {ex.Message}");
                 return StatusCode(500, $"An error occurred while updating user details: {ex.Message}");
             }
         }
