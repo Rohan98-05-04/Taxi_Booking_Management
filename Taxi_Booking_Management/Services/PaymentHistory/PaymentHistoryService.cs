@@ -149,5 +149,22 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
             }
             return paidAmount;
         }
+
+        public async Task<IList<Models.PaymentHistory>> GetPaymentHistoryByBookingId(int bookingId)
+        {
+            try
+            {
+                var payments =await _context.PaymentHistories
+            .Where(ph => ph.BookingId == bookingId)
+            .ToListAsync();
+                _loggerManager.LogInfo($"Retrieved all payment by booking id: {bookingId} successfully.");
+                return payments;
+            }
+            catch(Exception ex)
+            {
+                _loggerManager.LogError($"Error occurred while retrieving all payment by BookingId: {bookingId}.");
+                throw;
+            }
+        }
     }
 }

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.Services.DashBoard;
 
 namespace Taxi_Booking_Management.Controllers
 {
+    [Authorize]
     public class DashBoardController(IDashBoardService _dashBoardService) : Controller
     {
         

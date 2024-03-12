@@ -16,7 +16,7 @@
     @using (Html.BeginForm("Index", "TaxiOwner", FormMethod.Get, new { @class = "d-flex" }))
     {
         <div class="form-group me-2">
-            <input type="text" name="Search" class="form-control" value="@ViewBag.Search" placeholder="Search by name/Unique Code">
+            <input type="text" name="Search" class="form-control" value="@ViewBag.Search" placeholder="Search by name">
         </div>
         <button type="submit" class="btn btn-outline-success">
             <i class="fas fa-search"></i>

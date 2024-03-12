@@ -1,0 +1,123 @@
+﻿@model Booking
+@inject IConfiguration Configuration
+
+@{
+    ViewData["Title"] = "Bookings Details";
+}
+
+<div class="container mt-5">
+    <!-- 1. Top left side: Name and Verified User Button -->
+    <div class="row">
+        <div class="col-md-6">
+            <h4 class="h4 fw-bolder">Details of Bookings</h4>
+        </div>
+        <!-- 2. Top right side: Delete and Edit Buttons -->
+        <div class="col-md-6 text-end">
+            <a asp-controller="TaxiDriver" asp-action="EditDriver" asp-route-driverId="@Model.DriverId" class="btn btn-primary"><i class="bi bi-pencil"></i> &nbsp Edit</a>
+            <button class="btn btn-danger ms-2" data-toggle="modal" onclick="openModal()" id="deleteButton"><i class="bi bi-trash3"></i> &nbsp Delete </button>
+        </div>
+    </div>
+
+    <hr />
+    <!-- 3. User Details -->
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <p><strong>Booking Status : </strong><button class="btn btn-warning">@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingStatus), Model.BookingStatus)</button></p>
+            <p class="text-danger"><strong>Booking Code : </strong> @Model.BookingCode</p>
+            <p><strong>Customer Name : </strong> @Model.CustomerName</p>
+            <p><strong>Customer Number : </strong> @Model.CustomerMobile</p>
+            <p class="text-danger"><strong>Taxi Name : </strong> @Model.taxi.TaxiName</p>
+            <p><strong>Taxi Registaration Number : </strong> @Model.taxi.RegistrationNumber</p>
+            <p class="text-danger"><strong>Driver Name : </strong> @Model.TaxiDrivers.DriverName</p>
+            <p><strong>Driver Mobile Number : </strong> @Model.TaxiDrivers.DriverMobile</p>
+          
+            
+        </div>
+        <div class="col-md-6">
+            <p><strong>From Date  : </strong> @Model.FromDate</p>
+            <p><strong>To Date : </strong> @Model.ToDate</p>
+            <p class="text-danger"><strong>Journey Start : </strong> @Model.FromLocation</p>
+            <p class="text-danger"><strong>Journey End : </strong> @Model.ToLocation</p>
+            <p><strong>Gross Amount : </strong>@Configuration["AppSettings:indianCurrency"] @Model.GrossAmount</p>
+            <p><strong>Gst(%) : </strong> @Model.TotalGST</p>
+            <p><strong>Net Amount : </strong>@Configuration["AppSettings:indianCurrency"] @Model.NetAmount</p>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Driver Details</h5>
+                <button type="button" onclick="closeDeleteModal()" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this Booking Details?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeDeleteModal()">Cancel</button>
+                <form asp-controller="Booking" asp-action="DeleteBooking" asp-route-bookingId="@Model.BookingId">
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.TransactionDetails != null)
+{
+    <hr class="my-4" style="border-color: red;" />
+
+    <div>
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mt-4 mb-3 text-warning fw-bolder">Payment Details</h4>
+
+            @if (@ViewBag.PaidAmount >= Model.NetAmount)
+            {
+                <button class="btn btn-success">
+                    @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 2)
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-warning">
+                    @Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 1)
+                </button>
+            }
+        </div>
+        <div>
+            <h6 class="mt-4 mb-3 text-danger fw-bold">Total due amount @Configuration["AppSettings:indianCurrency"] @ViewBag.DueAmount</h6>
+            <h6 class="mt-4 mb-3 text-danger fw-bold">Total paid amount @Configuration["AppSettings:indianCurrency"] @ViewBag.PaidAmount</h6>
+        </div>
+        
+    </div>
+    
+
+    <div class="list-group">
+        @foreach (var transaction in @ViewBag.TransactionDetails)
+        {
+            <div class="list-group-item border-danger">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Payment Amount: @Configuration["AppSettings:indianCurrency"] @transaction.PayAmount (@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), @transaction.PaidMedium))</h5>
+                    <small>Date: @transaction.CreateDateTime</small>
+                </div>
+            </div>
+            <hr class="my-2" style="border-color: yellow;" />
+        }
+    </div>
+}
+
+<script>
+    function openModal() {
+        $('#deleteModal').modal('show')
+    }
+
+    function closeDeleteModal() {
+        $('#deleteModal').modal('hide')
+    }
+</script>

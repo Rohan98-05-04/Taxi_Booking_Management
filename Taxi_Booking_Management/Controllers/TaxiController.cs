@@ -15,7 +15,7 @@ using static Taxi_Booking_Management.Common.Enums;
 namespace Taxi_Booking_Management.Controllers
 {
 
-
+    [Authorize]
     public class TaxiController : Controller
     {
         private readonly ApplicationDbContext _context;

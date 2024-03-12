@@ -11,6 +11,7 @@ namespace Taxi_Booking_Management.Services.PaymentHistory
         Task<Models.PaymentHistory?> GetIndividualPaymentById(int paymentId);
         public Task<Models.PaymentHistory?> DeletePaymentAsync(int paymentId);
         public decimal GetPaidAmountByBookingId(int bookingId);
+        public Task<IList<Models.PaymentHistory>> GetPaymentHistoryByBookingId(int bookingId);
 
     }
 }

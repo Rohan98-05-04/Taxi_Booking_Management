@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Taxi_Booking_Management.Services.PaymentHistory;
 
 namespace Taxi_Booking_Management.Controllers
 {
+    [Authorize]
     public class PaymentHistoryController : Controller
     {
         private readonly IPaymentHistoryService _paymentHistoryService;
@@ -26,21 +28,34 @@ namespace Taxi_Booking_Management.Controllers
         public async Task<IActionResult> CreatePayment(string bookingCode)
         {
             var Bookings = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingCode == bookingCode);
-            ViewBag.BookingCode = Bookings.BookingCode;
+            if(Bookings != null)
+            {
+                ViewBag.BookingCode = Bookings.BookingCode;
+                ViewBag.BookingId = Bookings.BookingId;
+               var paidAmount =  _paymentHistoryService.GetPaidAmountByBookingId(Bookings.BookingId);
+                var dueAmount = Bookings.NetAmount - paidAmount;
+                ViewBag.DueAmount = dueAmount;
+                ViewBag.PaidAmount = paidAmount;
+            }
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePayment(PaymentHistory paymentHistory)
+        public async Task<IActionResult> CreatePayment(PaymentHistory paymentHistory, [FromServices] INotyfService notyf)
         {
             try
             {
                 var paymentId = await _paymentHistoryService.CreatePayment(paymentHistory);
+                if(paymentId == null)
+                {
+                    notyf.Warning("Payment transaction failed");
+                    return RedirectToAction("Index","Booking");
+                }
+                notyf.Success("Payment transaction successfully done");
                 return RedirectToAction("GetAllPayments");
             }
             catch (Exception ex)
             {
-                
                 return View("Error");
             }
         }
@@ -53,7 +68,7 @@ namespace Taxi_Booking_Management.Controllers
                 ViewBag.startDate = startDate;
                 ViewBag.endDate = endDate;
                 var pageNumber = page ?? 1;
-                var pageSize = 10; 
+                var pageSize = 10;
 
                 var pagedPayments = await _paymentHistoryService.GetAllPayments(pageNumber, pageSize, startDate, endDate);
 
@@ -85,6 +100,9 @@ namespace Taxi_Booking_Management.Controllers
                 return View("Error");
             }
         }
+
+         
+
         [HttpPost]
         public async Task<IActionResult> DeletePayment(int paymentId, [FromServices] INotyfService notyf)
         {

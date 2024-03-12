@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.User;
 
 namespace Taxi_Booking_Management.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IUserService _userService;

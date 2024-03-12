@@ -1,28 +1,37 @@
 ﻿@model PaymentHistory
 
 @{
-    ViewData["Title"] = "Create New Payment";
+    ViewData["Title"] = "Create New Payment ";
 }
 
 <h2>Create New Payment</h2>
-<input asp-for="BookingId" value="@ViewBag.BookingCode" class="form-control" type="text" required min="10" />
-
+<label>Booking Code</label>
+<input asp-for="BookingId" disabled value="@ViewBag.BookingCode" class="form-control w-25" type="text" required min="10" />
 <form asp-action="CreatePayment" asp-controller="PaymentHistory" method="post" id="AddproductForm">
     <div class="form-group w-50 mt-3">
-        <label asp-for="BookingId"></label>
-        <input asp-for="BookingId" value="@ViewBag.BookingCode" class="form-control" type="text" required min="10" />
+        <input hidden asp-for="BookingId" value="@ViewBag.BookingId" class="form-control" type="text" required min="10" />
         <span asp-validation-for="BookingId" class="text-danger"></span>
     </div>
-    <div class="form-group w-50 mt-5">
+    <div class="form-group w-50 mt-3">
+        <label>Due Amount</label>
+        <input disabled value="@ViewBag.DueAmount" class="form-control" type="text" />
+    </div>
+    <div class="form-group w-50 mt-3">
+        <label>Paid Amount</label>
+        <input disabled value="@ViewBag.PaidAmount" class="form-control" type="text" />
+    </div>
+
+    <div class="form-group w-50 mt-3">
         <label asp-for="PaidMedium" class="required">Paid Medium</label>
         <div class="col-md-10">
             Cash
-            @Html.RadioButtonFor(model => model.PaidMedium, 1)
+            @Html.RadioButtonFor(model => model.PaidMedium , 1,new{@checked = "checked"})
             Online
             @Html.RadioButtonFor(model => model.PaidMedium, 2)
         </div>
         <span asp-validation-for="PaidMedium" class="text-danger"></span>
     </div>
+
     <div class="form-group w-50 mt-3">
         <label asp-for="PayAmount" class="required">Pay Amount</label>
         <input asp-for="PayAmount" class="form-control" type="text" required min="10" />
@@ -30,7 +39,7 @@
     </div>
 
     <div class="form-group  w-50 mt-3">
-        <label asp-for="Remark"> Remark</label>
+        <label asp-for="Remark" class="required"> Remark</label>
         <textarea asp-for="Remark" class="form-control"></textarea>
         <span asp-validation-for="Remark" class="text-danger"></span>
     </div>
@@ -38,3 +47,10 @@
     <button type="submit" class="btn btn-primary mt-2">Submit</button>
     <a asp-action="GetAllPayments" asp-controller="PaymentHistory" class="btn btn-warning mt-2">Cancel</a>
 </form>
+
+        @section Scripts{
+    
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        }
