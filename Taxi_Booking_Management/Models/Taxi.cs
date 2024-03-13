@@ -26,5 +26,10 @@ namespace Taxi_Booking_Management.Models
 
         [ForeignKey("TaxiOwnerId")]
         public TaxiOwner TaxiOwner { get; set; }
+
+        [NotMapped]
+        public IFormFile? Filename { get; set; }
+        
+        public string? FilePath { get; set; }
     }
 }

@@ -21,5 +21,10 @@ namespace Taxi_Booking_Management.Models
         [Column(TypeName = "varchar(225)")]
         public string? Address { get; set; }
 
+        [NotMapped]
+        public IFormFile? Filename { get; set; }
+
+        public string? FilePath { get; set; }
+
     }
 }

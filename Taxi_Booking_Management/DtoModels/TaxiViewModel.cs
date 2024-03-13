@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using Taxi_Booking_Management.Validations;
 
 namespace Taxi_Booking_Management.DtoModels
 {
@@ -34,6 +36,14 @@ namespace Taxi_Booking_Management.DtoModels
 
         [AllowNull]
         public IEnumerable<SelectListItem?> TaxiOwners { get; set; }
+
+        [NotMapped]
+        [DataType(DataType.Upload)]
+        [AllowedExtensions(new string[] { ".pdf", ".jpg", ".jpeg", ".png" }, ErrorMessage = "Only PDF, JPG, JPEG, and PNG files are allowed.")]
+        [MaxFileSize(1 * 1024 * 1024, ErrorMessage = "File size must be less than 1MB.")]
+        public IFormFile? Filename { get; set; }
+
+        public string? FilePath { get; set; }
 
     }
 }

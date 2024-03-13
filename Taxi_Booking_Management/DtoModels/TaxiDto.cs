@@ -24,5 +24,7 @@ namespace Taxi_Booking_Management.DtoModels
 
         public string TaxiOwnerMobile { get; set; }
 
+        public string? FilePath { get; set; }
+
     }
 }

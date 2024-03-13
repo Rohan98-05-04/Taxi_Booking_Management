@@ -5,7 +5,7 @@
 }
 <h2>Update Your Taxi Details</h2>
 
-<form asp-action="EditTaxi" asp-controller="Taxi" method="post" class="mb-4">
+<form asp-action="EditTaxi" asp-controller="Taxi" method="post" class="mb-4" enctype="multipart/form-data">
     <input asp-for="TaxiViewId" class="form-control mt-2" type="hidden" />
     <div class="form-group w-50 mt-5">
         <label asp-for="TaxiName"></label>
@@ -51,6 +51,20 @@
         <span asp-validation-for="TaxiStatus" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label asp-for="Filename" class="control-label mt-3">upload taxi document</label>
+        <span class="text-danger">(only upload .pdf .jpg .jpeg .png with max size 1MB)</span>
+        <input asp-for="Filename" value="@Model.Filename" name="Filename" type="file" class="form-control w-25 mt-1" id="fileInput" />
+        <span asp-validation-for="Filename" class="text-danger"></span>
+
+        @if (!string.IsNullOrEmpty(Model.FilePath))
+        {
+            <p class="text-danger"><a href="@Model.FilePath" target="_blank" class="text-decoration-underline">View Taxi document</a></p>
+        }
+       
+    </div>
+    <input value="@Model.FilePath" asp-for="FilePath" hidden />
+
     <button type="submit" class="btn btn-primary mt-2">Submit</button>
     <button asp-action="Index" asp-controller="Taxi" class="btn btn-warning mt-2">Cancel</button>
 </form>
@@ -59,4 +73,27 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.getElementById("fileInput").addEventListener("change", function () {
+            var fileInput = this;
+            var file = fileInput.files[0];
+            var allowedExtensions = /(\.pdf|\.jpg|\.jpeg|\.png)$/i;
+            var maxSizeMB = 1; // 1MB
+
+            if (!allowedExtensions.exec(file.name)) {
+                alert("Only PDF, JPG, JPEG, and PNG files are allowed.");
+                fileInput.value = '';
+                return false;
+            }
+
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                alert("File size must be less than " + maxSizeMB + "MB.");
+                fileInput.value = '';
+                return false;
+            }
+
+            return true;
+        });
+    </script>
 }
