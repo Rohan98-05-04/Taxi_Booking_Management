@@ -1,10 +1,13 @@
 ﻿
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
+using Taxi_Booking_Management.Models;
 using X.PagedList;
 
 namespace Taxi_Booking_Management.Services.TaxiOwner
@@ -14,12 +17,14 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
         private readonly ApplicationDbContext _context;
         private readonly ILoggerManager _loggerManager;
         private readonly IMemoryCache _memoryCache;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public TaxiOwnerService(IMemoryCache memoryCache ,ApplicationDbContext dbContext , ILoggerManager loggerManager)
+        public TaxiOwnerService(IMemoryCache memoryCache ,ApplicationDbContext dbContext , ILoggerManager loggerManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
             _memoryCache = memoryCache;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<string> DeleteTaxiOwnerAsync(int ownerId)
@@ -91,13 +96,19 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             string message = MessagesAlerts.FailSave;
             try
             {
-              var exOwner = await  _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerMobile == taxiOwner.TaxiOwnerMobile);
+                var filePath = "/";
+                if (taxiOwner.Filename != null && taxiOwner.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxiOwner.Filename, _webHostEnvironment.WebRootPath);
+                }
+                var exOwner = await  _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerMobile == taxiOwner.TaxiOwnerMobile);
                 if (exOwner != null)
                 {
                     _loggerManager.LogInfo("taxiowner mobile is already exist");
                     return message;
                 }
-               await _context.owner.AddAsync(taxiOwner);
+                taxiOwner.FilePath = filePath;
+                await _context.owner.AddAsync(taxiOwner);
                await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
                 _loggerManager.LogInfo($"taxiOwner {MessagesAlerts.SuccessfullSave} with name {taxiOwner.TaxiOwnerName}");
@@ -111,17 +122,34 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
 
         public async Task<string?> UpdateTaxiOwner(Models.TaxiOwner taxiOwner)
         {
-            string message = MessagesAlerts.FailSave;
+            string message = MessagesAlerts.FailUpdate;
             try
             {
+                var filePath = "/";
+                if (taxiOwner.Filename != null && taxiOwner.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxiOwner.Filename, _webHostEnvironment.WebRootPath);
+                }
                 var exOwner = await _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerMobile == taxiOwner.TaxiOwnerMobile);
                 if (exOwner == null)
                 {
                     _loggerManager.LogInfo($"taxiowner not found with {taxiOwner.TaxiOwnerId}");
                     return message;
                 }
-                _context.Entry(exOwner).State = EntityState.Detached;
-                _context.owner.Update(taxiOwner);
+                exOwner.TaxiOwnerMobile = taxiOwner.TaxiOwnerMobile;
+                exOwner.TaxiOwnerName = taxiOwner.TaxiOwnerName;
+                exOwner.TaxiOwnerEmail = taxiOwner.TaxiOwnerEmail;
+                exOwner.TaxiOwnerAddress = taxiOwner.TaxiOwnerAddress;
+                if (filePath != "/")
+                {
+                    exOwner.FilePath = filePath;
+                }
+                else
+                {
+                    exOwner.FilePath = taxiOwner.FilePath;
+                }
+              
+                _context.owner.Update(exOwner);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
                 _loggerManager.LogInfo($"taxiOwner {MessagesAlerts.SuccessfullUpdate} with name {taxiOwner.TaxiOwnerName}");

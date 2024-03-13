@@ -6,7 +6,7 @@
 
 <h2>Update Taxi Owner Details</h2>
 
-<form asp-action="EditOwner" asp-controller="TaxiOwner" method="post" class="mb-4" id="AddproductForm">
+<form asp-action="EditOwner" asp-controller="TaxiOwner" method="post" class="mb-4" id="AddproductForm" enctype="multipart/form-data">
     <input asp-for="TaxiOwnerId" class="form-control" required type="hidden"/>
     <div class="form-group w-50 mt-5">
         <label asp-for="TaxiOwnerName" class="required">Full Name</label>
@@ -31,6 +31,19 @@
         <textarea asp-for="TaxiOwnerAddress" class="form-control"></textarea>
         <span asp-validation-for="TaxiOwnerAddress" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="Filename" class="control-label mt-3">upload taxi document</label>
+        <span class="text-danger">(only upload .pdf .jpg .jpeg .png with max size 1MB)</span>
+        <input asp-for="Filename"  name="Filename" type="file" class="form-control w-25 mt-1" id="fileInput" />
+        <span asp-validation-for="Filename" class="text-danger"></span>
+
+        @if (!string.IsNullOrEmpty(Model.FilePath))
+        {
+            <p class="text-danger"><a href="@Model.FilePath" target="_blank" class="text-decoration-underline">View Taxi document</a></p>
+        }
+
+    </div>
+    <input value="@Model.FilePath" asp-for="FilePath" hidden />
 
     <button type="submit" class="btn btn-primary mt-2">Update</button>
     <a asp-action="Index" asp-controller="TaxiOwner" class="btn btn-warning mt-2">Cancel</a>

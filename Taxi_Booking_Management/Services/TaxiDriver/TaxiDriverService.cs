@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using X.PagedList;
@@ -11,10 +13,12 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
     {
         private readonly ApplicationDbContext _context;
         private readonly ILoggerManager _loggerManager;
-        public TaxiDriverService(ApplicationDbContext dbContext, ILoggerManager loggerManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public TaxiDriverService(ApplicationDbContext dbContext, ILoggerManager loggerManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<string> DeleteTaxiDriverAsync(int driverId)
@@ -88,12 +92,18 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
             string message = MessagesAlerts.FailSave;
             try
             {
+                var filePath = "/";
+                if (taxiDriver.Filename != null && taxiDriver.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxiDriver.Filename, _webHostEnvironment.WebRootPath);
+                }
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverMobile == taxiDriver.DriverMobile);
                 if (exDriver != null)
                 {
                     _loggerManager.LogInfo("taxi driver mobile is already exist");
                     return message;
                 }
+                taxiDriver.FilePath = filePath;
                 await _context.drivers.AddAsync(taxiDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
@@ -112,14 +122,30 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
             string message = MessagesAlerts.FailUpdate;
             try
             {
+                var filePath = "/";
+                if (taxiDriver.Filename != null && taxiDriver.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxiDriver.Filename, _webHostEnvironment.WebRootPath);
+                }
                 var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == taxiDriver.DriverId);
                 if (exDriver == null)
                 {
                     _loggerManager.LogInfo("taxi driver not found");
                     return message;
                 }
-                _context.Entry(exDriver).State = EntityState.Detached;
-                _context.drivers.Update(taxiDriver);
+                exDriver.DriverMobile = taxiDriver.DriverMobile;
+                exDriver.DriverName = taxiDriver.DriverName;
+                exDriver.Address = taxiDriver.Address;
+            
+                if (filePath != "/")
+                {
+                    exDriver.FilePath = filePath;
+                }
+                else
+                {
+                    exDriver.FilePath = taxiDriver.FilePath;
+                }
+                _context.drivers.Update(exDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullUpdate;
                 _loggerManager.LogInfo($"taxi driver {MessagesAlerts.SuccessfullUpdate} {taxiDriver.DriverName}");
