@@ -21,8 +21,8 @@ namespace Taxi_Booking_Management.Services.Booking
         private readonly IMapper _mapper;
         private readonly IMemoryCache _memoryCache;
 
-        public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager ,
-              IMapper mapper,IMemoryCache memoryCache)
+        public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager,
+              IMapper mapper, IMemoryCache memoryCache)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
@@ -41,7 +41,7 @@ namespace Taxi_Booking_Management.Services.Booking
 
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
                 {
-                    data = data.Where(u => u.BookingCode.Contains(search)||u.CustomerName.Contains(search));
+                    data = data.Where(u => u.BookingCode.Contains(search) || u.CustomerName.Contains(search));
 
                 }
                 Bookings = await data.ToPagedListAsync(page, pageSize);
@@ -118,8 +118,8 @@ namespace Taxi_Booking_Management.Services.Booking
                     return null;
                 }
 
-            } 
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _loggerManager.LogError($"method name: GetBookingDataForUpdate");
                 throw;
@@ -132,13 +132,13 @@ namespace Taxi_Booking_Management.Services.Booking
             {
                 bool isAvailable = true;
                 var exkBookingdata = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == bookingmodel.BookingId);
-                if (exkBookingdata!=null ) 
+                if (exkBookingdata != null)
                 {
-                    if(exkBookingdata.FromDate!=bookingmodel.fromDate || exkBookingdata.ToDate != bookingmodel.toDate) 
+                    if (exkBookingdata.FromDate != bookingmodel.fromDate || exkBookingdata.ToDate != bookingmodel.toDate)
                     {
-                      isAvailable = await IsTaxiAvailableAsync(bookingmodel.BookingId, bookingmodel.fromDate, bookingmodel.toDate); 
+                        isAvailable = await IsTaxiAvailableAsync(bookingmodel.BookingId, bookingmodel.fromDate, bookingmodel.toDate);
                     }
-                  
+
                     if (isAvailable)
                     {
                         exkBookingdata.FromDate = bookingmodel.fromDate;
@@ -154,7 +154,7 @@ namespace Taxi_Booking_Management.Services.Booking
                         exkBookingdata.UpdatedDateTime = DateTime.Now;
                         decimal totalAmount = bookingmodel.GrossAmount + (bookingmodel.GrossAmount * bookingmodel.TotalGST) / 100;
                         exkBookingdata.NetAmount = totalAmount;
-                      
+
                         _context.Bookings.Update(exkBookingdata);
                         await _context.SaveChangesAsync();
                         _loggerManager.LogInfo($"Booking is successfully updated with given id{bookingmodel.BookingId}");
@@ -165,7 +165,7 @@ namespace Taxi_Booking_Management.Services.Booking
                         _loggerManager.LogInfo($"date is not available for booking for cus :{bookingmodel.CustomerName}");
                         return $"{MessagesAlerts.TaxiIsNotAvailable}";
                     }
-                    
+
                 }
                 _loggerManager.LogInfo($"taxi not found {bookingmodel.BookingId}");
                 return $"Booking Details not found  {bookingmodel.BookingCode}, {MessagesAlerts.FailUpdate}";
@@ -222,11 +222,11 @@ namespace Taxi_Booking_Management.Services.Booking
                     await _context.SaveChangesAsync();
                     _loggerManager.LogInfo($"Booking is successfully registed with given id{bookingDto.BookingCode}");
                     return $"you booking details {MessagesAlerts.SuccessfullSave} ";
-                } 
+                }
                 _loggerManager.LogInfo($"date is not available for booking for cus :{bookingDto.CustomerName}");
                 return $"{MessagesAlerts.FailSave}";
             }
-            catch  (Exception ex)
+            catch (Exception ex)
             {
                 _loggerManager.LogError($"{ex.Message} ,method name: RegisterBookingAsync");
                 throw;
@@ -242,7 +242,7 @@ namespace Taxi_Booking_Management.Services.Booking
         }
 
 
-       
+
 
         public async Task<int> GetTaxiIdByRegNo(string regNo)
         {
@@ -308,8 +308,8 @@ namespace Taxi_Booking_Management.Services.Booking
         public List<SelectListItem> GetTaxiNames()
         {
             const string cacheKey = "TaxiNamesCacheKey";
-            if(!_memoryCache.TryGetValue(cacheKey,out List<SelectListItem> taxiNames))
-                {
+            if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiNames))
+            {
                 taxiNames = _context.taxis
                .Select(x => new SelectListItem { Value = x.TaxiId.ToString(), Text = $"{x.TaxiName} ({x.RegistrationNumber})" })
                .ToList();
@@ -318,10 +318,10 @@ namespace Taxi_Booking_Management.Services.Booking
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 };
-                _memoryCache.Set(cacheKey,taxiNames,cacheEntryOptions);
+                _memoryCache.Set(cacheKey, taxiNames, cacheEntryOptions);
             }
             return taxiNames;
-           
+
         }
 
         public List<SelectListItem> GetDriverNames()
@@ -339,7 +339,11 @@ namespace Taxi_Booking_Management.Services.Booking
                 _memoryCache.Set(cacheKey, taxiDrivers, cacheEntryOptions);
             }
             return taxiDrivers;
-        } 
+
+        }
+
+       
+
 
         public async Task<Models.Booking> GetBookingByBookingCode(string bookingCode)
         {
@@ -362,5 +366,6 @@ namespace Taxi_Booking_Management.Services.Booking
             }
 
         }
+
     }
 }

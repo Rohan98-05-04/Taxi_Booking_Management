@@ -1,10 +1,12 @@
 ﻿
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using X.PagedList;
@@ -16,12 +18,14 @@ namespace Taxi_Booking_Management.Services.Taxi
         private readonly ApplicationDbContext _context;
         private readonly ILoggerManager _loggerManager;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public TaxiService(ApplicationDbContext dbContext, ILoggerManager loggerManager , IMapper mapper)
+        public TaxiService(IWebHostEnvironment webHostEnvironment ,ApplicationDbContext dbContext, ILoggerManager loggerManager , IMapper mapper)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<int?> DeleteTaxiAsync(int taxiId)
@@ -117,6 +121,11 @@ namespace Taxi_Booking_Management.Services.Taxi
         {
             try
             {
+                var filePath = "/";
+                if (taxi.Filename != null && taxi.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxi.Filename, _webHostEnvironment.WebRootPath);
+                }
                 var exTaxi = await _context.taxis.FirstOrDefaultAsync(u =>u.RegistrationNumber == taxi.RegistrationNumber);
                 if (exTaxi != null)
                 {
@@ -133,6 +142,7 @@ namespace Taxi_Booking_Management.Services.Taxi
                     _loggerManager.LogInfo($"Invalid task type: {taxi.TaxiType}");
                     return $"Invalid taxi type {taxi.TaxiType}";
                 }
+                taxi.FilePath= filePath;
                 await _context.taxis.AddAsync(taxi);
                 await _context.SaveChangesAsync();
                 _loggerManager.LogInfo($"taxi is register with taxi name: {taxi.TaxiName}");
@@ -149,6 +159,11 @@ namespace Taxi_Booking_Management.Services.Taxi
         {
             try
             {
+                var filePath = "/";
+                if (taxiModel.Filename != null && taxiModel.Filename.Length > 0)
+                {
+                    filePath = await FileHelper.SaveFileAsync(taxiModel.Filename, _webHostEnvironment.WebRootPath);
+                }
                 var exTaxi =await _context.taxis.FirstOrDefaultAsync(u => u.TaxiId == taxiModel.TaxiViewId);
                 if (exTaxi == null)
                 {
@@ -160,6 +175,14 @@ namespace Taxi_Booking_Management.Services.Taxi
                 exTaxi.TaxiStatus = taxiModel.TaxiStatus;
                 exTaxi.TaxiOwnerId = taxiModel.TaxiOwnerId;
                 exTaxi.TaxiType = taxiModel.TaxiType;
+                if(filePath != "/")
+                {
+                    exTaxi.FilePath= filePath;
+                }
+                else
+                {
+                    exTaxi.FilePath = taxiModel.FilePath;
+                }
                 _context.taxis.Update(exTaxi);
                await _context.SaveChangesAsync();
                 return $"{MessagesAlerts.SuccessfullUpdate}";

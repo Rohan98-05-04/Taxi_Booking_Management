@@ -74,6 +74,10 @@ Model.TaxiStatus == 3 ? "btn-danger" : "") dropdown-toggle" type="button" id="dr
             {
                 <p><strong>Taxi Owner Name : </strong> Not Available</p>
             }
+            @if (!string.IsNullOrEmpty(Model.FilePath))
+            {
+                <p class="text-danger"><a href="@Model.FilePath" target="_blank">View Taxi document</a></p>
+            }
         </div>
 
     </div>

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.LoggerService;
@@ -218,8 +219,8 @@ namespace Taxi_Booking_Management.Controllers
                             TaxiStatus = taxiDetails.TaxiStatus,
                             TaxiTypes = GetTaxiTypes(),
                             TaxiStatuses = GetTaxiStatus(),
-                            TaxiOwners = _OwnerService.GetTaxiOwners()
-
+                            TaxiOwners = _OwnerService.GetTaxiOwners(),
+                            FilePath = taxiDetails.FilePath,
                         };
                         return View(taxiViewModeldata);
                     }
