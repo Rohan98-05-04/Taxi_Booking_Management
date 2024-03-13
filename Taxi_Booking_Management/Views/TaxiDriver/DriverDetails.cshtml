@@ -33,7 +33,10 @@
             {
                 <p><strong>Address : </strong> Not Available</p>
             }
-
+            @if (!string.IsNullOrEmpty(Model.FilePath))
+            {
+                <p class="text-danger"><a href="@Model.FilePath" target="_blank">View Owner document</a></p>
+            }
 
         </div>
 
