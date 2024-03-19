@@ -1,6 +1,4 @@
 ﻿
-
-
 document.getElementById("fileInput").addEventListener("change", function () {
     var fileInput = this;
     var file = fileInput.files[0];

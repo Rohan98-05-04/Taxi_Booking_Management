@@ -3,6 +3,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
@@ -30,7 +31,7 @@ namespace Taxi_Booking_Management.Services.Booking
             _memoryCache = memoryCache;
         }
 
-        public async Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search)
+        public async Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search, string? startDate, string? endDate)
         {
             IPagedList<Models.Booking> Bookings = null;
             try
@@ -38,6 +39,19 @@ namespace Taxi_Booking_Management.Services.Booking
                 IQueryable<Models.Booking> data = _context.Bookings
                 .Include(t => t.taxi)
                 .AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDateValue))
+                {
+                    data = data
+                        .Where(ph => ph.FromDate >= startDateValue);
+                }
+
+                if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDateValue))
+                {
+                    endDateValue = endDateValue.AddDays(1).Date;
+                    data = data
+                        .Where(ph => ph.ToDate < endDateValue);
+                }
 
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
                 {
@@ -231,6 +245,24 @@ namespace Taxi_Booking_Management.Services.Booking
                 _loggerManager.LogError($"{ex.Message} ,method name: RegisterBookingAsync");
                 throw;
             }
+        }
+
+        public async Task<List<Models.Taxi>> GetAvailableTaxisAsync(DateTime fromDate, DateTime toDate)
+        {
+            var overlappingBookings = await _context.Bookings
+             .Where(b =>
+                 (b.FromDate >= fromDate && b.FromDate <= toDate) ||
+                 (b.ToDate >= fromDate && b.ToDate <= toDate) ||
+                 (b.FromDate <= fromDate && b.ToDate >= toDate))
+             .Select(b => b.TaxiId)
+             .Distinct()
+             .ToListAsync();
+
+            var availableTaxis = await _context.taxis
+                .Where(t => !overlappingBookings.Contains(t.TaxiId) && t.TaxiStatus==1)
+                .ToListAsync();
+
+            return availableTaxis;
         }
 
         public async Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate)
