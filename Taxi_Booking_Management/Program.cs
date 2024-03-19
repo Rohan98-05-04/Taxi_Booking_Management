@@ -16,6 +16,7 @@ using Taxi_Booking_Management.LoggerService;
 using AspNetCoreHero.ToastNotification;
 using Taxi_Booking_Management.Services.User;
 using Taxi_Booking_Management.Services.DashBoard;
+using Taxi_Booking_Management.Services.Customer;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddTransient<IPaymentHistoryService , PaymentHistoryService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddTransient<IDashBoardService , DashBoardService>();
+builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddMemoryCache();
