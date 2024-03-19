@@ -52,11 +52,19 @@
                 <h5><i class="fas fa-file-invoice me-2"></i>Payment History</h5>
                 </a>
             </li>
+        <li class="nav-item mb-2 cursor @Html.IsActive("Customer", "CustomerIndex") ">
+            <a class="nav-link" asp-action="CustomerIndex" asp-controller="Customer">
+                <h5>
+                    <i class="fas fa-users me-2"></i>Customer Details
+                </h5>
+            </a>
+        </li>
 
         <li class="nav-item mb-2 cursor @Html.IsActive("User", "Edit") @Html.IsActive("User", "GetUserDetails")">
             <a class="nav-link" asp-action="GetUserDetails" asp-controller="User" >
                     <h5><i class="fas fa-user-edit me-2"></i>Edit Profile </h5>
                 </a>
             </li>
+
     </ul>
 </div>
