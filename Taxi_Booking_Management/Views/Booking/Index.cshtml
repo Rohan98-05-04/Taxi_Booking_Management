@@ -32,9 +32,14 @@
                 color: red;
             }
 </style>
-
-<h2 class="d-inline">All Booking Details </h2>
-
+<div class="d-flex mt-3 justify-content-between align-items-center">
+    <h2 class="d-inline">All Booking Details</h2>
+    <div>
+        <a href="@Url.Action("RegisterBooking", "Booking")" class="btn btn-primary ms-2">Add New</a>
+        <a href="@Url.Action("GetAvailableTaxi", "Booking")" class="btn btn-primary">Check Available Taxi</a>
+        <a href="@Url.Action("CheckBookingAvailbility", "Booking")" class="btn btn-primary">Check Availability</a>
+    </div>
+</div>
 
 <div class="d-flex mt-3 justify-content-between">
     @using (Html.BeginForm("Index", "Booking", FormMethod.Get, new { @class = "d-flex", id = "filterForm" }))
@@ -52,14 +57,24 @@
             </select>
         </div>
 
+        <div class="form-group me-2">
+            <input type="date" name="startDate" placeholder="From date" class="form-control" value="@ViewBag.startDate">
+        </div>
+        <div class="form-group me-2">
+            <input type="date" name="endDate" placeholder="To date" class="form-control" value="@ViewBag.endDate">
+        </div>
+
         <button type="button" class="btn btn-outline-success" onclick="submitForm()">
             <i class="fas fa-search"></i>
         </button>
+
+        <p type="button" class="mt-3 ms-2" onclick="clearFilters()">
+            <i class="fas fa-times"></i>
+        </p>
     }
     
 
-    <a href="@Url.Action("RegisterBooking", "Booking")" class="btn btn-primary ms-2">Add New</a>
-    <a href="@Url.Action("CheckBookingAvailbility", "Booking")" class="btn btn-primary ">Check Avaibility</a>
+   
 </div>
 
 <table class="table table-striped  mt-3">
@@ -122,7 +137,9 @@
                 {
                     page,
                     Search = ViewBag.Search,
-                    statusFilter = ViewBag.StatusFilter
+                    statusFilter = ViewBag.StatusFilter,
+                    StartDate = ViewBag.startDate,
+                    EndDate = ViewBag.endDate,
                 }),
                 new PagedListRenderOptionsBase
     {
@@ -153,6 +170,14 @@
         function submitForm() {
             document.forms["filterForm"].submit();
         }
+
+        function clearFilters() {
+
+            var tempArray = location.href.split("?");
+            var baseURL = tempArray[0];
+            window.location.replace(baseURL);
+        }
+
 
         function handleKeyPress(event) {
             if (event.keyCode === 13) {

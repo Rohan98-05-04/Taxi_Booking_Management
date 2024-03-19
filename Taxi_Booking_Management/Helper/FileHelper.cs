@@ -11,6 +11,10 @@
             string uploadsFolder = Path.Combine(webRootPath, "uploads");
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
             using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream);

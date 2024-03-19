@@ -1,0 +1,75 @@
+﻿@model Taxi_Booking_Management.DtoModels.GetAvailableTaxiDto;
+
+@{
+    ViewData["Title"] = "Get available taxi";
+    var minDate = DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<div class="row">
+    <div class="col-md-6">
+        <h2>Check available taxi</h2>
+        <form asp-action="GetAvailableTaxi" asp-controller="Booking" method="post" class="mb-4">
+
+            <div class="form-group w-50 mt-3">
+                <label asp-for="FromDate" class="required"></label>
+                <input asp-for="FromDate" type="date" min="@minDate" class="form-control mt-2" id="fromDate" />
+                <span asp-validation-for="FromDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group w-50 mt-3">
+                <label asp-for="ToDate" class="required"></label>
+                <input asp-for="ToDate" type="date" class="form-control mt-2" id="toDate" />
+                <span asp-validation-for="ToDate" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">Check</button>
+            <button asp-action="Index" asp-controller="Taxi" class="btn btn-warning mt-2">Cancel</button>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        @if (ViewBag.TaxiDetails != null && ViewBag.TaxiDetails.Count > 0)
+        {
+            <div style="height: 400px; overflow-y: scroll;">
+                <h2>Taxi Details</h2>
+                @foreach (var taxi in ViewBag.TaxiDetails)
+                {
+                    <div class="border p-2 mb-2 border border-warning">
+                        <p>
+                            Taxi Name: @taxi.TaxiName<br />
+                            Registration no: @taxi.RegistrationNumber<br />
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p></p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#taxiIdSelect').select2({
+                placeholder: "-- Select Taxi --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $("#fromDate").change(function () {
+
+                var selectedDate = $(this).val();
+
+                $("#toDate").attr("min", selectedDate);
+            });
+        });
+    </script>
+}

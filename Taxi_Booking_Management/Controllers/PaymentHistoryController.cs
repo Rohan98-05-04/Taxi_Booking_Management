@@ -17,14 +17,16 @@ namespace Taxi_Booking_Management.Controllers
         private readonly IPaymentHistoryService _paymentHistoryService;
         private readonly ILoggerManager _loggerManager;
         private readonly IBookingService _bookingService;
+        private readonly IConfiguration _configuration;
 
-        public PaymentHistoryController(IPaymentHistoryService paymentHistoryService,
+        public PaymentHistoryController(IConfiguration configuration ,IPaymentHistoryService paymentHistoryService,
               ILoggerManager loggerManager
             ,IBookingService bookingService)
         {
             _paymentHistoryService = paymentHistoryService;
             _loggerManager = loggerManager;
             _bookingService = bookingService;
+            _configuration = configuration;
         }
         public IActionResult Index()
         {
@@ -84,7 +86,7 @@ namespace Taxi_Booking_Management.Controllers
                 ViewBag.startDate = startDate;
                 ViewBag.endDate = endDate;
                 var pageNumber = page ?? 1;
-                var pageSize = 10;
+                var pageSize = _configuration.GetValue<int>("AppSettings:PageSize"); 
 
                 var pagedPayments = await _paymentHistoryService.GetAllPayments(pageNumber, pageSize, startDate, endDate);
 

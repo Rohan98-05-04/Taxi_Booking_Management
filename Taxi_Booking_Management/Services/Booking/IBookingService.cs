@@ -8,8 +8,9 @@ namespace Taxi_Booking_Management.Services.Booking
     public interface IBookingService
     {
         public Task<string> RegisterBookingAsync(RegisterBookingDto bookingDto);
-        public Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search);
+        public Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search, string? startDate, string? endDate);
         public Task<Models.Booking> GetTaxiBookingAsync(int bookingId);
+        public Task<List<Models.Taxi>> GetAvailableTaxisAsync(DateTime fromDate, DateTime toDate);
         public Task<bool> IsTaxiAvailableAsync(int taxiId, DateTime fromDate, DateTime toDate);
         public Task<int> GetTaxiIdByRegNo(string regNo);
         public Task<IList<Models.Booking>> GetTaxiAvailableDates(int taxiId);

@@ -20,24 +20,28 @@ namespace Taxi_Booking_Management.Controllers
         private readonly IBookingService _BookingService;
     
         private readonly IPaymentHistoryService _paymentHistoryService;
+        private readonly IConfiguration _configuration;
         const string bookingcontroller = "Booking";
         const string indexAction = "Index";
-        public BookingController(IBookingService context
+
+        public BookingController(IConfiguration configuration,IBookingService context
             , IPaymentHistoryService paymentHistoryService)
         {
             _BookingService=context;
-          
             _paymentHistoryService = paymentHistoryService;
+            _configuration = configuration;
         }
 
-        public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter = 0)
+        public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter = 0, string? startDate = "", string? endDate = "")
         {
             ViewBag.Search = search;
+            ViewBag.startDate = startDate;
+            ViewBag.endDate = endDate;
             var pageNumber = page ?? 1;
-            int pageSize = 10;
+            int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
 
             IPagedList<Booking> allBookings;
-            allBookings = await _BookingService.GetAllBookingDetailsAsync(pageNumber, pageSize, search);
+            allBookings = await _BookingService.GetAllBookingDetailsAsync(pageNumber, pageSize, search, startDate, endDate);
             if (statusFilter > 0)
             {
                 if (statusFilter.HasValue)
@@ -93,6 +97,33 @@ namespace Taxi_Booking_Management.Controllers
             }
             return View(dto);
         }
+
+        [HttpGet]
+        public IActionResult GetAvailableTaxi()
+        {
+            GetAvailableTaxiDto aviTaxi = new GetAvailableTaxiDto();
+            return View(aviTaxi);
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetAvailableTaxi(GetAvailableTaxiDto dto, [FromServices] INotyfService notyf)
+        {
+            if (ModelState.IsValid)
+            {
+                var data = await _BookingService.GetAvailableTaxisAsync(dto.FromDate, dto.ToDate);
+                if (data.Count>0)
+                {
+                    notyf.Success(MessagesAlerts.TaxiIsAvailable);
+                }
+                else
+                {
+                    notyf.Information(MessagesAlerts.TaxiIsNotAvailable);
+                }
+                ViewBag.TaxiDetails = data;
+            }
+           
+            return View();
+        }
+        
 
 
         [HttpGet]
