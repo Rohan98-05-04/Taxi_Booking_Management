@@ -68,12 +68,7 @@ namespace Taxi_Booking_Management.Controllers
                     var propertiesToInclude = new string[] { "BookingCode", "CustomerName", "CustomerMobile", "GrossAmount", "TotalGST" , "NetAmount"};
                     var taxibookingList = allBookings.ToList(); // Convert IPagedList to List
                     var csvData = CsvExportService.GenerateCsvData(taxibookingList, propertiesToInclude);
-
-                                        var taxibookingList = allBookings.ToList(); // Convert IPagedList to List
-                    var csvData = CsvExportService.GenerateCsvData(taxibookingList);
-
-
-                                        // Set the appropriate response headers for CSV download
+                    // Set the appropriate response headers for CSV download
                     return File(csvData, "text/csv", "taxiBookings.csv");
                 }
                 else if (exportType == "pdf")
