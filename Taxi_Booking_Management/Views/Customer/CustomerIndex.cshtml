@@ -2,15 +2,13 @@
 @using X.PagedList.Mvc.Core;
 @using X.PagedList.Web.Common;
 
-@model IPagedList<Booking>
+@model IPagedList<Taxi_Booking_Management.DtoModels.CustomerViewModel>
 
 @{
     ViewData["Title"] = "All Customer Details";
 }
 
-
 <h2 class="d-inline">All Customer Details </h2>
-
 
 <div class="d-flex mt-3 justify-content-between">
     @using (Html.BeginForm("Index", "TaxiDriver", FormMethod.Get, new { @class = "d-flex" }))
@@ -22,21 +20,18 @@
             <i class="fas fa-search"></i>
         </button>
     }
-
-
 </div>
+
 <div class="col-md-3 mt-3 ">
-    <a href="@Url.Action("CustomerIndex", new { export = "csv",page = Context.Request.Query["page"] })" class="btn btn-success">Download CSV</a>
-    <a href="@Url.Action("CustomerIndex", new { export = "pdf",page = Context.Request.Query["page"] })" class="btn btn-danger">Download PDF</a>
+    <a href="@Url.Action("CustomerIndex", new { export = "csv", page = Context.Request.Query["page"] })" class="btn btn-success">Download CSV</a>
+    <a href="@Url.Action("CustomerIndex", new { export = "pdf", page = Context.Request.Query["page"] })" class="btn btn-danger">Download PDF</a>
 </div>
+
 <table class="table table-striped  mt-3">
     <thead>
         <tr class="table-primary">
             <th class="text-center">Customer Name</th>
             <th class="text-center">Mobile Number</th>
-           
-
-
         </tr>
     </thead>
     <tbody>
@@ -45,24 +40,22 @@
             <tr>
                 <td class="text-center">@details.CustomerName</td>
                 <td class="text-center">@details.CustomerMobile</td>
-                
-
             </tr>
-        } 
+        }
         @if (Model.TotalItemCount <= 0)
         {
             <tr>
-                <td colspan="6" class="text-center">No Result Found</td>
+                <td colspan="2" class="text-center">No Result Found</td>
             </tr>
         }
     </tbody>
-
 </table>
+
 @if (Model != null && Model.Count() > 0)
 {
     <br />
     <div class="pull-right" style="float:right;margin-right:10px;">
-        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index",
+        @Html.PagedListPager(Model, page => Url.Action("Index",
                 new
                 {
                     page,
@@ -73,10 +66,10 @@
         LiElementClasses = new string[] { "page-item" },
         PageClasses = new string[] { "page-link" },
         Display = PagedListDisplayMode.Always
-
     })
     </div>
 }
+
 
 @*  @functions {
     // Helper function to truncate the description to a specified number of words

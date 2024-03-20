@@ -23,6 +23,8 @@ namespace Taxi_Booking_Management.Services.Booking
         public List<SelectListItem> GetDriverNames();
 
         public Task<Models.Booking> GetBookingByBookingCode(string bookingCode);
+        public string GenerateHtmlContentForPdf(IPagedList<Models.Booking> bookingData);
+        public string CreatePdfForOneBooking(Models.Booking bookingData, IList<Models.PaymentHistory> transactionData, decimal paidAmount, decimal dueAmount);
 
     }
 }

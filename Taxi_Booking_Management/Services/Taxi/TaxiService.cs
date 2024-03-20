@@ -234,49 +234,31 @@ namespace Taxi_Booking_Management.Services.Taxi
             // Create an HTML table with student data
             var htmlBuilder = new StringBuilder();
             htmlBuilder.Append("<html><head>");
+            htmlBuilder.Append("<style>");
+            htmlBuilder.Append("table { border-collapse: collapse; width: 100%; border: 1px solid #000; }");
+            htmlBuilder.Append("th, td { border: 1px solid #000; padding: 8px; }");
+            htmlBuilder.Append("</style>");
             htmlBuilder.Append("</head><body>");
+            htmlBuilder.Append("<h2>All Taxi Details</h2>");
+            htmlBuilder.Append("<table>");
+            htmlBuilder.Append("<thead><tr><th>Taxi Name</th><th>Registration Number</th><th>Owner Name</th><th>Mobile Number</th><th>Taxi Type</th></tr></thead>");
+            htmlBuilder.Append("<tbody>");
 
             foreach (var items in taxiData)
             {
-                htmlBuilder.Append("<hr>");
-                htmlBuilder.Append("<div class=\"row mt-3\">");
-                htmlBuilder.Append("<div class=\"col-md-6\">");
-               
-                htmlBuilder.Append($"<p><strong> Taxi Name: </strong> {items.TaxiName} </p>");
-                htmlBuilder.Append($"<p><strong> Registration Number: </strong> {items.RegistrationNumber} </p>");
-       
-                htmlBuilder.Append($"<p><strong> Taxi Type: </strong><button>{@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiType), items.TaxiType)}</button></p>");
-                if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerName))
-                {
-                    htmlBuilder.Append($" <p class=\"text-danger\"><strong> Taxi Owner Name : </strong>{items.TaxiOwner.TaxiOwnerName} </p>");
-                   
-                }
-                else
-                {
-                    htmlBuilder.Append($" <p class= \"text-danger\" ><strong> Taxi Owner Name : </strong>Not Available </p>");
-                    
-                }
-                if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerMobile))
-                {
-                    htmlBuilder.Append($"<p><strong> Owner Mobile No : </strong>{items.TaxiOwner.TaxiOwnerMobile} </p>");
-                }
-                else
-                {
-                    htmlBuilder.Append($" <p><strong> Owner Mobile No : </strong>Not Available </p>");
-                }
-                if (!string.IsNullOrEmpty(items.FilePath))
-                {
-                    htmlBuilder.Append($" <p><a href = \"{items.FilePath}\" target = \"_blank\"> View Taxi document</a></p>");
-                }
-
-                htmlBuilder.Append("</div>");
-                htmlBuilder.Append("</div>");
-
+                htmlBuilder.Append("<tr>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiName}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.RegistrationNumber}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiOwner.TaxiOwnerName}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiOwner.TaxiOwnerMobile}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiType), items.TaxiType)}</td>");
+                htmlBuilder.Append("</tr>");
             }
-      
+
             htmlBuilder.Append("</tbody></table>");
 
             return htmlBuilder.ToString();
+
         }
 
 
@@ -284,3 +266,48 @@ namespace Taxi_Booking_Management.Services.Taxi
 }
 
 
+//var htmlBuilder = new StringBuilder();
+//htmlBuilder.Append("<html><head>");
+//htmlBuilder.Append("</head><body>");
+
+//foreach (var items in taxiData)
+//{
+//    htmlBuilder.Append("<hr>");
+//    htmlBuilder.Append("<div class=\"row mt-3\">");
+//    htmlBuilder.Append("<div class=\"col-md-6\">");
+
+//    htmlBuilder.Append($"<p><strong> Taxi Name: </strong> {items.TaxiName} </p>");
+//    htmlBuilder.Append($"<p><strong> Registration Number: </strong> {items.RegistrationNumber} </p>");
+
+//    htmlBuilder.Append($"<p><strong> Taxi Type: </strong><button>{@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiType), items.TaxiType)}</button></p>");
+//    if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerName))
+//    {
+//        htmlBuilder.Append($" <p class=\"text-danger\"><strong> Taxi Owner Name : </strong>{items.TaxiOwner.TaxiOwnerName} </p>");
+
+//    }
+//    else
+//    {
+//        htmlBuilder.Append($" <p class= \"text-danger\" ><strong> Taxi Owner Name : </strong>Not Available </p>");
+
+//    }
+//    if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerMobile))
+//    {
+//        htmlBuilder.Append($"<p><strong> Owner Mobile No : </strong>{items.TaxiOwner.TaxiOwnerMobile} </p>");
+//    }
+//    else
+//    {
+//        htmlBuilder.Append($" <p><strong> Owner Mobile No : </strong>Not Available </p>");
+//    }
+//    if (!string.IsNullOrEmpty(items.FilePath))
+//    {
+//        htmlBuilder.Append($" <p><a href = \"{items.FilePath}\" target = \"_blank\"> View Taxi document</a></p>");
+//    }
+
+//    htmlBuilder.Append("</div>");
+//    htmlBuilder.Append("</div>");
+
+//}
+
+//htmlBuilder.Append("</tbody></table>");
+
+//return htmlBuilder.ToString();

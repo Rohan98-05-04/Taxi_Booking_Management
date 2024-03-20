@@ -1,4 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +10,7 @@ using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Helper;
+using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
@@ -22,15 +25,20 @@ namespace Taxi_Booking_Management.Controllers
     
         private readonly IPaymentHistoryService _paymentHistoryService;
         private readonly IConfiguration _configuration;
+        private readonly IConverter _pdfConverter;
+        private readonly ILoggerManager _loggerManager;
         const string bookingcontroller = "Booking";
         const string indexAction = "Index";
 
         public BookingController(IConfiguration configuration,IBookingService context
-            , IPaymentHistoryService paymentHistoryService)
+            , IPaymentHistoryService paymentHistoryService, IConverter pdfConverter, ILoggerManager loggerManager)
         {
             _BookingService=context;
             _paymentHistoryService = paymentHistoryService;
             _configuration = configuration;
+            _loggerManager = loggerManager;
+            _pdfConverter = pdfConverter;
+
         }
 
         public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter = 0, string? startDate = "", string? endDate = "")
@@ -56,12 +64,37 @@ namespace Taxi_Booking_Management.Controllers
                 var exportType = Request.Query["export"];
                 if (exportType == "csv")
                 {
+
                     var propertiesToInclude = new string[] { "BookingCode", "CustomerName", "CustomerMobile", "GrossAmount", "TotalGST" , "NetAmount"};
                     var taxibookingList = allBookings.ToList(); // Convert IPagedList to List
                     var csvData = CsvExportService.GenerateCsvData(taxibookingList, propertiesToInclude);
 
-                    // Set the appropriate response headers for CSV download
+                                        var taxibookingList = allBookings.ToList(); // Convert IPagedList to List
+                    var csvData = CsvExportService.GenerateCsvData(taxibookingList);
+
+
+                                        // Set the appropriate response headers for CSV download
                     return File(csvData, "text/csv", "taxiBookings.csv");
+                }
+                else if (exportType == "pdf")
+                {
+                    // Generate HTML content for PDF (implement this method)
+                    var htmlContent = _BookingService.GenerateHtmlContentForPdf(allBookings);
+
+                    // Convert HTML to PDF using DinkToPdf (implement this method)
+                    var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
+                    {
+                        GlobalSettings = new GlobalSettings
+                        {
+                            // Set global settings (e.g., paper size, margins, etc.)
+                            PaperSize = PaperKind.A4,
+                            Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                        },
+                        Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                    });
+                    _loggerManager.LogInfo($"Successfully TaxiBookings PDF File download for {pageNumber}");
+                    // Set the appropriate response headers for PDF download
+                    return File(pdf, "application/pdf", "taxiBookings.pdf");
                 }
             }
                 return View(allBookings);
@@ -148,11 +181,37 @@ namespace Taxi_Booking_Management.Controllers
                 bookingdetails = await _BookingService.GetTaxiBookingAsync(bookingid);
                 if(bookingdetails != null)
                 {
-                    ViewBag.TransactionDetails = await _paymentHistoryService.GetPaymentHistoryByBookingId(bookingid);
+                var transactionsDetails= await _paymentHistoryService.GetPaymentHistoryByBookingId(bookingid);
+                ViewBag.TransactionDetails = transactionsDetails;
                     var paidAmount = _paymentHistoryService.GetPaidAmountByBookingId(bookingid);
                     var dueAmount = bookingdetails.NetAmount - paidAmount;
                     ViewBag.DueAmount = dueAmount;
                     ViewBag.PaidAmount = paidAmount;
+                if (Request.Query.ContainsKey("export"))
+                {
+                    var exportType = Request.Query["export"];
+                    if (exportType == "pdf")
+                    {
+                       
+                        // Generate HTML content for PDF (implement this method)
+                        var htmlContent = _BookingService.CreatePdfForOneBooking(bookingdetails ,transactionsDetails, paidAmount, dueAmount);
+
+                        // Convert HTML to PDF using DinkToPdf (implement this method)
+                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
+                        {
+                            GlobalSettings = new GlobalSettings
+                            {
+                                // Set global settings (e.g., paper size, margins, etc.)
+                                PaperSize = PaperKind.A4,
+                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                            },
+                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                        });
+                        _loggerManager.LogInfo($"Successfully details of TaxiBookings PDF File download for {bookingdetails.BookingCode}");
+                        // Set the appropriate response headers for PDF download
+                        return File(pdf, "application/pdf", $"taxiBooking({bookingdetails.BookingCode}).pdf");
+                    }
+                }
                     return View(bookingdetails);
                 }
             return RedirectToAction("Error", "Home");
