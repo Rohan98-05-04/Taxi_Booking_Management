@@ -8,28 +8,27 @@ namespace Taxi_Booking_Management.Helper
 {
     public static class CsvExportService 
     {
-        public static byte[] GenerateCsvData<T>(List<T> records)
+        public static byte[] GenerateCsvData<T>(List<T> records , string[] propertiesToInclude)
         {
             using var memoryStream = new MemoryStream();
             using var writer = new StreamWriter(memoryStream);
             using var csv = new CsvHelper.CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture));
 
-            // Get the properties of the generic type T
-            var properties = typeof(T).GetProperties();
-
+         
             // Write header row
-            foreach (var property in properties)
+            foreach (var propertyName in propertiesToInclude)
             {
-                csv.WriteField(property.Name);
+                csv.WriteField(propertyName);
             }
             csv.NextRecord();
 
             // Write records
             foreach (var record in records)
             {
-                foreach (var property in properties)
+                foreach (var propertyName in propertiesToInclude)
                 {
-                    var value = property.GetValue(record);
+                    var property = typeof(T).GetProperty(propertyName);
+                    var value = property?.GetValue(record);
                     csv.WriteField(value);
                 }
                 csv.NextRecord();
