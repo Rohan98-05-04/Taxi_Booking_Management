@@ -22,6 +22,10 @@ namespace Taxi_Booking_Management.Helper
             CreateMap<TaxiViewModel, Taxi>();
             CreateMap<EditBookingViewModel, Booking>();
 
+            CreateMap<Booking, CustomerViewModel>()
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.CustomerName))
+                .ForMember(dest => dest.CustomerMobile, opt => opt.MapFrom(src => src.CustomerMobile));
+
 
         }
     }
