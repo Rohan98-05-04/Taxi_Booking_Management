@@ -12,5 +12,6 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
 
         public Task<string> DeleteTaxiOwnerAsync(int ownerId);
         public IEnumerable<SelectListItem> GetTaxiOwners();
+        public string GenerateHtmlContentForPdf(IPagedList<Models.TaxiOwner> taxiOwners);
     }
 }

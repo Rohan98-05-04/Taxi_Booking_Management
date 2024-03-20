@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.Helper;
@@ -156,6 +157,33 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 _loggerManager.LogError($"{ex.Message} ,method name: UpdateTaxiDriverAsync");
                 throw;
             }
+        }
+        public string GenerateHtmlContentForPdf(IPagedList<Models.TaxiDriver> taxiDrivers)
+        {
+            // Create an HTML table with student data
+            var htmlBuilder = new StringBuilder();
+            htmlBuilder.Append("<html><head>");
+            htmlBuilder.Append("<style>");
+            htmlBuilder.Append("table { border-collapse: collapse; width: 100%; border: 1px solid #000; }");
+            htmlBuilder.Append("th, td { border: 1px solid #000; padding: 8px; }");
+            htmlBuilder.Append("</style>");
+            htmlBuilder.Append("</head><body>");
+            htmlBuilder.Append("<table>");
+            htmlBuilder.Append("<thead><tr><th>Driver Name</th><th>Mobile Number</th><th>Address</th></tr></thead>");
+            htmlBuilder.Append("<tbody>");
+
+            foreach (var items in taxiDrivers)
+            {
+                htmlBuilder.Append("<tr>");
+                htmlBuilder.Append($"<td>{items.DriverName}</td>");
+                htmlBuilder.Append($"<td>{items.DriverMobile}</td>");
+                htmlBuilder.Append($"<td>{items.Address}</td>");
+                htmlBuilder.Append("</tr>");
+            }
+
+            htmlBuilder.Append("</tbody></table>");
+
+            return htmlBuilder.ToString();
         }
 
     }

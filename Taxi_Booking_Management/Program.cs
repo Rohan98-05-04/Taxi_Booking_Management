@@ -17,6 +17,8 @@ using AspNetCoreHero.ToastNotification;
 using Taxi_Booking_Management.Services.User;
 using Taxi_Booking_Management.Services.DashBoard;
 using Taxi_Booking_Management.Services.Customer;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +39,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddTransient<IDashBoardService , DashBoardService>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddMemoryCache();
