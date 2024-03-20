@@ -42,7 +42,8 @@ namespace Taxi_Booking_Management.Services.Taxi
                     _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
                     return null;
                 }
-                _context.taxis.Remove(taxi);
+                taxi.IsEnabled = false;
+                _context.taxis.Update(taxi);
                 await _context.SaveChangesAsync();
                 _loggerManager.LogInfo($"taxi {MessagesAlerts.SuccessfullDelete} with taxiId {taxiId}");
                 return taxiId;
@@ -61,6 +62,7 @@ namespace Taxi_Booking_Management.Services.Taxi
             {
                 IQueryable<Models.Taxi> data = _context.taxis
                 .Include(t => t.TaxiOwner)
+                .Where(u => u.IsEnabled)
                 .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
@@ -85,7 +87,7 @@ namespace Taxi_Booking_Management.Services.Taxi
             try
             {
                 var taxi = await _context.taxis.Include(t => t.TaxiOwner)
-                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
+                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId && t.IsEnabled);
                 if (taxi == null)
                 {
                     _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
@@ -105,7 +107,7 @@ namespace Taxi_Booking_Management.Services.Taxi
             try
             {
                 var taxi = await  _context.taxis.Include(t => t.TaxiOwner)
-                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId);
+                                                .FirstOrDefaultAsync(t => t.TaxiId == taxiId && t.IsEnabled);
                 if(taxi == null)
                 {
                     _loggerManager.LogInfo($"not taxi found with taxiId {taxiId}");
@@ -147,6 +149,7 @@ namespace Taxi_Booking_Management.Services.Taxi
                     return $"Invalid taxi type {taxi.TaxiType}";
                 }
                 taxi.FilePath= filePath;
+                taxi.IsEnabled = true;
                 await _context.taxis.AddAsync(taxi);
                 await _context.SaveChangesAsync();
                 _loggerManager.LogInfo($"taxi is register with taxi name: {taxi.TaxiName}");
@@ -179,6 +182,7 @@ namespace Taxi_Booking_Management.Services.Taxi
                 exTaxi.TaxiStatus = taxiModel.TaxiStatus;
                 exTaxi.TaxiOwnerId = taxiModel.TaxiOwnerId;
                 exTaxi.TaxiType = taxiModel.TaxiType;
+                exTaxi.IsEnabled = true;
                 if(filePath != "/")
                 {
                     exTaxi.FilePath= filePath;

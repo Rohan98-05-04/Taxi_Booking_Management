@@ -48,10 +48,10 @@ namespace Taxi_Booking_Management.Controllers
                     var exportType = Request.Query["export"];
                     if (exportType == "csv")
                     {
-                        var driverOwnerList = allDrivers.ToList(); // Convert IPagedList to List
-                        var csvData = CsvExportService.GenerateCsvData(driverOwnerList);
+                        var propertiesToInclude = new string[] { "DriverName", "DriverMobile", "Address", "FilePath" };
+                        var driverOwnerList = allDrivers.ToList(); 
+                        var csvData = CsvExportService.GenerateCsvData(driverOwnerList, propertiesToInclude);
                         _loggerManager.LogInfo($"Successfully TaxiDriver CSV File download for {pageNumber}");
-                        // Set the appropriate response headers for CSV download
                         return File(csvData, "text/csv", "taxiDrivers.csv");
                     }
                     else if (exportType == "pdf")

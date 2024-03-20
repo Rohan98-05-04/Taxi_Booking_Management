@@ -33,7 +33,8 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                     _loggerManager.LogInfo($"taxi driver not found by given id{driverId}");
                     return message;
                 }
-                _context.drivers.Remove(exDriver);
+                exDriver.IsEnabled = false;
+                _context.drivers.Update(exDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullDelete;
                 _loggerManager.LogInfo($"taxi driver is successfully Deleted with given id{driverId}");
@@ -51,7 +52,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
             IPagedList<Models.TaxiDriver> taxiDrivers = null;
             try
             {
-                IQueryable<Models.TaxiDriver> data = _context.drivers.AsQueryable();
+                IQueryable<Models.TaxiDriver> data = _context.drivers.Where(u=> u.IsEnabled).AsQueryable();
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
                 {
                     data = data.Where(u => u.DriverName.Contains(search));
@@ -72,7 +73,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
         {
             try
             {
-                var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == driverId);
+                var exDriver = await _context.drivers.FirstOrDefaultAsync(u => u.DriverId == driverId && u.IsEnabled);
                 if (exDriver == null)
                 {
                     _loggerManager.LogInfo($"taxi driver not found by given id{driverId}");
@@ -105,6 +106,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                     return message;
                 }
                 taxiDriver.FilePath = filePath;
+                taxiDriver.IsEnabled = true;
                 await _context.drivers.AddAsync(taxiDriver);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
@@ -137,7 +139,7 @@ namespace Taxi_Booking_Management.Services.TaxiDriver
                 exDriver.DriverMobile = taxiDriver.DriverMobile;
                 exDriver.DriverName = taxiDriver.DriverName;
                 exDriver.Address = taxiDriver.Address;
-            
+                exDriver.IsEnabled = true;
                 if (filePath != "/")
                 {
                     exDriver.FilePath = filePath;

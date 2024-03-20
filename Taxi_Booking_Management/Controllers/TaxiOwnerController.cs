@@ -49,8 +49,9 @@ namespace Taxi_Booking_Management.Controllers
                     var exportType = Request.Query["export"];
                     if (exportType == "csv")
                     {
+                        var propertiesToInclude = new string[] { "TaxiOwnerName", "TaxiOwnerMobile", "TaxiOwnerEmail", "TaxiOwnerAddress", "FilePath" };
                         var taxiOwnerList = allOwners.ToList(); // Convert IPagedList to List
-                        var csvData = CsvExportService.GenerateCsvData(taxiOwnerList);
+                        var csvData = CsvExportService.GenerateCsvData(taxiOwnerList, propertiesToInclude);
                         _loggerManager.LogInfo($"Successfully TaxiOwner CSV File download for {pageNumber}");
                         // Set the appropriate response headers for CSV download
                         return File(csvData, "text/csv", "taxiOwner.csv");

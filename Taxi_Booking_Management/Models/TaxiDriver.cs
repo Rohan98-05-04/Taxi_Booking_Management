@@ -26,5 +26,7 @@ namespace Taxi_Booking_Management.Models
 
         public string? FilePath { get; set; }
 
+        public bool IsEnabled { get; set; } = true;
+
     }
 }

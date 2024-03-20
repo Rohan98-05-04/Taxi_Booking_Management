@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Build.ObjectModelRemoting;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Taxi_Booking_Management.Models
@@ -28,5 +29,8 @@ namespace Taxi_Booking_Management.Models
         public IFormFile? Filename { get; set; }
 
         public string? FilePath { get; set; }
+
+        public bool IsEnabled { get; set; } = true;
+
     }
 }

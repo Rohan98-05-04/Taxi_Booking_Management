@@ -39,7 +39,8 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                     _loggerManager.LogInfo($"taxi owner not found by given id{ownerId}");
                     return message;
                 }
-                _context.owner.Remove(exOwner);
+                exOwner.IsEnabled = false;
+                _context.owner.Update(exOwner);
                 await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullDelete;
                 _loggerManager.LogInfo($"taxi owner is successfully retrived with given id{ownerId}");
@@ -56,7 +57,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             IPagedList<Models.TaxiOwner> taxiOwners = null;
             try
             {
-                IQueryable<Models.TaxiOwner> data = _context.owner.AsQueryable();
+                IQueryable<Models.TaxiOwner> data = _context.owner.Where(u => u.IsEnabled).AsQueryable();
                 if (!string.IsNullOrWhiteSpace(search) && data != null)
                 {
                     data = data.Where(u => u.TaxiOwnerName.Contains(search));
@@ -77,7 +78,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
         {
             try
             {
-              var exOwner = await _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerId == ownerId);
+              var exOwner = await _context.owner.FirstOrDefaultAsync(u => u.TaxiOwnerId == ownerId && u.IsEnabled);
                 if(exOwner == null)
                 {
                     _loggerManager.LogInfo($"taxiowner not found by given id{ownerId}");
@@ -109,6 +110,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                     return message;
                 }
                 taxiOwner.FilePath = filePath;
+                taxiOwner.IsEnabled = true;
                 await _context.owner.AddAsync(taxiOwner);
                await _context.SaveChangesAsync();
                 message = MessagesAlerts.SuccessfullSave;
@@ -141,6 +143,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
                 exOwner.TaxiOwnerName = taxiOwner.TaxiOwnerName;
                 exOwner.TaxiOwnerEmail = taxiOwner.TaxiOwnerEmail;
                 exOwner.TaxiOwnerAddress = taxiOwner.TaxiOwnerAddress;
+                exOwner.IsEnabled = true;
                 if (filePath != "/")
                 {
                     exOwner.FilePath = filePath;
@@ -168,7 +171,7 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             const string cacheKey = "TaxiOwnerCacheKey";
             if(!_memoryCache.TryGetValue(cacheKey, out IEnumerable<SelectListItem> taxiOwner))
             {
-                taxiOwner = _context.owner
+                taxiOwner = _context.owner.Where(u=> u.IsEnabled)
                 .Select(x => new SelectListItem { Value = x.TaxiOwnerId.ToString(), Text = $"{x.TaxiOwnerName} ({x.TaxiOwnerMobile})" })
                 .ToList();
 
