@@ -1,5 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Taxi;
@@ -26,9 +29,10 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ILoggerManager _loggerManager;
         private readonly ITaxiOwnerService _OwnerService;
         private readonly IConfiguration _configuration;
+        private readonly IConverter _pdfConverter;
 
         public TaxiController(IConfiguration configuration ,ITaxiService taxiService
-            , IMapper mapper, ILoggerManager loggerManager , ITaxiOwnerService OwnerService)
+            , IMapper mapper, ILoggerManager loggerManager , ITaxiOwnerService OwnerService, IConverter pdfConverter)
         {
             
             _taxiService = taxiService;
@@ -36,6 +40,7 @@ namespace Taxi_Booking_Management.Controllers
             _loggerManager = loggerManager;
             _OwnerService = OwnerService;
             _configuration = configuration;
+            _pdfConverter = pdfConverter;
         }
         public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter =0)
         {
@@ -53,7 +58,38 @@ namespace Taxi_Booking_Management.Controllers
                     allTaxies = allTaxies.Where(t => t.TaxiStatus == statusFilter).ToPagedList();
                     ViewBag.StatusFilter = statusFilter;
                 }
+                if (Request.Query.ContainsKey("export"))
+                {
+                    var exportType = Request.Query["export"];
+                    if (exportType == "csv")
+                    {
+                        var taxiList = allTaxies.ToList(); // Convert IPagedList to List
+                        var csvData = CsvExportService.GenerateCsvData(taxiList);
 
+                        // Set the appropriate response headers for CSV download
+                        return File(csvData, "text/csv", "Alltaxi.csv");
+                    }
+                    else if (exportType == "pdf")
+                    {
+                        // Generate HTML content for PDF (implement this method)
+                        var htmlContent = _taxiService.GenerateHtmlContentForPdf(allTaxies);
+
+                        // Convert HTML to PDF using DinkToPdf (implement this method)
+                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
+                        {
+                            GlobalSettings = new GlobalSettings
+                            {
+                                // Set global settings (e.g., paper size, margins, etc.)
+                                PaperSize = PaperKind.A4,
+                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                            },
+                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                        });
+
+                        // Set the appropriate response headers for PDF download
+                        return File(pdf, "application/pdf", "Alltaxis.pdf");
+                    }
+                }
                 return View(allTaxies);
             }
             catch (Exception ex)

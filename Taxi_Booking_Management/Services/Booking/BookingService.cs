@@ -340,6 +340,7 @@ namespace Taxi_Booking_Management.Services.Booking
         public List<SelectListItem> GetTaxiNames()
         {
             const string cacheKey = "TaxiNamesCacheKey";
+           
             if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiNames))
             {
                 taxiNames = _context.taxis
@@ -351,14 +352,18 @@ namespace Taxi_Booking_Management.Services.Booking
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 };
                 _memoryCache.Set(cacheKey, taxiNames, cacheEntryOptions);
+              
             }
+
             return taxiNames;
+
 
         }
 
         public List<SelectListItem> GetDriverNames()
         {
             const string cacheKey = "TaxiDriversCacheKey";
+           
             if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiDrivers))
             {
                 taxiDrivers = _context.drivers
@@ -369,7 +374,9 @@ namespace Taxi_Booking_Management.Services.Booking
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 };
                 _memoryCache.Set(cacheKey, taxiDrivers, cacheEntryOptions);
+               
             }
+
             return taxiDrivers;
 
         }

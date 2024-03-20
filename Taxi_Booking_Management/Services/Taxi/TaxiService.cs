@@ -3,6 +3,10 @@ using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NLog.Targets;
+using System.Reflection;
+using System.Text;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
@@ -221,6 +225,58 @@ namespace Taxi_Booking_Management.Services.Taxi
             }
         }
 
-        
+        public string GenerateHtmlContentForPdf(IPagedList<Models.Taxi> taxiData)
+        {
+            // Create an HTML table with student data
+            var htmlBuilder = new StringBuilder();
+            htmlBuilder.Append("<html><head>");
+            htmlBuilder.Append("</head><body>");
+
+            foreach (var items in taxiData)
+            {
+                htmlBuilder.Append("<hr>");
+                htmlBuilder.Append("<div class=\"row mt-3\">");
+                htmlBuilder.Append("<div class=\"col-md-6\">");
+               
+                htmlBuilder.Append($"<p><strong> Taxi Name: </strong> {items.TaxiName} </p>");
+                htmlBuilder.Append($"<p><strong> Registration Number: </strong> {items.RegistrationNumber} </p>");
+       
+                htmlBuilder.Append($"<p><strong> Taxi Type: </strong><button>{@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiType), items.TaxiType)}</button></p>");
+                if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerName))
+                {
+                    htmlBuilder.Append($" <p class=\"text-danger\"><strong> Taxi Owner Name : </strong>{items.TaxiOwner.TaxiOwnerName} </p>");
+                   
+                }
+                else
+                {
+                    htmlBuilder.Append($" <p class= \"text-danger\" ><strong> Taxi Owner Name : </strong>Not Available </p>");
+                    
+                }
+                if (!string.IsNullOrEmpty(items.TaxiOwner.TaxiOwnerMobile))
+                {
+                    htmlBuilder.Append($"<p><strong> Owner Mobile No : </strong>{items.TaxiOwner.TaxiOwnerMobile} </p>");
+                }
+                else
+                {
+                    htmlBuilder.Append($" <p><strong> Owner Mobile No : </strong>Not Available </p>");
+                }
+                if (!string.IsNullOrEmpty(items.FilePath))
+                {
+                    htmlBuilder.Append($" <p><a href = \"{items.FilePath}\" target = \"_blank\"> View Taxi document</a></p>");
+                }
+
+                htmlBuilder.Append("</div>");
+                htmlBuilder.Append("</div>");
+
+            }
+      
+            htmlBuilder.Append("</tbody></table>");
+
+            return htmlBuilder.ToString();
+        }
+
+
     }
 }
+
+

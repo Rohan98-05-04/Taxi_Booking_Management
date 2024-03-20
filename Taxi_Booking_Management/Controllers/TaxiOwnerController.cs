@@ -1,9 +1,12 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
-using System.Drawing.Printing;
+//using System.Drawing.Printing;
 using Taxi_Booking_Management.Common;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiOwner;
@@ -18,25 +21,70 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ITaxiOwnerService _taxiOwnerServices;
         private readonly ILoggerManager _loggerManager;
         private readonly IConfiguration _configuration;
+        private readonly IConverter _pdfConverter;
 
-        public TaxiOwnerController(IConfiguration configuration ,ILoggerManager loggerManager, ITaxiOwnerService taxiOwnerServices )
+        public TaxiOwnerController(IConfiguration configuration ,ILoggerManager loggerManager, 
+            ITaxiOwnerService taxiOwnerServices, IConverter pdfConverter)
         {
             _taxiOwnerServices = taxiOwnerServices;
             _loggerManager = loggerManager;
             _configuration = configuration;
+            _pdfConverter = pdfConverter;
         }
 
 
         [HttpGet]
         public async Task<IActionResult> Index(int? page,  string search="")
         {
-            ViewBag.Search = search;
-            var pageNumber = page ?? 1;
-            int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
+            try
+            {
+                ViewBag.Search = search;
+                var pageNumber = page ?? 1;
+                int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
 
-            IPagedList<TaxiOwner> allOwners;
-             allOwners = await _taxiOwnerServices.GetAllTaxiOwnerAsync(pageNumber, pageSize, search);
-            return View(allOwners);
+                IPagedList<TaxiOwner> allOwners;
+                allOwners = await _taxiOwnerServices.GetAllTaxiOwnerAsync(pageNumber, pageSize, search);
+                if (Request.Query.ContainsKey("export"))
+                {
+                    var exportType = Request.Query["export"];
+                    if (exportType == "csv")
+                    {
+                        var taxiOwnerList = allOwners.ToList(); // Convert IPagedList to List
+                        var csvData = CsvExportService.GenerateCsvData(taxiOwnerList);
+                        _loggerManager.LogInfo($"Successfully TaxiOwner CSV File download for {pageNumber}");
+                        // Set the appropriate response headers for CSV download
+                        return File(csvData, "text/csv", "taxiOwner.csv");
+                    }
+                    else if (exportType == "pdf")
+                    {
+                        // Generate HTML content for PDF (implement this method)
+                        var htmlContent = _taxiOwnerServices.GenerateHtmlContentForPdf(allOwners);
+
+                        // Convert HTML to PDF using DinkToPdf (implement this method)
+                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
+                        {
+                            GlobalSettings = new GlobalSettings
+                            {
+                                // Set global settings (e.g., paper size, margins, etc.)
+                                PaperSize = PaperKind.A4,
+                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                            },
+                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                        });
+                        _loggerManager.LogInfo($"Successfully TaxiOwner PDF File download for {pageNumber}");
+                        // Set the appropriate response headers for PDF download
+                        return File(pdf, "application/pdf", "taxiOwners.pdf");
+                    }
+
+                }
+                return View(allOwners);
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while fetching taxiOwner details: {ex.Message}");
+                return View("Error");
+            }
+           
         }
 
         [HttpGet]

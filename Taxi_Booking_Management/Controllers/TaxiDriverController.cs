@@ -1,7 +1,10 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Taxi_Booking_Management.Common;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiDriver;
@@ -16,12 +19,15 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ITaxiDriverService _taxiDriverServices;
         private readonly ILoggerManager _loggerManager;
         private readonly IConfiguration _configuration;
+        private readonly IConverter _pdfConverter;
 
-        public TaxiDriverController(IConfiguration configuration ,ITaxiDriverService taxiDriverServices, ILoggerManager loggerManager)
+        public TaxiDriverController(IConfiguration configuration ,ITaxiDriverService taxiDriverServices, 
+            ILoggerManager loggerManager, IConverter pdfConverter)
         {
             _taxiDriverServices = taxiDriverServices;
             _loggerManager = loggerManager;
             _configuration = configuration;
+            _pdfConverter = pdfConverter;
         }
 
 
@@ -29,13 +35,54 @@ namespace Taxi_Booking_Management.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(int? page, string search = "")
         {
-            ViewBag.Search = search;
-            var pageNumber = page ?? 1;
-            int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
+            try
+            {
+                ViewBag.Search = search;
+                var pageNumber = page ?? 1;
+                int pageSize = _configuration.GetValue<int>("AppSettings:PageSize");
 
-            IPagedList<TaxiDriver> allDrivers;
-            allDrivers = await _taxiDriverServices.GetAllTaxiDriverAsync(pageNumber, pageSize, search);
-            return View(allDrivers);
+                IPagedList<TaxiDriver> allDrivers;
+                allDrivers = await _taxiDriverServices.GetAllTaxiDriverAsync(pageNumber, pageSize, search);
+                if (Request.Query.ContainsKey("export"))
+                {
+                    var exportType = Request.Query["export"];
+                    if (exportType == "csv")
+                    {
+                        var driverOwnerList = allDrivers.ToList(); // Convert IPagedList to List
+                        var csvData = CsvExportService.GenerateCsvData(driverOwnerList);
+                        _loggerManager.LogInfo($"Successfully TaxiDriver CSV File download for {pageNumber}");
+                        // Set the appropriate response headers for CSV download
+                        return File(csvData, "text/csv", "taxiDrivers.csv");
+                    }
+                    else if (exportType == "pdf")
+                    {
+                        // Generate HTML content for PDF (implement this method)
+                        var htmlContent = _taxiDriverServices.GenerateHtmlContentForPdf(allDrivers);
+
+                        // Convert HTML to PDF using DinkToPdf (implement this method)
+                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
+                        {
+                            GlobalSettings = new GlobalSettings
+                            {
+                                // Set global settings (e.g., paper size, margins, etc.)
+                                PaperSize = PaperKind.A4,
+                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                            },
+                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                        });
+                        _loggerManager.LogInfo($"Successfully TaxiDriver PDF File download for {pageNumber}");
+                        // Set the appropriate response headers for PDF download
+                        return File(pdf, "application/pdf", "taxiDrivers.pdf");
+                    }
+                }
+                return View(allDrivers);
+            }
+            catch (Exception ex)
+            {
+                _loggerManager.LogError($"An error occurred while fetching taxiDriver details: {ex.Message}");
+                return View("Error");
+            }
+            
         }
 
         [HttpGet]

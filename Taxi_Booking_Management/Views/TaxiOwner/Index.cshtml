@@ -22,9 +22,14 @@
             <i class="fas fa-search"></i>
         </button>
     }
-
+  
     <a onclick="displayBusyIndicator()" href="@Url.Action("AddOwner", "TaxiOwner")" class="btn btn-primary ms-2">Add New </a>
-</div> 
+  
+</div>
+<div class="col-md-3 mt-3 ">
+    <a href="@Url.Action("Index", new { export = "csv",page = Context.Request.Query["page"] })" class="btn btn-success">Download CSV</a>
+    <a href="@Url.Action("Index", new { export = "pdf",page = Context.Request.Query["page"] })" class="btn btn-danger">Download PDF</a>
+</div>
 
 <table class="table table-striped  mt-3">
     <thead>

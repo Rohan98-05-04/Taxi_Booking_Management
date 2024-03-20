@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Helper;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Booking;
 using Taxi_Booking_Management.Services.PaymentHistory;
@@ -50,7 +51,19 @@ namespace Taxi_Booking_Management.Controllers
                     ViewBag.StatusFilter = statusFilter;
                 }
             }
-            return View(allBookings);
+            if (Request.Query.ContainsKey("export"))
+            {
+                var exportType = Request.Query["export"];
+                if (exportType == "csv")
+                {
+                    var taxibookingList = allBookings.ToList(); // Convert IPagedList to List
+                    var csvData = CsvExportService.GenerateCsvData(taxibookingList);
+
+                    // Set the appropriate response headers for CSV download
+                    return File(csvData, "text/csv", "taxiBookings.csv");
+                }
+            }
+                return View(allBookings);
         }
 
         public async Task<IActionResult> RegisterBooking()
