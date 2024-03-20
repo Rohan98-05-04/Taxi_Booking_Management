@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Globalization;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
@@ -37,7 +40,7 @@ namespace Taxi_Booking_Management.Services.Booking
             try
             {
                 IQueryable<Models.Booking> data = _context.Bookings
-                .Include(t => t.taxi)
+                .Include(t => t.taxi ).Include(d => d.TaxiDrivers)
                 .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDateValue))
@@ -259,7 +262,7 @@ namespace Taxi_Booking_Management.Services.Booking
              .ToListAsync();
 
             var availableTaxis = await _context.taxis
-                .Where(t => !overlappingBookings.Contains(t.TaxiId) && t.TaxiStatus==1)
+                .Where(t => !overlappingBookings.Contains(t.TaxiId) && t.TaxiStatus == 1)
                 .ToListAsync();
 
             return availableTaxis;
@@ -340,7 +343,7 @@ namespace Taxi_Booking_Management.Services.Booking
         public List<SelectListItem> GetTaxiNames()
         {
             const string cacheKey = "TaxiNamesCacheKey";
-           
+
             if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiNames))
             {
                 taxiNames = _context.taxis
@@ -352,7 +355,7 @@ namespace Taxi_Booking_Management.Services.Booking
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 };
                 _memoryCache.Set(cacheKey, taxiNames, cacheEntryOptions);
-              
+
             }
 
             return taxiNames;
@@ -363,7 +366,7 @@ namespace Taxi_Booking_Management.Services.Booking
         public List<SelectListItem> GetDriverNames()
         {
             const string cacheKey = "TaxiDriversCacheKey";
-           
+
             if (!_memoryCache.TryGetValue(cacheKey, out List<SelectListItem> taxiDrivers))
             {
                 taxiDrivers = _context.drivers
@@ -374,14 +377,14 @@ namespace Taxi_Booking_Management.Services.Booking
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 };
                 _memoryCache.Set(cacheKey, taxiDrivers, cacheEntryOptions);
-               
+
             }
 
             return taxiDrivers;
 
         }
 
-       
+
 
 
         public async Task<Models.Booking> GetBookingByBookingCode(string bookingCode)
@@ -406,5 +409,88 @@ namespace Taxi_Booking_Management.Services.Booking
 
         }
 
+        public string GenerateHtmlContentForPdf(IPagedList<Models.Booking> bookingData)
+        {
+            // Create an HTML table with student data
+            var htmlBuilder = new StringBuilder();
+            htmlBuilder.Append("<html><head>");
+            htmlBuilder.Append("<style>");
+            htmlBuilder.Append("table { border-collapse: collapse; width: 100%; border: 1px solid #000; }");
+            htmlBuilder.Append("th, td { border: 1px solid #000; padding: 8px; }");
+            htmlBuilder.Append("</style>");
+            htmlBuilder.Append("</head><body>");
+            htmlBuilder.Append("<h2>All Taxi Bookings Details</h2>");
+            htmlBuilder.Append("<table>");
+            htmlBuilder.Append("<thead><tr><th>Booking Code</th><th>Taxi Name</th><th>Registration Number</th><th>Customer Name</th>" +
+                "<th>Customer Mobile</th><th>Driver Name</th><th>Driver Mobile</th><th>From</th><th>To</th></tr></thead>");
+            htmlBuilder.Append("<tbody>");
+
+            foreach (var items in bookingData)
+            {
+                htmlBuilder.Append("<tr>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.BookingCode}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.taxi.TaxiName}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.taxi.RegistrationNumber}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.CustomerName}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.CustomerMobile}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiDrivers.DriverName}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiDrivers.DriverMobile}</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">({items.FromLocation}) ({items.FromDate.ToShortDateString()})</td>");
+                htmlBuilder.Append($"<td class=\"text-center\">({items.ToLocation}) ({items.ToDate.ToShortDateString()})</td>");
+
+                htmlBuilder.Append("</tr>");
+            }
+
+            htmlBuilder.Append("</tbody></table>");
+
+            return htmlBuilder.ToString();
+
+
+        }
+        public string CreatePdfForOneBooking(Models.Booking bookingData ,IList<Models.PaymentHistory> transactionData, decimal paidAmount,decimal dueAmount  )
+        {
+            // Create an HTML table with student data
+            var htmlBuilder = new StringBuilder();
+            htmlBuilder.Append("<html><head>");
+            htmlBuilder.Append("<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\">");
+            htmlBuilder.Append("<style>");
+            htmlBuilder.Append("p{ font-size:20px;}");
+            htmlBuilder.Append("button{ border-radius:10px;}");
+            htmlBuilder.Append("</style>");
+            htmlBuilder.Append("</head><body>");
+            htmlBuilder.Append($"<h1>Booking Details for bookingCode( {bookingData.BookingCode})</h1>");
+            htmlBuilder.Append("<div class=\"row mt-3\">");
+                htmlBuilder.Append("<div class=\"col-md-6\">");
+                htmlBuilder.Append($"<p><strong> Booking Status: </strong><button class=\"btn btn-primary\"> {@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingStatus), bookingData.BookingStatus)}</button></p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Booking Code: </strong> {bookingData.BookingCode} </p>");
+                htmlBuilder.Append($"<p><strong> Customer Name: </strong> {bookingData.CustomerName} </p>");
+                htmlBuilder.Append($"<p><strong> Customer Number: </strong> {bookingData.CustomerMobile} </p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Taxi Name: </strong>{ bookingData.taxi.TaxiName }</p>");
+                htmlBuilder.Append($"<p><strong> Taxi Registaration Number : </strong> {bookingData.taxi.RegistrationNumber}</p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Driver Name: </strong> { bookingData.TaxiDrivers.DriverName} </p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Driver Name: </strong> { bookingData.TaxiDrivers.DriverMobile} </p>");
+                htmlBuilder.Append("</div>");
+                 htmlBuilder.Append("<div class=\"col-md-6\">");
+                 htmlBuilder.Append($"<p><strong> From Date: </strong> {bookingData.FromDate} </p>");
+                htmlBuilder.Append($"<p><strong> To Date: </strong> {bookingData.ToDate} </p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Journey Start: </strong> { bookingData.FromLocation} </p>");
+                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Journey End: </strong> { bookingData.ToLocation }</p>");
+                htmlBuilder.Append($"<p><strong> Gross Amount: </strong>{bookingData.GrossAmount} </p>");
+                htmlBuilder.Append($"<p><strong> Gst(%) : </strong> {bookingData.TotalGST} </p>");
+                htmlBuilder.Append($"<p><strong> Net Amount: </strong> {bookingData.NetAmount} </p>");
+                
+                htmlBuilder.Append("</div>");
+                htmlBuilder.Append("</div>");
+            htmlBuilder.Append("<hr>");
+
+
+            htmlBuilder.Append("</body></html>");
+
+            return htmlBuilder.ToString();
+
+
+        }
     }
 }
+
+
