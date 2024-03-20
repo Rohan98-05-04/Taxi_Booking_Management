@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taxi_Booking_Management.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -77,7 +77,8 @@ namespace Taxi_Booking_Management.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DriverName = table.Column<string>(type: "varchar(225)", nullable: false),
                     DriverMobile = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Address = table.Column<string>(type: "varchar(225)", nullable: true)
+                    Address = table.Column<string>(type: "varchar(225)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,7 +94,8 @@ namespace Taxi_Booking_Management.Migrations
                     TaxiOwnerName = table.Column<string>(type: "varchar(225)", nullable: false),
                     TaxiOwnerMobile = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     TaxiOwnerEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TaxiOwnerAddress = table.Column<string>(type: "varchar(225)", nullable: true)
+                    TaxiOwnerAddress = table.Column<string>(type: "varchar(225)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -216,7 +218,8 @@ namespace Taxi_Booking_Management.Migrations
                     TaxiType = table.Column<int>(type: "int", nullable: true),
                     RegistrationNumber = table.Column<string>(type: "varchar(125)", nullable: false),
                     TaxiStatus = table.Column<int>(type: "int", nullable: false),
-                    TaxiOwnerId = table.Column<int>(type: "int", nullable: false)
+                    TaxiOwnerId = table.Column<int>(type: "int", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

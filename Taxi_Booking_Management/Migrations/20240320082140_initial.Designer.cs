@@ -12,8 +12,8 @@ using Taxi_Booking_Management.Data;
 namespace Taxi_Booking_Management.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240313060349_updateFileUpload")]
-    partial class updateFileUpload
+    [Migration("20240320082140_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
