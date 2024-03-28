@@ -422,7 +422,7 @@ namespace Taxi_Booking_Management.Services.Booking
             htmlBuilder.Append("<h2>All Taxi Bookings Details</h2>");
             htmlBuilder.Append("<table>");
             htmlBuilder.Append("<thead><tr><th>Booking Code</th><th>Taxi Name</th><th>Registration Number</th><th>Customer Name</th>" +
-                "<th>Customer Mobile</th><th>Driver Name</th><th>Driver Mobile</th><th>From</th><th>To</th></tr></thead>");
+                "<th>Customer Mobile</th><th>Driver Name</th><th>Driver Mobile</th><th>From Jounery</th><th>To Jounery</th></tr></thead>");
             htmlBuilder.Append("<tbody>");
 
             foreach (var items in bookingData)
@@ -450,6 +450,7 @@ namespace Taxi_Booking_Management.Services.Booking
         public string CreatePdfForOneBooking(Models.Booking bookingData ,IList<Models.PaymentHistory> transactionData, decimal paidAmount,decimal dueAmount  )
         {
             // Create an HTML table with student data
+         
             var htmlBuilder = new StringBuilder();
             htmlBuilder.Append("<html><head>");
             htmlBuilder.Append("<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\">");
@@ -481,13 +482,67 @@ namespace Taxi_Booking_Management.Services.Booking
                 
                 htmlBuilder.Append("</div>");
                 htmlBuilder.Append("</div>");
-            htmlBuilder.Append("<hr>");
+
+            htmlBuilder.Append("<hr class=\"my-4\" style=\"border-color: red;\" />");
+            htmlBuilder.Append("<div>");
+            htmlBuilder.Append("<div class=\"d-flex justify-content-between align-items-center\">");
+            htmlBuilder.Append("<h1 class=\"mt-4 mb-3 text-warning fw-bolder\">Payment Details</h1>");
+
+            if (paidAmount >= bookingData.NetAmount)
+            {
+
+                htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Payment Status:- ");
+                htmlBuilder.Append("<button class=\"btn btn-success\">");
+                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 2));
+                htmlBuilder.Append("</button>");
+
+            }
+            else
+            {
+                htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Payment Status:- ");
+                htmlBuilder.Append("<button class=\"btn btn-warning\">");
+                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 1));
+                htmlBuilder.Append("</button>");
+                htmlBuilder.Append("</h3>");
+            }
+
+            htmlBuilder.Append("</div>");
+            htmlBuilder.Append("<div>");
+            htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Total due amount: ");
+            //htmlBuilder.Append(_configuration["AppSettings:indianCurrency"]);
+            htmlBuilder.Append(dueAmount);
+            htmlBuilder.Append("</h3>");
+            htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Total paid amount: ");
+            //htmlBuilder.Append(_configuration["AppSettings:indianCurrency"]);
+            htmlBuilder.Append(paidAmount);
+            htmlBuilder.Append("</h3>");
+            htmlBuilder.Append("</div>");
+            htmlBuilder.Append("</div>");
+
+            htmlBuilder.Append("<div class=\"list-group\">");
+            foreach (var transaction in transactionData)
+            {
+                htmlBuilder.Append("<div class=\"list-group-item border-danger\">");
+                htmlBuilder.Append("<div class=\"d-flex w-100 justify-content-between\">");
+                htmlBuilder.Append("<h4 class=\"mb-1\">Payment Amount: ");
+                //htmlBuilder.Append();
+                htmlBuilder.Append(transaction.PayAmount);
+                htmlBuilder.Append(" (");
+                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), transaction.PaidMedium));
+                htmlBuilder.Append(")</h4>");
+                htmlBuilder.Append("<small>Date: ");
+                htmlBuilder.Append(transaction.CreateDateTime);
+                htmlBuilder.Append("</small>");
+                htmlBuilder.Append("</div>");
+                htmlBuilder.Append("</div>");
+                htmlBuilder.Append("<hr class=\"my-2\" style=\"border-color: yellow;\" />");
+            }
+            htmlBuilder.Append("</div>");
 
 
             htmlBuilder.Append("</body></html>");
 
             return htmlBuilder.ToString();
-
 
         }
     }
