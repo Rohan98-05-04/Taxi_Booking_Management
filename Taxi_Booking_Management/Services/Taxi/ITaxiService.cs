@@ -13,7 +13,7 @@ namespace Taxi_Booking_Management.Services.Taxi
         public Task<int?> DeleteTaxiAsync(int taxiId);
         public Task<string> UpdateTaxiAsync(TaxiViewModel taxiModel);
         public Task<Models.Taxi> GetDBTaxiDetailsAsync(int taxiId);
-        public string GenerateHtmlContentForPdf(IPagedList<Models.Taxi> taxiData);
+        public  Task<string> GenerateHtmlContentForPdf(IEnumerable<Models.Taxi> taxiOwnerData);
 
 
 

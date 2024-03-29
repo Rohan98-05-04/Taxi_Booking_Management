@@ -10,6 +10,7 @@ using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Helper;
+using Taxi_Booking_Management.Helper.PdfFormats;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Booking;
@@ -29,15 +30,16 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ILoggerManager _loggerManager;
         const string bookingcontroller = "Booking";
         const string indexAction = "Index";
-
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
         public BookingController(IConfiguration configuration,IBookingService context
-            , IPaymentHistoryService paymentHistoryService, IConverter pdfConverter, ILoggerManager loggerManager)
+            , IPaymentHistoryService paymentHistoryService,  ILoggerManager loggerManager, IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             _BookingService=context;
             _paymentHistoryService = paymentHistoryService;
             _configuration = configuration;
             _loggerManager = loggerManager;
-            _pdfConverter = pdfConverter;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
+
 
         }
 
@@ -74,19 +76,11 @@ namespace Taxi_Booking_Management.Controllers
                 else if (exportType == "pdf")
                 {
                     // Generate HTML content for PDF (implement this method)
-                    var htmlContent = _BookingService.GenerateHtmlContentForPdf(allBookings);
+                    var htmlContentTask = _BookingService.GenerateHtmlContentForPdf(allBookings);
 
                     // Convert HTML to PDF using DinkToPdf (implement this method)
-                    var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
-                    {
-                        GlobalSettings = new GlobalSettings
-                        {
-                            // Set global settings (e.g., paper size, margins, etc.)
-                            PaperSize = PaperKind.A4,
-                            Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
-                        },
-                        Objects = { new ObjectSettings { HtmlContent = htmlContent } }
-                    });
+                    var htmlContent =await htmlContentTask;
+                    var pdf = _razorViewToStringRenderer.GeneratePdf(htmlContent);
                     _loggerManager.LogInfo($"Successfully TaxiBookings PDF File download for {pageNumber}");
                     // Set the appropriate response headers for PDF download
                     return File(pdf, "application/pdf", "taxiBookings.pdf");
@@ -189,19 +183,10 @@ namespace Taxi_Booking_Management.Controllers
                     {
                        
                         // Generate HTML content for PDF (implement this method)
-                        var htmlContent = _BookingService.CreatePdfForOneBooking(bookingdetails ,transactionsDetails, paidAmount, dueAmount);
-
+                        var htmlContentTask = _BookingService.CreatePdfForOneBooking(bookingdetails ,transactionsDetails, paidAmount, dueAmount);
+                        var htmlContent = await htmlContentTask;
                         // Convert HTML to PDF using DinkToPdf (implement this method)
-                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
-                        {
-                            GlobalSettings = new GlobalSettings
-                            {
-                                // Set global settings (e.g., paper size, margins, etc.)
-                                PaperSize = PaperKind.A4,
-                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
-                            },
-                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
-                        });
+                        var pdf = _razorViewToStringRenderer.GeneratePdf(htmlContent);
                         _loggerManager.LogInfo($"Successfully details of TaxiBookings PDF File download for {bookingdetails.BookingCode}");
                         // Set the appropriate response headers for PDF download
                         return File(pdf, "application/pdf", $"taxiBooking({bookingdetails.BookingCode}).pdf");

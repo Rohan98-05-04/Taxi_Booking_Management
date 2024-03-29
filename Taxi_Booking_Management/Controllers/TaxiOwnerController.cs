@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 //using System.Drawing.Printing;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Helper;
+using Taxi_Booking_Management.Helper.PdfFormats;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiOwner;
@@ -22,14 +23,15 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ILoggerManager _loggerManager;
         private readonly IConfiguration _configuration;
         private readonly IConverter _pdfConverter;
-
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
         public TaxiOwnerController(IConfiguration configuration ,ILoggerManager loggerManager, 
-            ITaxiOwnerService taxiOwnerServices, IConverter pdfConverter)
+            ITaxiOwnerService taxiOwnerServices, IConverter pdfConverter, IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             _taxiOwnerServices = taxiOwnerServices;
             _loggerManager = loggerManager;
             _configuration = configuration;
             _pdfConverter = pdfConverter;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
         }
 
 
@@ -59,19 +61,10 @@ namespace Taxi_Booking_Management.Controllers
                     else if (exportType == "pdf")
                     {
                         // Generate HTML content for PDF (implement this method)
-                        var htmlContent = _taxiOwnerServices.GenerateHtmlContentForPdf(allOwners);
+                        var htmlContentTask = _taxiOwnerServices.GenerateHtmlContentForPdf(allOwners);
 
-                        // Convert HTML to PDF using DinkToPdf (implement this method)
-                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
-                        {
-                            GlobalSettings = new GlobalSettings
-                            {
-                                // Set global settings (e.g., paper size, margins, etc.)
-                                PaperSize = PaperKind.A4,
-                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
-                            },
-                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
-                        });
+                        var htmlContent =await htmlContentTask;
+                        var pdf = _razorViewToStringRenderer.GeneratePdf(htmlContent);
                         _loggerManager.LogInfo($"Successfully TaxiOwner PDF File download for {pageNumber}");
                         // Set the appropriate response headers for PDF download
                         return File(pdf, "application/pdf", "taxiOwners.pdf");

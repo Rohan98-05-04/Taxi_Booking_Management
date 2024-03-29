@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
+using Taxi_Booking_Management.Helper.PdfFormats;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.TaxiDriver;
@@ -24,14 +25,16 @@ namespace Taxi_Booking_Management.Services.Booking
         private readonly ILoggerManager _loggerManager;
         private readonly IMapper _mapper;
         private readonly IMemoryCache _memoryCache;
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
 
         public BookingService(ApplicationDbContext dbContext, ILoggerManager loggerManager,
-              IMapper mapper, IMemoryCache memoryCache)
+              IMapper mapper, IMemoryCache memoryCache, IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
             _mapper = mapper;
             _memoryCache = memoryCache;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
         }
 
         public async Task<IPagedList<Models.Booking>> GetAllBookingDetailsAsync(int page, int pageSize, string search, string? startDate, string? endDate)
@@ -409,141 +412,27 @@ namespace Taxi_Booking_Management.Services.Booking
 
         }
 
-        public string GenerateHtmlContentForPdf(IPagedList<Models.Booking> bookingData)
+       
+        public async Task<string> GenerateHtmlContentForPdf(IEnumerable<Models.Booking> BookingData)
         {
-            // Create an HTML table with student data
-            var htmlBuilder = new StringBuilder();
-            htmlBuilder.Append("<html><head>");
-            htmlBuilder.Append("<style>");
-            htmlBuilder.Append("table { border-collapse: collapse; width: 100%; border: 1px solid #000; }");
-            htmlBuilder.Append("th, td { border: 1px solid #000; padding: 8px; }");
-            htmlBuilder.Append("</style>");
-            htmlBuilder.Append("</head><body>");
-            htmlBuilder.Append("<h2>All Taxi Bookings Details</h2>");
-            htmlBuilder.Append("<table>");
-            htmlBuilder.Append("<thead><tr><th>Booking Code</th><th>Taxi Name</th><th>Registration Number</th><th>Customer Name</th>" +
-                "<th>Customer Mobile</th><th>Driver Name</th><th>Driver Mobile</th><th>From Jounery</th><th>To Jounery</th></tr></thead>");
-            htmlBuilder.Append("<tbody>");
+            var htmlContent = await _razorViewToStringRenderer.RenderViewToStringAsync("BookingPdf", BookingData);
 
-            foreach (var items in bookingData)
-            {
-                htmlBuilder.Append("<tr>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.BookingCode}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.taxi.TaxiName}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.taxi.RegistrationNumber}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.CustomerName}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.CustomerMobile}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiDrivers.DriverName}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">{items.TaxiDrivers.DriverMobile}</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">({items.FromLocation}) ({items.FromDate.ToShortDateString()})</td>");
-                htmlBuilder.Append($"<td class=\"text-center\">({items.ToLocation}) ({items.ToDate.ToShortDateString()})</td>");
-
-                htmlBuilder.Append("</tr>");
-            }
-
-            htmlBuilder.Append("</tbody></table>");
-
-            return htmlBuilder.ToString();
-
-
+            return htmlContent;
         }
-        public string CreatePdfForOneBooking(Models.Booking bookingData ,IList<Models.PaymentHistory> transactionData, decimal paidAmount,decimal dueAmount  )
+       
+
+        public async Task<string> CreatePdfForOneBooking(Models.Booking bookingData, IList<Models.PaymentHistory> paymentData, decimal paidAmount, decimal dueAmount)
         {
-            // Create an HTML table with student data
-         
-            var htmlBuilder = new StringBuilder();
-            htmlBuilder.Append("<html><head>");
-            htmlBuilder.Append("<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\">");
-            htmlBuilder.Append("<style>");
-            htmlBuilder.Append("p{ font-size:20px;}");
-            htmlBuilder.Append("button{ border-radius:10px;}");
-            htmlBuilder.Append("</style>");
-            htmlBuilder.Append("</head><body>");
-            htmlBuilder.Append($"<h1>Booking Details for bookingCode( {bookingData.BookingCode})</h1>");
-            htmlBuilder.Append("<div class=\"row mt-3\">");
-                htmlBuilder.Append("<div class=\"col-md-6\">");
-                htmlBuilder.Append($"<p><strong> Booking Status: </strong><button class=\"btn btn-primary\"> {@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingStatus), bookingData.BookingStatus)}</button></p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Booking Code: </strong> {bookingData.BookingCode} </p>");
-                htmlBuilder.Append($"<p><strong> Customer Name: </strong> {bookingData.CustomerName} </p>");
-                htmlBuilder.Append($"<p><strong> Customer Number: </strong> {bookingData.CustomerMobile} </p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Taxi Name: </strong>{ bookingData.taxi.TaxiName }</p>");
-                htmlBuilder.Append($"<p><strong> Taxi Registaration Number : </strong> {bookingData.taxi.RegistrationNumber}</p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Driver Name: </strong> { bookingData.TaxiDrivers.DriverName} </p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Driver Name: </strong> { bookingData.TaxiDrivers.DriverMobile} </p>");
-                htmlBuilder.Append("</div>");
-                 htmlBuilder.Append("<div class=\"col-md-6\">");
-                 htmlBuilder.Append($"<p><strong> From Date: </strong> {bookingData.FromDate} </p>");
-                htmlBuilder.Append($"<p><strong> To Date: </strong> {bookingData.ToDate} </p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Journey Start: </strong> { bookingData.FromLocation} </p>");
-                htmlBuilder.Append($"<p class=\"text-danger\"><strong> Journey End: </strong> { bookingData.ToLocation }</p>");
-                htmlBuilder.Append($"<p><strong> Gross Amount: </strong>{bookingData.GrossAmount} </p>");
-                htmlBuilder.Append($"<p><strong> Gst(%) : </strong> {bookingData.TotalGST} </p>");
-                htmlBuilder.Append($"<p><strong> Net Amount: </strong> {bookingData.NetAmount} </p>");
-                
-                htmlBuilder.Append("</div>");
-                htmlBuilder.Append("</div>");
-
-            htmlBuilder.Append("<hr class=\"my-4\" style=\"border-color: red;\" />");
-            htmlBuilder.Append("<div>");
-            htmlBuilder.Append("<div class=\"d-flex justify-content-between align-items-center\">");
-            htmlBuilder.Append("<h1 class=\"mt-4 mb-3 text-warning fw-bolder\">Payment Details</h1>");
-
-            if (paidAmount >= bookingData.NetAmount)
+            var viewModel = new OneBookingPdfView
             {
+                BookingData = bookingData,
+                TransactionData = paymentData,
+                PaidAmount = paidAmount,
+                DueAmount = dueAmount
+            };
+            var htmlContent = await _razorViewToStringRenderer.RenderViewToStringAsync("SingleBookingPdf", viewModel);
 
-                htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Payment Status:- ");
-                htmlBuilder.Append("<button class=\"btn btn-success\">");
-                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 2));
-                htmlBuilder.Append("</button>");
-
-            }
-            else
-            {
-                htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Payment Status:- ");
-                htmlBuilder.Append("<button class=\"btn btn-warning\">");
-                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingPaymentStatus), 1));
-                htmlBuilder.Append("</button>");
-                htmlBuilder.Append("</h3>");
-            }
-
-            htmlBuilder.Append("</div>");
-            htmlBuilder.Append("<div>");
-            htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Total due amount: ");
-            //htmlBuilder.Append(_configuration["AppSettings:indianCurrency"]);
-            htmlBuilder.Append(dueAmount);
-            htmlBuilder.Append("</h3>");
-            htmlBuilder.Append("<h3 class=\"mt-4 mb-3 text-danger fw-bold\">Total paid amount: ");
-            //htmlBuilder.Append(_configuration["AppSettings:indianCurrency"]);
-            htmlBuilder.Append(paidAmount);
-            htmlBuilder.Append("</h3>");
-            htmlBuilder.Append("</div>");
-            htmlBuilder.Append("</div>");
-
-            htmlBuilder.Append("<div class=\"list-group\">");
-            foreach (var transaction in transactionData)
-            {
-                htmlBuilder.Append("<div class=\"list-group-item border-danger\">");
-                htmlBuilder.Append("<div class=\"d-flex w-100 justify-content-between\">");
-                htmlBuilder.Append("<h4 class=\"mb-1\">Payment Amount: ");
-                //htmlBuilder.Append();
-                htmlBuilder.Append(transaction.PayAmount);
-                htmlBuilder.Append(" (");
-                htmlBuilder.Append(Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.PaymentMedium), transaction.PaidMedium));
-                htmlBuilder.Append(")</h4>");
-                htmlBuilder.Append("<small>Date: ");
-                htmlBuilder.Append(transaction.CreateDateTime);
-                htmlBuilder.Append("</small>");
-                htmlBuilder.Append("</div>");
-                htmlBuilder.Append("</div>");
-                htmlBuilder.Append("<hr class=\"my-2\" style=\"border-color: yellow;\" />");
-            }
-            htmlBuilder.Append("</div>");
-
-
-            htmlBuilder.Append("</body></html>");
-
-            return htmlBuilder.ToString();
-
+            return htmlContent;
         }
     }
 }

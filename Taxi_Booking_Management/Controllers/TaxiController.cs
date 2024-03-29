@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.DtoModels;
 using Taxi_Booking_Management.Helper;
+using Taxi_Booking_Management.Helper.PdfFormats;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using Taxi_Booking_Management.Services.Taxi;
@@ -29,10 +30,11 @@ namespace Taxi_Booking_Management.Controllers
         private readonly ILoggerManager _loggerManager;
         private readonly ITaxiOwnerService _OwnerService;
         private readonly IConfiguration _configuration;
-        private readonly IConverter _pdfConverter;
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
 
         public TaxiController(IConfiguration configuration ,ITaxiService taxiService
-            , IMapper mapper, ILoggerManager loggerManager , ITaxiOwnerService OwnerService, IConverter pdfConverter)
+            , IMapper mapper, ILoggerManager loggerManager , ITaxiOwnerService OwnerService, 
+            IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             
             _taxiService = taxiService;
@@ -40,7 +42,7 @@ namespace Taxi_Booking_Management.Controllers
             _loggerManager = loggerManager;
             _OwnerService = OwnerService;
             _configuration = configuration;
-            _pdfConverter = pdfConverter;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
         }
         public async Task<IActionResult> Index(int? page, string search = "", int? statusFilter =0)
         {
@@ -73,20 +75,11 @@ namespace Taxi_Booking_Management.Controllers
                     else if (exportType == "pdf")
                     {
                         // Generate HTML content for PDF (implement this method)
-                        var htmlContent = _taxiService.GenerateHtmlContentForPdf(allTaxies);
-
-                        // Convert HTML to PDF using DinkToPdf (implement this method)
-                        var pdf = _pdfConverter.Convert(new HtmlToPdfDocument
-                        {
-                            GlobalSettings = new GlobalSettings
-                            {
-                                // Set global settings (e.g., paper size, margins, etc.)
-                                PaperSize = PaperKind.A4,
-                                Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
-                            },
-                            Objects = { new ObjectSettings { HtmlContent = htmlContent } }
-                        });
-
+                        var htmlContentTask = _taxiService.GenerateHtmlContentForPdf(allTaxies);
+                        // Await the task to get the HTML content
+                        
+                        var htmlContent = await htmlContentTask;
+                        var pdf = _razorViewToStringRenderer.GeneratePdf(htmlContent);
                         // Set the appropriate response headers for PDF download
                         return File(pdf, "application/pdf", "Alltaxis.pdf");
                     }

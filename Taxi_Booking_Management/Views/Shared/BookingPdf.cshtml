@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Booking>
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #000;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center; /* Added text alignment */
+        }
+    </style>
+</head>
+<body>
+    <h2>All Taxi Bookings Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Booking Code</th>
+                <th>Taxi Name</th>
+                <th>Registration Number</th>
+                <th>Customer Name</th>
+                <th>Customer Mobile</th>
+                <th>Driver Name</th>
+                <th>Driver Mobile</th>
+                <th>From Journey</th>
+                <th>To Journey</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.BookingCode</td>
+                    <td>@item.taxi.TaxiName</td>
+                    <td>@item.taxi.RegistrationNumber</td>
+                    <td>@item.CustomerName</td>
+                    <td>@item.CustomerMobile</td>
+                    <td>@item.TaxiDrivers.DriverName</td>
+                    <td>@item.TaxiDrivers.DriverMobile</td>
+                    <td>(@item.FromLocation) (@item.FromDate.ToShortDateString())</td>
+                    <td>(@item.ToLocation) (@item.ToDate.ToShortDateString())</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
+
+
+
+
+
