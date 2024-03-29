@@ -19,6 +19,8 @@ using Taxi_Booking_Management.Services.DashBoard;
 using Taxi_Booking_Management.Services.Customer;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using Taxi_Booking_Management.Services.Account;
+using Taxi_Booking_Management.Services.Accounts;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString));
 
+builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<ITaxiService , TaxiService>();
 builder.Services.AddTransient<ITaxiDriverService , TaxiDriverService>();
