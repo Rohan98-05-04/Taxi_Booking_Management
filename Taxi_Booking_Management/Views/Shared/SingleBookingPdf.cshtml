@@ -1,0 +1,69 @@
+﻿@model Taxi_Booking_Management.DtoModels.OneBookingPdfView
+
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        p {
+            font-size: 20px;
+        }
+
+        button {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Booking Details for bookingCode(@Model.BookingData.BookingCode)</h1>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <p><strong>Booking Status: </strong><button class="btn btn-primary">@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.BookingStatus), Model.BookingData.BookingStatus)</button></p>
+            <p class="text-danger"><strong>Booking Code: </strong>@Model.BookingData.BookingCode</p>
+            <p><strong>Customer Name: </strong>@Model.BookingData.CustomerName</p>
+            <p><strong>Customer Number: </strong>@Model.BookingData.CustomerMobile</p>
+            <p class="text-danger"><strong>Taxi Name: </strong>@Model.BookingData.taxi.TaxiName</p>
+            <p><strong>Taxi Registration Number: </strong>@Model.BookingData.taxi.RegistrationNumber</p>
+            <p class="text-danger"><strong>Driver Name: </strong>@Model.BookingData.TaxiDrivers.DriverName</p>
+            <p class="text-danger"><strong>Driver Mobile: </strong>@Model.BookingData.TaxiDrivers.DriverMobile</p>
+        </div>
+        <div class="col-md-6">
+            <p><strong>From Date: </strong>@Model.BookingData.FromDate</p>
+            <p><strong>To Date: </strong>@Model.BookingData.ToDate</p>
+            <p class="text-danger"><strong>Journey Start: </strong>@Model.BookingData.FromLocation</p>
+            <p class="text-danger"><strong>Journey End: </strong>@Model.BookingData.ToLocation</p>
+            <p><strong>Gross Amount: </strong>@Model.BookingData.GrossAmount</p>
+            <p><strong>GST(%): </strong>@Model.BookingData.TotalGST</p>
+            <p><strong>Net Amount: </strong>@Model.BookingData.NetAmount</p>
+        </div>
+    </div>
+    <hr class="my-4" style="border-color: red;">
+     <div>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mt-4 mb-3 text-warning fw-bolder">Payment Details</h1>
+            <h3 class="mt-4 mb-3 text-danger fw-bold">
+                Payment Status:
+                <button class="btn @(@Model.PaidAmount >= Model.BookingData.NetAmount ? "btn-success" : "btn-warning")">
+                    @(@Model.PaidAmount >= Model.BookingData.NetAmount ? "Paid" : "Pending")
+                </button>
+            </h3>
+        </div>
+        <div>
+            <h3 class="mt-4 mb-3 text-danger fw-bold">Total due amount: @Model.DueAmount</h3>
+            <h3 class="mt-4 mb-3 text-danger fw-bold">Total paid amount: @Model.PaidAmount</h3>
+        </div>
+    </div>
+    <div class="list-group">
+        @foreach (var transaction in Model.TransactionData)
+        {
+            <div class="list-group-item border-danger">
+                <div class="d-flex w-100 justify-content-between">
+                    <h4 class="mb-1">Payment Amount: @transaction.PayAmount (@transaction.PaidMedium)</h4>
+                    <small>Date: @transaction.CreateDateTime</small>
+                </div>
+            </div>
+            <hr class="my-2" style="border-color: yellow;">
+        }
+    </div> 
+</body>
+</html>

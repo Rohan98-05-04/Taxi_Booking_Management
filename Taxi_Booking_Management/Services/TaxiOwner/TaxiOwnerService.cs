@@ -7,6 +7,7 @@ using System.Text;
 using Taxi_Booking_Management.Common;
 using Taxi_Booking_Management.Data;
 using Taxi_Booking_Management.Helper;
+using Taxi_Booking_Management.Helper.PdfFormats;
 using Taxi_Booking_Management.LoggerService;
 using Taxi_Booking_Management.Models;
 using X.PagedList;
@@ -19,13 +20,16 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
         private readonly ILoggerManager _loggerManager;
         private readonly IMemoryCache _memoryCache;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
 
-        public TaxiOwnerService(IMemoryCache memoryCache ,ApplicationDbContext dbContext , ILoggerManager loggerManager, IWebHostEnvironment webHostEnvironment)
+        public TaxiOwnerService(IMemoryCache memoryCache ,ApplicationDbContext dbContext , 
+            ILoggerManager loggerManager, IWebHostEnvironment webHostEnvironment, IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             _context = dbContext;
             _loggerManager = loggerManager;
             _memoryCache = memoryCache;
             _webHostEnvironment = webHostEnvironment;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
         }
 
         public async Task<string> DeleteTaxiOwnerAsync(int ownerId)
@@ -185,33 +189,13 @@ namespace Taxi_Booking_Management.Services.TaxiOwner
             return taxiOwner;
         }
 
-        public string GenerateHtmlContentForPdf(IPagedList<Models.TaxiOwner> taxiOwners)
+       
+
+        public async Task<string> GenerateHtmlContentForPdf(IEnumerable<Models.TaxiOwner> taxiOwnerData)
         {
-            // Create an HTML table with student data
-            var htmlBuilder = new StringBuilder();
-            htmlBuilder.Append("<html><head>");
-            htmlBuilder.Append("<style>");
-            htmlBuilder.Append("table { border-collapse: collapse; width: 100%; border: 1px solid #000; }");
-            htmlBuilder.Append("th, td { border: 1px solid #000; padding: 8px; }");
-            htmlBuilder.Append("</style>");
-            htmlBuilder.Append("</head><body>");
-            htmlBuilder.Append("<table>");
-            htmlBuilder.Append("<thead><tr><th>Owner Name</th><th>Mobile Number</th><th>Email</th><th>Address</th></tr></thead>");
-            htmlBuilder.Append("<tbody>");
+            var htmlContent = await _razorViewToStringRenderer.RenderViewToStringAsync("TaxiOwnerPdf", taxiOwnerData);
 
-            foreach (var owners in taxiOwners)
-            {
-                htmlBuilder.Append("<tr>");
-                htmlBuilder.Append($"<td>{owners.TaxiOwnerName}</td>");
-                htmlBuilder.Append($"<td>{owners.TaxiOwnerMobile}</td>");
-                htmlBuilder.Append($"<td>{owners.TaxiOwnerEmail}</td>");
-                htmlBuilder.Append($"<td>{owners.TaxiOwnerAddress}</td>");
-                htmlBuilder.Append("</tr>");
-            }
-
-            htmlBuilder.Append("</tbody></table>");
-
-            return htmlBuilder.ToString();
+            return htmlContent;
         }
     }
 }

@@ -1,0 +1,46 @@
+﻿@model IEnumerable<Taxi>
+
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #000;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>All Taxi Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Taxi Name</th>
+                <th>Registration Number</th>
+                <th>Owner Name</th>
+                <th>Mobile Number</th>
+                <th>Taxi Type</th>
+                <th>Taxi Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TaxiName</td>
+                    <td>@item.RegistrationNumber</td>
+                    <td>@item.TaxiOwner.TaxiOwnerName</td>
+                    <td>@item.TaxiOwner.TaxiOwnerMobile</td>
+                    <td>@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiType), item.TaxiType)</td>
+                    <td>@Enum.GetName(typeof(Taxi_Booking_Management.Common.Enums.TaxiStatus), item.TaxiStatus)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
