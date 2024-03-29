@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taxi_Booking_Management.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,7 +78,8 @@ namespace Taxi_Booking_Management.Migrations
                     DriverName = table.Column<string>(type: "varchar(225)", nullable: false),
                     DriverMobile = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Address = table.Column<string>(type: "varchar(225)", nullable: true),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,7 +96,8 @@ namespace Taxi_Booking_Management.Migrations
                     TaxiOwnerMobile = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     TaxiOwnerEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TaxiOwnerAddress = table.Column<string>(type: "varchar(225)", nullable: true),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,7 +221,8 @@ namespace Taxi_Booking_Management.Migrations
                     RegistrationNumber = table.Column<string>(type: "varchar(125)", nullable: false),
                     TaxiStatus = table.Column<int>(type: "int", nullable: false),
                     TaxiOwnerId = table.Column<int>(type: "int", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -294,6 +297,11 @@ namespace Taxi_Booking_Management.Migrations
                         principalColumn: "BookingId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "City", "ConcurrencyStamp", "Country", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "State", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "1", 0, null, "5bef43e6-1226-48db-8c0a-4cb6446d5f9c", null, "admin@example.com", true, false, null, "Admin", "ADMIN@EXAMPLE.COM", "ADMIN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEMkQ6DZmu21zHEC8rPEyGbyn9C/D/5x7VEitHCU28uXvKZ9cSXX5MNx5UYDVRQ5blg==", null, false, "af29be03-e99b-4dfc-8763-53fd9474537d", null, false, "admin@example.com" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

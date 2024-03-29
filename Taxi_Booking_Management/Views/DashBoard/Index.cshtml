@@ -41,7 +41,49 @@
         </div>
     </div>
 
+    <button type="button" class="btn btn-primary" id="openModalBtn">Account</button>
+
     <h2 class="mb-4 text-warning fw-bolder">Monthly Total Bill Amounts</h2>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Account</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="modalForm" asp-controller="Account" asp-action="YearlyTotalBookingAmounts">
+                        <div class="form-row row">
+                            <div class="col">
+                                <label for="yearInput">Year:</label>
+                                <input type="number" class="form-control" id="yearInput" name="year" />
+                            </div>
+                            <div class="col my-4">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                    <form id="dateBillForm">
+                        <div class="form-row row">
+                            <div class="form-group col">
+                                <label for="fromDate">From Date:</label>
+                                <input type="date" class="form-control" id="fromDate" name="fromDate">
+                            </div>
+                            <div class="form-group col">
+                                <label for="toDate">To Date:</label>
+                                <input type="date" class="form-control" id="toDate" name="toDate">
+                            </div>
+                            <div class="form-group col my-4">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="d-flex">
         <h5 class="chartType text-success fw-bold">Chart Type</h5>
         <label class="control-label text-success ps-3"> Bar  <input class="form-check-inline" value="bar" name="Chart" type="radio" onchange="showMonthlyChart()" /></label>
@@ -180,6 +222,26 @@
                     borderWidth: 1
                 }]
             }
+        });
+
+        $(document).ready(function () {
+            // When the close button is clicked, hide the modal
+            $(".close").click(function () {
+                $("#myModal").modal("hide");
+            });
+        });
+
+        function openModal() {
+            $('#myModal').modal('show')
+        }
+
+        function closeDeleteModal() {
+            $('#myModal').modal('hide')
+        }
+        $(document).ready(function () {
+            $('#openModalBtn').click(function () {
+                $('#myModal').modal('show');
+            });
         });
     </script>
 }

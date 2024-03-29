@@ -12,8 +12,8 @@ using Taxi_Booking_Management.Data;
 namespace Taxi_Booking_Management.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240320134342_softdelete")]
-    partial class softdelete
+    [Migration("20240322051208_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -461,6 +461,25 @@ namespace Taxi_Booking_Management.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "5bef43e6-1226-48db-8c0a-4cb6446d5f9c",
+                            Email = "admin@example.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            Name = "Admin",
+                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                            NormalizedUserName = "ADMIN@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMkQ6DZmu21zHEC8rPEyGbyn9C/D/5x7VEitHCU28uXvKZ9cSXX5MNx5UYDVRQ5blg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "af29be03-e99b-4dfc-8763-53fd9474537d",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@example.com"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

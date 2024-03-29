@@ -21,8 +21,28 @@ namespace Taxi_Booking_Management.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            SeedAdminUser(modelBuilder).GetAwaiter().GetResult();
             modelBuilder.Ignore<IdentityUser>();
             modelBuilder.Entity<IdentityRole>().ToTable("AspNetRoles");
+
+        }
+        private async Task SeedAdminUser(ModelBuilder modelBuilder)
+        {
+            var adminUser = new User
+            {
+                Id = "1",
+                UserName = "admin@example.com",
+                NormalizedUserName = "ADMIN@EXAMPLE.COM",
+                Email = "admin@example.com",
+                NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                EmailConfirmed = true,
+                Name = "Admin" // Provide the value for the 'Name' property
+            };
+
+            var passwordHasher = new PasswordHasher<User>();
+            adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin@123");
+
+            modelBuilder.Entity<User>().HasData(adminUser);
         }
 
     }
