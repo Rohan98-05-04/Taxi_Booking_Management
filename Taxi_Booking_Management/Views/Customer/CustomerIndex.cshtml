@@ -11,7 +11,7 @@
 <h2 class="d-inline">All Customer Details </h2>
 
 <div class="d-flex mt-3 justify-content-between">
-    @using (Html.BeginForm("Index", "TaxiDriver", FormMethod.Get, new { @class = "d-flex" }))
+    @using (Html.BeginForm("CustomerIndex", "Customer", FormMethod.Get, new { @class = "d-flex" }))
     {
         <div class="form-group me-2">
             <input type="text" name="Search" class="form-control" value="@ViewBag.Search" placeholder="Search by name">

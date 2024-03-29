@@ -64,11 +64,11 @@
             <input type="date" name="endDate" placeholder="To date" class="form-control" value="@ViewBag.endDate">
         </div>
 
-        <button type="button" class="btn btn-outline-success" onclick="submitForm()">
+        <button type="button" class="btn btn-outline-success forBtnHeight" onclick="submitForm()">
             <i class="fas fa-search"></i>
         </button>
 
-        <p type="button" class="mt-3 ms-2" onclick="clearFilters()">
+        <p type="button" class="mt-2 ms-2 btn-outline-danger" onclick="clearFilters()">
             <i class="fas fa-times"></i>
         </p>
     }
@@ -77,8 +77,8 @@
    
 </div>
 <div class="col-md-3 mt-3 ">
-    <a href="@Url.Action("Index", new { export = "csv" })" class="btn btn-success">Download CSV</a>
-    <a href="@Url.Action("Index", new { export = "pdf" })" class="btn btn-danger">Download PDF</a>
+    <a href="@Url.Action("Index", new { export = "csv",page = Context.Request.Query["page"], Search=Context.Request.Query["Search"],StatusFilter=Context.Request.Query["StatusFilter"],startDate = Context.Request.Query["startDate"], endDate=Context.Request.Query["endDate"] })" class="btn btn-success">Download CSV</a>
+    <a href="@Url.Action("Index", new { export = "pdf",page = Context.Request.Query["page"], Search=Context.Request.Query["Search"],StatusFilter=Context.Request.Query["StatusFilter"],startDate = Context.Request.Query["startDate"], endDate=Context.Request.Query["endDate"] })" class="btn btn-danger">Download PDF</a>
 </div>
 <table class="table table-striped  mt-3">
     <thead>

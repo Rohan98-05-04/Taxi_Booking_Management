@@ -1,0 +1,42 @@
+﻿@model IEnumerable<TaxiOwner>
+
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #000;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Owner Name</th>
+                <th>Mobile Number</th>
+                <th>Email</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var owner in Model)
+            {
+                <tr>
+                    <td>@owner.TaxiOwnerName</td>
+                    <td>@owner.TaxiOwnerMobile</td>
+                    <td>@owner.TaxiOwnerEmail</td>
+                    <td>@owner.TaxiOwnerAddress</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
+
