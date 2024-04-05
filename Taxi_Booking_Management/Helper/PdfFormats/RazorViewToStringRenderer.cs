@@ -51,7 +51,7 @@ namespace Taxi_Booking_Management.Helper.PdfFormats
                     
 
 
-            };
+                };
 
                 var viewContext = new ViewContext(
                     actionContext,
@@ -63,6 +63,7 @@ namespace Taxi_Booking_Management.Helper.PdfFormats
                 );
 
                 await viewResult.View.RenderAsync(viewContext);
+              
 
                 return sw.ToString();
             }
