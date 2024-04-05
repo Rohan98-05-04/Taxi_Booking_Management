@@ -1,0 +1,29 @@
+﻿@model Taxi_Booking_Management.DtoModels.DateTotalAmountModel
+
+
+<html>
+
+<style>
+    .custom-list-item {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 2em;
+    }
+
+    .data {
+        color:green;
+    }
+
+</style>
+<h1 class="mb-4">Account Summary from <span class="data">@Model.fromDate.ToString("dd-MM-yyyy")</span> to <span class="data">@Model.toDate.ToString("dd-MM-yyyy")</span>    </h1>
+<hr />
+<ul class="list-group">
+    <li class="list-group-item mb-2 custom-list-item text-danger "><strong>Total Booking Amount:</strong><span class="data">@Model.TotalAmount</span>  </li>
+    <li class="list-group-item mb-2 custom-list-item  text-danger"><strong>Total Pay Amount:</strong> <span class="data">@Model.TotalPayAmount</span> </li>
+    <li class="list-group-item mb-2 custom-list-item text-danger "><strong>Payments By Cash:</strong><span class="data">@Model.PaymentsByCash</span>  </li>
+    <li class="list-group-item mb-2 custom-list-item text-danger"><strong>Payments By Online:</strong><span class="data">@Model.PaymentsOnline</span>  </li>
+    <li class="list-group-item mb-2 custom-list-item text-danger "><strong>Due Amount:</strong><span class="data">@Model.DueAmount</span> </li>
+</ul>
+</html>
+
+

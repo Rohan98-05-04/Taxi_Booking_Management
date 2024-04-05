@@ -22,5 +22,10 @@
         public static string TaxiIsAvailable = "taxi is available for booking";
         public static string BookingDetailsNotAvailable = "Booking details not found by given details";
         public static string InvalidId = "provide valid BookingID";
+
+        //For account report
+        public static string NotAvailableAmountDetails = " Amount details Not found ";
+        public static string NotaYear = " Please Enter the Specific Year ";
+        public static string yearLength = " Year length should be 4 digit ";
     }
 }
