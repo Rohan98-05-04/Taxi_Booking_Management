@@ -1,4 +1,4 @@
-﻿@{
+﻿﻿@{
     ViewData["Title"] = "Dashboard";
 }
 
@@ -91,153 +91,26 @@
         </div>
     </div>
 
-    <div class="d-flex">
-        <h5 class="chartType text-success fw-bold">Chart Type</h5>
-        <label class="control-label text-success ps-3"> Bar  <input class="form-check-inline" value="bar" name="Chart" type="radio" onchange="showMonthlyChart()" /></label>
 
-        <label class="control-label text-success"> Line <input class="form-check-inline" value="line" name="Chart" type="radio" checked onchange="showMonthlyChart()" /></label>
-    </div>
-
-    <div class="d-flex flex-row">
-        <div class="flex-grow-1">
-            <canvas id="monthlyChart" style="max-height: 300px;"></canvas>
-        </div>
-    </div>
-
-    <h2 class="mt-4 mb-4 text-warning fw-bolder">Daily Total Bill Amounts</h2>
-    <div class="d-flex flex-row">
-        <div class="flex-grow-1">
-            <canvas id="dailyChart" style="max-height: 300px;"></canvas>
-        </div>
-    </div>
+    @await Html.PartialAsync("_MonthlyChart")
+     @await Html.PartialAsync("_DailyChart")
+    
 </div>
 
 @section scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         $(document).ready(function () {
             showMonthlyChart();
 
-        })
-
-
-        // Monthly Chart
-        function showMonthlyChart() {
-            var existingChart = window.myChart;
-            console.log("existingChart", existingChart)
-            if (existingChart) {
-                existingChart.destroy();
-            }
-            var monthlyData = @Html.Raw(Json.Serialize(ViewBag.MonthlyData));
-            var monthlyChartCanvas = document.getElementById('monthlyChart').getContext('2d');
-            var chartTypeValue = $('input[name="Chart"]:checked').val()
-            console.log("chartTypeValue", chartTypeValue)
-            window.myChart = new Chart(monthlyChartCanvas, {
-                type: chartTypeValue == 'bar' ? 'bar' : 'line',
-                data: {
-                    labels:  ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Monthly Total Bill Amount',
-                        data: monthlyData,
-                        backgroundColor: ['rgba(75, 192, 192, 0.2)',
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(255, 159, 64, 0.2)',
-                            'rgba(255, 205, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(201, 203, 207, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(255, 159, 64, 0.2)',
-                            'rgba(255, 205, 86, 0.2)'],
-                        borderColor: ['rgba(75, 192, 192, 1)',
-                            'rgb(255, 99, 132)',
-                            'rgb(255, 159, 64)',
-                            'rgb(255, 205, 86)',
-                            'rgb(75, 192, 192)',
-                            'rgb(54, 162, 235)',
-                            'rgb(153, 102, 255)',
-                            'rgb(201, 203, 207)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgb(255, 99, 132)',
-                            'rgb(255, 159, 64)',
-                            'rgb(255, 205, 86)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'red'
-                            }
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 10,
-                            top: 10,
-                            bottom: 10
-                        }
-                    },
-                    elements: {
-                        bar: {
-                            borderColor: 'rgba(50, 168, 92)',
-                            borderWidth: 1
-                        }
-                    }
-                }
-            });
-        }
-
-
-
-        // Daily Chart
-        var dailyData = @Html.Raw(Json.Serialize(ViewBag.DailyData));
-        var dailyChartCanvas = document.getElementById('dailyChart').getContext('2d');
-
-        new Chart(dailyChartCanvas, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(dailyData),
-                datasets: [{
-                    data: Object.values(dailyData),
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            }
-        });
-
-        $(document).ready(function () {
-            // When the close button is clicked, hide the modal
             $(".close").click(function () {
                 $("#myModal").modal("hide");
             });
-        });
 
+            $('#openModalBtn').click(function () {
+                $('#myModal').modal('show');
+            });
+        })
+        
         function openModal() {
             $('#myModal').modal('show')
         }
@@ -245,6 +118,7 @@
         function closeModal() {
             $('#myModal').modal('hide')
         }
+
         $(document).ready(function () {
             $('#openModalBtn').click(function () {
                 $('#myModal').modal('show');
@@ -276,5 +150,6 @@
             toDateInput .value= "";
             closeModal()
         }
+
     </script>
 }
